@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import stock
 import stock_planning
 import wizard
 

@@ -1047,21 +1047,13 @@ class account_period(osv.osv):
         else:
             company_id = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.id
             args.append(('company_id', '=', company_id))
-        result = []
-        if context.get('account_period_prefer_normal'):
-            # look for non-special periods first, and fallback to all if no result is found
-            result = self.search(cr, uid, args + [('special', '=', False)], context=context)
-        if not result:
-            result = self.search(cr, uid, args, context=context)
-        if not result:
+        ids = self.search(cr, uid, args, context=context)
+        if not ids:
             raise osv.except_osv(_('Error !'), _('No period defined for this date: %s !\nPlease create one.')%dt)
-        return result
+        return ids
 
     def action_draft(self, cr, uid, ids, *args):
         mode = 'draft'
-        for period in self.browse(cr, uid, ids):
-            if period.fiscalyear_id.state == 'done':
-                raise osv.except_osv(_('Warning !'), _('You can not re-open a period which belongs to closed fiscal year'))
         cr.execute('update account_journal_period set state=%s where period_id in %s', (mode, tuple(ids),))
         cr.execute('update account_period set state=%s where id in %s', (mode, tuple(ids),))
         return True
@@ -1087,7 +1079,7 @@ class account_period(osv.osv):
 
     def build_ctx_periods(self, cr, uid, period_from_id, period_to_id):
         if period_from_id == period_to_id:
-            return [period_from_id]
+            return period_from_id
         period_from = self.browse(cr, uid, period_from_id)
         period_date_start = period_from.date_start
         company1_id = period_from.company_id.id
@@ -1231,9 +1223,10 @@ class account_move(osv.osv):
         return res
 
     def _get_period(self, cr, uid, context=None):
-        ctx = dict(context or {}, account_period_prefer_normal=True)
-        period_ids = self.pool.get('account.period').find(cr, uid, context=ctx)
-        return period_ids[0]
+        periods = self.pool.get('account.period').find(cr, uid)
+        if periods:
+            return periods[0]
+        return False
 
     def _amount_compute(self, cr, uid, ids, name, args, context, where =''):
         if not ids: return {}
@@ -1358,9 +1351,7 @@ class account_move(osv.osv):
 
     def button_cancel(self, cr, uid, ids, context=None):
         for line in self.browse(cr, uid, ids, context=context):
-            if line.period_id.state == 'done':
-                raise osv.except_osv(_('Error !'), _('You can not modify a posted entry of closed periods'))
-            elif not line.journal_id.update_posted:
+            if not line.journal_id.update_posted:
                 raise osv.except_osv(_('Error !'), _('You can not modify a posted entry of this journal !\nYou should set the journal to allow cancelling entries if you want to do that.'))
         if ids:
             cr.execute('UPDATE account_move '\
@@ -1370,10 +1361,9 @@ class account_move(osv.osv):
 
     def onchange_line_id(self, cr, uid, ids, line_ids, context=None):
         balance = 0.0
-        line_ids = [ line for line in line_ids if not (isinstance(line, (tuple, list)) and line and line[0] == 2) ]
-        line_ids = self.resolve_o2m_commands_to_record_dicts(cr, uid, 'line_id', line_ids, context=context)
         for line in line_ids:
-            balance += (line['debit'] or 0.00)- (line['credit'] or 0.00)
+            if line[2]:
+                balance += (line[2]['debit'] or 0.00)- (line[2]['credit'] or 0.00)
         return {'value': {'balance': balance}}
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -1662,7 +1652,7 @@ class account_move_reconcile(osv.osv):
         'create_date': fields.date('Creation date', readonly=True),
     }
     _defaults = {
-        'name': lambda self,cr,uid,ctx=None: self.pool.get('ir.sequence').get(cr, uid, 'account.reconcile', context=ctx) or '/',
+        'name': lambda self,cr,uid,ctx={}: self.pool.get('ir.sequence').get(cr, uid, 'account.reconcile') or '/',
     }
 
     def reconcile_partial_check(self, cr, uid, ids, type='auto', context=None):
@@ -2920,7 +2910,7 @@ class account_fiscal_position_template(osv.osv):
         obj_fiscal_position = self.pool.get('account.fiscal.position')
         fp_ids = self.search(cr, uid, [('chart_template_id', '=', chart_temp_id)])
         for position in self.browse(cr, uid, fp_ids, context=context):
-            new_fp = obj_fiscal_position.create(cr, uid, {'company_id': company_id, 'name': position.name, 'note': position.note})
+            new_fp = obj_fiscal_position.create(cr, uid, {'company_id': company_id, 'name': position.name})
             for tax in position.tax_ids:
                 obj_tax_fp.create(cr, uid, {
                     'tax_src_id': tax_template_ref[tax.tax_src_id.id],
@@ -3337,10 +3327,10 @@ class wizard_multi_charts_accounts(osv.osv_memory):
 
         # write values of default taxes for product
         if obj_wizard.sale_tax and taxes_ref:
-            ir_values_obj.set(cr, 1, key='default', key2=False, name="taxes_id", company=company_id,
+            ir_values_obj.set(cr, uid, key='default', key2=False, name="taxes_id", company=company_id,
                                 models =[('product.product',False)], value=[taxes_ref[obj_wizard.sale_tax.id]])
         if obj_wizard.purchase_tax and taxes_ref:
-            ir_values_obj.set(cr, 1, key='default', key2=False, name="supplier_taxes_id", company=company_id,
+                ir_values_obj.set(cr, uid, key='default', key2=False, name="supplier_taxes_id", company=company_id,
                                 models =[('product.product',False)], value=[taxes_ref[obj_wizard.purchase_tax.id]])
 
         # Create Bank journals

@@ -25,9 +25,15 @@ from tools.translate import _
 # Creates forecasts records for products from selected Product Category for selected 'Warehouse - Period'
 # Object added by contributor in ver 1.1
 class stock_sale_forecast_createlines(osv.osv_memory):
+
+    def _get_next_period(self, cr, uid, context={}):
+        if context is None: context={}
+        cr.execute("select id from stock_period where now() < date_start  and state <> 'close' order by date_start")
+        ret = cr.fetchone()
+        return ret and ret[0] or False
+
     _name = "stock.sale.forecast.createlines"
     _description = "stock.sale.forecast.createlines"
-
 
     _columns = {
         'company_id': fields.many2one('res.company', 'Company', required=True, select=1),
@@ -42,6 +48,7 @@ class stock_sale_forecast_createlines(osv.osv_memory):
 
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'stock.sale.forecast.createlines', context=c),
+        'period_id': _get_next_period,
     }
 
     def create_forecast(self, cr, uid, ids, context=None):
@@ -80,7 +87,7 @@ class stock_sale_forecast_createlines(osv.osv_memory):
                         if ret:
                             forecast_qty = ret[1]
                             prod_uom = ret[2]
-                    prod_uom = prod_uom or p.uom_id.id
+                    prod_uom = prod_uom or p.uom_po_id.id
                     prod_uos_categ = False
                     if p.uos_id:
                         prod_uos_categ = p.uos_id.category_id.id
@@ -96,13 +103,16 @@ class stock_sale_forecast_createlines(osv.osv_memory):
                         'product_uom_categ': p.uom_id.category_id.id,
                         'product_uos_categ': prod_uos_categ,
                      }))
+        result = mod_obj._get_id(cr, uid, 'stock_planning', 'view_stock_sale_forecast_filter')
+        id = mod_obj.read(cr, uid, result, ['res_id'], context=context)
 
         return {
             'domain': "[('id','in', ["+','.join(map(str, forecast_lines))+"])]",
             'view_type': 'form',
-            "view_mode": 'tree,form',
+            "view_mode": 'tree, form',
             'res_model': 'stock.sale.forecast',
             'type': 'ir.actions.act_window',
+            'search_view_id': id['res_id'],
         }
 
 stock_sale_forecast_createlines()

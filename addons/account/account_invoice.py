@@ -80,11 +80,8 @@ class account_invoice(osv.osv):
 
     def _reconciled(self, cr, uid, ids, name, args, context=None):
         res = {}
-        wf_service = netsvc.LocalService("workflow")
-        for inv in self.browse(cr, uid, ids, context=context):
-            res[inv.id] = self.test_paid(cr, uid, [inv.id])
-            if not res[inv.id] and inv.state == 'paid':
-                wf_service.trg_validate(uid, 'account.invoice', inv.id, 'open_test', cr)
+        for id in ids:
+            res[id] = self.test_paid(cr, uid, [id])
         return res
 
     def _get_reference_type(self, cr, uid, context=None):
@@ -93,17 +90,11 @@ class account_invoice(osv.osv):
     def _amount_residual(self, cr, uid, ids, name, args, context=None):
         result = {}
         for invoice in self.browse(cr, uid, ids, context=context):
-            checked_partial_rec_ids = []
             result[invoice.id] = 0.0
             if invoice.move_id:
-                for move_line in invoice.move_id.line_id:
-                    if move_line.account_id.type in ('receivable','payable'):
-                        if move_line.reconcile_partial_id:
-                            partial_reconcile_id = move_line.reconcile_partial_id.id
-                            if partial_reconcile_id in checked_partial_rec_ids:
-                                continue
-                            checked_partial_rec_ids.append(partial_reconcile_id)
-                        result[invoice.id] += move_line.amount_residual_currency
+                for m in invoice.move_id.line_id:
+                    if m.account_id.type in ('receivable','payable'):
+                        result[invoice.id] += m.amount_residual_currency
         return result
 
     # Give Journal Items related to the payment reconciled to this invoice
@@ -200,7 +191,7 @@ class account_invoice(osv.osv):
             ('in_refund','Supplier Refund'),
             ],'Type', readonly=True, select=True, change_default=True),
 
-        'number': fields.related('move_id','name', type='char', readonly=True, size=64, relation='account.move', store=True, string='Number'),
+        'number': fields.related('move_id','name', type='char', readonly=True, states={'open':[('readonly',False),('required',True)]}, size=64, relation='account.move', store=True, string='Number'),
         'internal_number': fields.char('Invoice Number', size=32, readonly=True, help="Unique number of the invoice, computed automatically when the invoice is created."),
         'reference': fields.char('Invoice Reference', size=64, help="The partner reference of this invoice."),
         'reference_type': fields.selection(_get_reference_type, 'Reference Type',
@@ -795,8 +786,6 @@ class account_invoice(osv.osv):
                     line2[tmp]['credit'] = (am < 0) and -am or 0.0
                     line2[tmp]['tax_amount'] += l['tax_amount']
                     line2[tmp]['analytic_lines'] += l['analytic_lines']
-                    line2[tmp]['amount_currency'] += l['amount_currency']
-                    line2[tmp]['quantity'] += l['quantity']
                 else:
                     line2[tmp] = l
             line = []
@@ -941,8 +930,7 @@ class account_invoice(osv.osv):
                 'narration':inv.comment
             }
             period_id = inv.period_id and inv.period_id.id or False
-            ctx.update(company_id=inv.company_id.id,
-                       account_period_prefer_normal=True)
+            ctx.update({'company_id': inv.company_id.id})
             if not period_id:
                 period_ids = period_obj.find(cr, uid, inv.date_invoice, context=ctx)
                 period_id = period_ids and period_ids[0] or False
@@ -1104,7 +1092,7 @@ class account_invoice(osv.osv):
         return map(lambda x: (0,0,x), lines)
 
     def refund(self, cr, uid, ids, date=None, period_id=None, description=None, journal_id=None):
-        invoices = self.read(cr, uid, ids, ['name', 'type', 'number', 'reference', 'comment', 'date_due', 'partner_id', 'address_contact_id', 'address_invoice_id', 'partner_contact', 'partner_insite', 'partner_ref', 'payment_term', 'account_id', 'currency_id', 'invoice_line', 'tax_line', 'journal_id', 'user_id', 'fiscal_position'])
+        invoices = self.read(cr, uid, ids, ['name', 'type', 'number', 'reference', 'comment', 'date_due', 'partner_id', 'address_contact_id', 'address_invoice_id', 'partner_contact', 'partner_insite', 'partner_ref', 'payment_term', 'account_id', 'currency_id', 'invoice_line', 'tax_line', 'journal_id'])
         obj_invoice_line = self.pool.get('account.invoice.line')
         obj_invoice_tax = self.pool.get('account.invoice.tax')
         obj_journal = self.pool.get('account.journal')
@@ -1153,8 +1141,7 @@ class account_invoice(osv.osv):
                 })
             # take the id part of the tuple returned for many2one fields
             for field in ('address_contact_id', 'address_invoice_id', 'partner_id',
-                    'account_id', 'currency_id', 'payment_term', 'journal_id',
-                    'user_id', 'fiscal_position'):
+                    'account_id', 'currency_id', 'payment_term', 'journal_id'):
                 invoice[field] = invoice[field] and invoice[field][0]
             # create the new invoice
             new_ids.append(self.create(cr, uid, invoice))
@@ -1365,12 +1352,6 @@ class account_invoice_line(osv.osv):
             a = res.product_tmpl_id.property_account_expense.id
             if not a:
                 a = res.categ_id.property_account_expense_categ.id
-
-        if context.get('account_id',False):
-            # this is set by onchange_account_id() to force the account choosen by the
-            # user - to get defaults taxes when product have no tax defined.
-            a = context['account_id']
-
         a = fpos_obj.map_account(cr, uid, fpos, a)
         if a:
             result['account_id'] = a
@@ -1499,22 +1480,16 @@ class account_invoice_line(osv.osv):
     def onchange_account_id(self, cr, uid, ids, product_id, partner_id, inv_type, fposition_id, account_id):
         if not account_id:
             return {}
-        unique_tax_ids = []
+        taxes = self.pool.get('account.account').browse(cr, uid, account_id).tax_ids
         fpos = fposition_id and self.pool.get('account.fiscal.position').browse(cr, uid, fposition_id) or False
-        account = self.pool.get('account.account').browse(cr, uid, account_id)
-        if not product_id:
-            taxes = account.tax_ids
-            unique_tax_ids = self.pool.get('account.fiscal.position').map_tax(cr, uid, fpos, taxes)
-        else:
-            # force user choosen account in context to allow product_id_change()
-            # to fallback to the this accounts in case product has no taxes defined.
-            context = {'account_id': account_id}
-            product_change_result = self.product_id_change(cr, uid, ids, product_id, False, type=inv_type,
-                partner_id=partner_id, fposition_id=fposition_id, context=context,
-                company_id=account.company_id.id)
-            if product_change_result and 'value' in product_change_result and 'invoice_line_tax_id' in product_change_result['value']:
-                unique_tax_ids = product_change_result['value']['invoice_line_tax_id']
-        return {'value':{'invoice_line_tax_id': unique_tax_ids}}
+        tax_ids = self.pool.get('account.fiscal.position').map_tax(cr, uid, fpos, taxes)
+
+        product_change_result = self.product_id_change(cr, uid, ids, product_id, False, type=inv_type,
+                                                       partner_id=partner_id, fposition_id=fposition_id)
+        unique_tax_ids = set(tax_ids)
+        if product_change_result and 'value' in product_change_result and 'invoice_line_tax_id' in product_change_result['value']:
+            unique_tax_ids |= set(product_change_result['value']['invoice_line_tax_id'])
+        return {'value':{'invoice_line_tax_id': list(unique_tax_ids)}}
 
 account_invoice_line()
 

@@ -62,31 +62,15 @@ class pos_order(osv.osv):
             statement_ids = order.pop('statement_ids')
             order_id = self.create(cr, uid, order, context)
             list.append(order_id)
-            for payments in statement_ids:
-                # call add_payment; refer to wizard/pos_payment for data structure
-                # add_payment launches the 'paid' signal to advance the workflow to the 'paid' state
-                payment = payments[2]
-                order_obj.add_payment(cr, uid, order_id, {
-                    'amount': payment['amount'],
-                    'payment_name': order['name'],
-                    'payment_date': payment['name'],
-                    'journal': payment['journal_id'],
-                }, context=context)
-            if order['amount_return']:
-                # search for open cash register of 'cash' journal
-                statement_obj = self.pool.get('account.bank.statement')
-                cash_registers_domain = [('state','=','open'),('user_id','=',uid),('journal_id.type','=','cash')]
-                cash_register_ids = statement_obj.search(cr, uid, cash_registers_domain, context=context)
-                if not len(cash_register_ids):
-                    raise osv.except_osv( _('Error!'),
-                            _("No cash statement found for this session. Unable to record returned cash."))
-                cash_register = statement_obj.browse(cr, uid, cash_register_ids[0], context=context)
-                self.add_payment(cr, uid, order_id, {
-                    'amount': -order['amount_return'],
-                    'payment_date': time.strftime('%Y-%m-%d %H:%M:%S'),
-                    'payment_name': _('return'),
-                    'journal': cash_register.journal_id.id,
-                }, context=context)
+            # call add_payment; refer to wizard/pos_payment for data structure
+            # add_payment launches the 'paid' signal to advance the workflow to the 'paid' state
+            data = {
+                'journal': statement_ids[0][2]['journal_id'],
+                'amount': order['amount_paid'],
+                'payment_name': order['name'],
+                'payment_date': statement_ids[0][2]['name'],
+            }
+            order_obj.add_payment(cr, uid, order_id, data, context=context)
         return list
 
     def unlink(self, cr, uid, ids, context=None):
@@ -141,14 +125,14 @@ class pos_order(osv.osv):
             'picking_id': False,
             'statement_ids': [],
             'nb_print': 0,
-            'name': self.pool.get('ir.sequence').get(cr, uid, 'pos.order'),
+            'name': '/',  #YT 10/5/2012 self.pool.get('ir.sequence').get(cr, uid, 'pos.order'),
         }
         d.update(default)
         return super(pos_order, self).copy(cr, uid, id, d, context=context)
 
     _columns = {
         'name': fields.char('Order Ref', size=64, required=True,
-            states={'draft': [('readonly', False)]}, readonly=True),
+            states={'draft': [('readonly', False)],'paid': [('readonly',False)]}, readonly=True),
         'company_id':fields.many2one('res.company', 'Company', required=True, readonly=True),
         'shop_id': fields.many2one('sale.shop', 'Shop', required=True,
             states={'draft': [('readonly', False)]}, readonly=True),
@@ -172,7 +156,7 @@ class pos_order(osv.osv):
 
         'invoice_id': fields.many2one('account.invoice', 'Invoice'),
         'account_move': fields.many2one('account.move', 'Journal Entry', readonly=True),
-        'picking_id': fields.many2one('stock.picking', 'Picking', readonly=True),
+        'picking_id': fields.many2one('stock.picking', 'Picking', readonly=True, select=True),
         'note': fields.text('Internal Notes'),
         'nb_print': fields.integer('Number of Print', readonly=True),
         'sale_journal': fields.many2one('account.journal', 'Journal', required=True, states={'draft': [('readonly', False)]}, readonly=True),
@@ -470,8 +454,11 @@ class pos_order(osv.osv):
             order_account = order.partner_id and order.partner_id.property_account_receivable and order.partner_id.property_account_receivable.id or account_def or curr_c.account_receivable.id
 
             # Create an entry for the sale
+            #YT 04/09/2012
             move_id = account_move_obj.create(cr, uid, {
                 'journal_id': order.sale_journal.id,
+                'name': order.name,
+                'date': order.date_order,
             }, context=context)
 
             # Create an move for each order line
@@ -653,9 +640,9 @@ class pos_order_line(osv.osv):
         account_tax_obj = self.pool.get('account.tax')
         cur_obj = self.pool.get('res.currency')
         for line in self.browse(cr, uid, ids, context=context):
-            taxes_ids = [ tax for tax in line.product_id.taxes_id if tax.company_id.id == line.order_id.company_id.id ]
+            taxes = line.product_id.taxes_id
             price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-            taxes = account_tax_obj.compute_all(cr, uid, taxes_ids, price, line.qty, product=line.product_id, partner=line.order_id.partner_id or False)
+            taxes = account_tax_obj.compute_all(cr, uid, line.product_id.taxes_id, price, line.qty, product=line.product_id, partner=line.order_id.partner_id or False)
 
             cur = line.order_id.pricelist_id.currency_id
             res[line.id]['price_subtotal'] = cur_obj.round(cr, uid, cur, taxes['total'])

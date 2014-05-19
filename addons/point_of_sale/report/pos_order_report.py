@@ -35,7 +35,7 @@ class pos_order_report(osv.osv):
         'day': fields.char('Day', size=128, readonly=True),
         'partner_id':fields.many2one('res.partner', 'Partner', readonly=True),
         'product_id':fields.many2one('product.product', 'Product', readonly=True),
-        'state': fields.selection([('draft', 'New'), ('paid', 'Closed'), ('done', 'Synchronized'), ('invoiced', 'Invoiced'), ('cancel', 'Cancelled')],
+        'state': fields.selection([('draft', 'New'), ('paid', 'Paid'), ('done', 'Posted'), ('invoiced', 'Invoiced'), ('cancel', 'Cancelled')],
                                   'State'),
         'user_id':fields.many2one('res.users', 'Salesman', readonly=True),
         'price_total':fields.float('Total Price', readonly=True),
@@ -46,7 +46,17 @@ class pos_order_report(osv.osv):
         'nbr':fields.integer('# of Lines', readonly=True),
         'product_qty':fields.integer('# of Qty', readonly=True),
         'journal_id': fields.many2one('account.journal', 'Journal'),
-        'delay_validation': fields.integer('Delay Validation'),
+        'delay_validation': fields.integer('Delay Delivery'),
+        'delivery_year': fields.char('Delivery Year', size=4, readonly=True),
+        'delivery_month': fields.selection([('01','January'), ('02','February'), ('03','March'), ('04','April'),
+            ('05','May'), ('06','June'), ('07','July'), ('08','August'), ('09','September'),
+            ('10','October'), ('11','November'), ('12','December')], 'Month',readonly=True),
+        'delivery_date': fields.char('Delivery Date', size=16, readonly=True),
+        'time_id': fields.many2one('delivery.time','Delivery Time'),
+        'province_id': fields.many2one('res.country.province','Delivery Province'),
+        'district_id': fields.many2one('res.country.district','Delivery District'),
+        'categ_id': fields.many2one('product.category','Product Category'),
+        'product_type': fields.selection([('consu', 'Consumable'), ('Product', 'Stockable'), ('service', 'Service')],'Product Type'),
     }
     _order = 'date desc'
 
@@ -62,7 +72,7 @@ class pos_order_report(osv.osv):
                     sum(l.qty * l.price_unit) as price_total,
                     sum(l.qty * l.discount) as total_discount,
                     (sum(l.qty*l.price_unit)/sum(l.qty * u.factor))::decimal(16,2) as average_price,
-                    sum(cast(to_char(date_trunc('day',s.date_order) - date_trunc('day',s.create_date),'DD') as int)) as delay_validation,
+                    avg(cast(to_char(date_trunc('day',s.greeting_date) - date_trunc('day',s.date_order),'DD') as int)) as delay_validation,
                     to_char(s.date_order, 'YYYY') as year,
                     to_char(s.date_order, 'MM') as month,
                     to_char(s.date_order, 'YYYY-MM-DD') as day,
@@ -72,17 +82,27 @@ class pos_order_report(osv.osv):
                     s.shop_id as shop_id,
                     s.company_id as company_id,
                     s.sale_journal as journal_id,
-                    l.product_id as product_id
+                    l.product_id as product_id,
+                    to_char(s.greeting_date, 'YYYY') as delivery_year,
+                    to_char(s.greeting_date, 'MM') as delivery_month,
+                    to_char(s.greeting_date, 'YYYY-MMM-DD') as delivery_date,
+                    s.time_id as time_id,
+                    a.province_id as province_id,
+                    a.district_id as district_id,
+                    pt.categ_id as categ_id,
+                    pt.type as product_type
                 from pos_order_line as l
                     left join pos_order s on (s.id=l.order_id)
-                    left join product_template pt on (pt.id=l.product_id)
+                    left join product_product pp on (pp.id=l.product_id)
+                    left join product_template pt on (pt.id=pp.product_tmpl_id)
                     left join product_uom u on (u.id=pt.uom_id)
+                    left join res_partner_address a on (a.id=s.shiping_address_id)
                 group by
                     to_char(s.date_order, 'dd-MM-YYYY'),to_char(s.date_order, 'YYYY'),to_char(s.date_order, 'MM'),
                     to_char(s.date_order, 'YYYY-MM-DD'), s.partner_id,s.state,
-                    s.user_id,s.shop_id,s.company_id,s.sale_journal,l.product_id,s.create_date
-                having
-                    sum(l.qty * u.factor) != 0)""")
+                    s.user_id,s.shop_id,s.company_id,s.sale_journal,l.product_id,s.create_date,s.time_id,a.province_id,a.district_id,
+                    to_char(s.greeting_date, 'YYYY'),to_char(s.greeting_date, 'MM'),to_char(s.greeting_date, 'YYYY-MMM-DD'),pt.categ_id,pt.type
+                    )""")
 
 pos_order_report()
 

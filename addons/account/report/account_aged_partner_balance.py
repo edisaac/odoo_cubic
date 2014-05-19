@@ -22,7 +22,6 @@
 import time
 from report import report_sxw
 from common_report_header import common_report_header
-from tools.translate import _
 
 class aged_trial_report(report_sxw.rml_parse, common_report_header):
 
@@ -42,7 +41,6 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
             'get_account': self._get_account,
             'get_fiscalyear': self._get_fiscalyear,
             'get_target_move': self._get_target_move,
-            'get_direction_selection': self._get_direction_selection,
         })
 
     def set_context(self, objects, data, ids, report_type=None):
@@ -369,19 +367,12 @@ class aged_trial_report(report_sxw.rml_parse, common_report_header):
 
     def _get_partners(self,data):
         if data['form']['result_selection'] == 'customer':
-            return _('Receivable Accounts')
+            return 'Receivable Accounts'
         elif data['form']['result_selection'] == 'supplier':
-            return _('Payable Accounts')
+            return 'Payable Accounts'
         elif data['form']['result_selection'] == 'customer_supplier':
-            return _('Receivable and Payable Accounts')
+            return 'Receivable and Payable Accounts'
         return ''
-
-    def _get_direction_selection(self, data):
-        if data['form']['direction_selection'] == 'past':
-            return _('Past')
-        elif data['form']['direction_selection'] == 'future':
-            return _('Future') 
-        return ''   
 
 report_sxw.report_sxw('report.account.aged_trial_balance', 'res.partner',
         'addons/account/report/account_aged_partner_balance.rml',parser=aged_trial_report, header="internal landscape")

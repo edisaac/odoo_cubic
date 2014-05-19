@@ -17,13 +17,19 @@
                     <field name="shop_id" invisible="1"/>
                     <!--<field name="journal_id" invisible="1"/>-->
                     <field name="company_id" invisible="1" groups="base.group_multi_company"/>
+                    <field name="delivery_date" invisible="1"/>
+                    <field name="time_id" invisible="1"/>
+                    <field name="province_id" invisible="1"/>
+                    <field name="district_id" invisible="1"/>
                     <field name="nbr" sum="# of Lines"/>
                     <field name="product_qty" sum="# of Qty"/>
                     <field name="average_price" sum="Average Price"/>
                     <field name="total_discount" sum="Total Discount"/>
                     <field name="price_total" sum="Total Price"/>
-                    <field name="delay_validation"/>
-                    <!--<field name="state" invisible="1"/>-->
+                    <field name="delay_validation" avg="Average Delay Delivery"/>
+                    <field name="state" invisible="1"/>
+                    <field name="categ_id" invisible="1"/>
+                    <field name="product_type" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -54,12 +60,16 @@
                              help="POS ordered created by today"/>
                         <separator orientation="vertical"/>
                         <filter icon="terp-dolar"
-                            string="Invoiced"
-                            domain="[('state','=',('invoiced'))]"/>
+                            string="Valid Sales"
+                            domain="[('state','not in',('new','cancel'))]"/>
                         <filter icon="terp-dolar"
-                            string="Not Invoiced"
-                            domain="[('state','=',('paid'))]"/>
+                            string="New"
+                            domain="[('state','=',('new'))]"/>
+                        <filter icon="terp-dolar"
+                            string="Cancelled"
+                            domain="[('state','=',('cancel'))]"/>
                     <separator orientation="vertical"/>
+                    <field name="product_id"/>
                     <field name="partner_id"/>
                     <field name="user_id" widget="selection">
                         <filter icon="terp-personal"
@@ -73,11 +83,24 @@
                         <filter string="Salesman" icon="terp-personal" name="User" context="{'group_by':'user_id'}"/>
                         <filter string="Customer" icon="terp-personal" context="{'group_by':'partner_id'}"/>
                         <separator orientation="vertical"/>
+                        <filter string="State" icon="terp-personal" context="{'group_by':'state'}"/>
+                        <separator orientation="vertical"/>
                         <filter string="Product" icon="terp-accessories-archiver" context="{'group_by':'product_id'}"/>
+                        <filter string="Product Category" icon="terp-accessories-archiver" context="{'group_by':'categ_id'}"/>
+                        <filter string="Product Type" icon="terp-accessories-archiver" context="{'group_by':'product_type'}"/>
                         <separator orientation="vertical"/>
                         <filter string="Day" icon="terp-go-today" context="{'group_by':'day'}" help="Day of order date"/>
                         <filter string="Month" icon="terp-go-month" context="{'group_by':'month'}" help="Month of order date"/>
                         <filter string="Year" icon="terp-go-year" context="{'group_by':'year'}" help="Year of order date"/>
+                        <separator orientation="vertical"/>
+                        <filter string="Delivery Year" icon="terp-accessories-archiver" context="{'group_by':'delivery_year'}"/>
+                        <filter string="Delivery Month" icon="terp-accessories-archiver" context="{'group_by':'delivery_month'}"/>
+                        <filter string="Delivery Date" icon="terp-accessories-archiver" context="{'group_by':'delivery_date'}"/>
+                        <filter string="Delivery Time" icon="terp-accessories-archiver" context="{'group_by':'time_id'}"/>
+                        <separator orientation="vertical"/>
+                        <filter string="Delivery Province" icon="terp-accessories-archiver" context="{'group_by':'province_id'}"/>
+                        <filter string="Delivery District" icon="terp-accessories-archiver" context="{'group_by':'district_id'}"/>
+
                     </group>
                 </search>
             </field>

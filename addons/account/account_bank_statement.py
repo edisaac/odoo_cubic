@@ -341,11 +341,11 @@ class account_bank_statement(osv.osv):
             if not st.name == '/':
                 st_number = st.name
             else:
-                c = {'fiscalyear_id': st.period_id.fiscalyear_id.id}
                 if st.journal_id.sequence_id:
+                    c = {'fiscalyear_id': st.period_id.fiscalyear_id.id}
                     st_number = obj_seq.next_by_id(cr, uid, st.journal_id.sequence_id.id, context=c)
                 else:
-                    st_number = obj_seq.next_by_code(cr, uid, 'account.bank.statement', context=c)
+                    st_number = obj_seq.next_by_code(cr, uid, 'account.bank.statement')
 
             for line in st.move_line_ids:
                 if line.state <> 'valid':
@@ -373,11 +373,10 @@ class account_bank_statement(osv.osv):
         for st in self.browse(cr, uid, ids, context=context):
             if st.state=='draft':
                 continue
-            move_ids = []
+            ids = []
             for line in st.line_ids:
-                move_ids += [x.id for x in line.move_ids]
-            account_move_obj.button_cancel(cr, uid, move_ids, context=context)
-            account_move_obj.unlink(cr, uid, move_ids, context)
+                ids += [x.id for x in line.move_ids]
+            account_move_obj.unlink(cr, uid, ids, context)
             done.append(st.id)
         return self.write(cr, uid, done, {'state':'draft'}, context=context)
 

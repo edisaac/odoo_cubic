@@ -22,5 +22,3 @@
 import stock_planning_create_periods
 import stock_planning_forecast
 import stock_planning_createlines
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

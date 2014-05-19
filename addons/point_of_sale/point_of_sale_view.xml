@@ -21,7 +21,7 @@
                         <field name="name"/>
                         <field name="date_order"/>
                         <field name="partner_id" on_change="onchange_partner_id(partner_id)" context="{'search_default_customer':1}" attrs="{'readonly': [('state','=','invoiced')]}"/>
-                        <button name="action_invoice" string="Invoice" icon="gtk-apply" type="object" states="paid" attrs="{'readonly': [('partner_id','=',False)]}"/>
+                        <button name="action_invoice" string="Invoice" icon="gtk-apply" type="object" states="paid" invisible="1" attrs="{'readonly': [('partner_id','=',False)]}"/>
                     </group>
                     <notebook colspan="4">
                         <page string="Sale Order">
@@ -55,7 +55,7 @@
                             <group colspan="4" col="8">
                                 <field name="state" widget="statusbar" statusbar_visible="draft,paid,done" statusbar_colors='{"cancel":"red"}'/>
                                 <button name="%(action_pos_payment)d" string="Payment" icon="gtk-apply" type="action" states="draft"/>
-                                <button name="refund" string="Return Products" type="object" icon="gtk-ok"
+                                <button name="refund" string="Return Products" type="object" icon="gtk-ok" groups="point_of_sale.pos_manager"
                                     attrs="{'invisible':[('state','=','draft')]}"/>
                                 <button name="%(action_report_pos_receipt)d" string="Reprint" icon="gtk-print" type="action" states="paid,done,invoiced"/>
                             </group>
@@ -87,7 +87,7 @@
                                 <separator string="Accounting Information" colspan="3"/>
                                 <field name="sale_journal" domain="[('type','=','sale')]"/>
                                 <button name="done" string="Post Entries" icon="gtk-apply" type="workflow" states="paid"/>
-                                <field name="invoice_id" colspan="2" readonly="1"
+                                <field name="invoice_id" colspan="2" readonly="0"
                                     attrs="{'invisible':[('state','&lt;&gt;','invoiced')]}"/>
                                 <button name="%(pos_invoice_report)d" string="Re-Print"
                                     icon="gtk-print" type="action" attrs="{'invisible':[('state','&lt;&gt;','invoiced')]}"/>
@@ -121,7 +121,7 @@
                     <field name="partner_id"/>
                     <field name="date_order"/>
                     <field name="user_id"/>
-                    <field name="invoice_id"/>
+                    <!--field name="invoice_id"/-->
                     <field name="amount_total" sum="Amount total"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                     <field name="state"/>
@@ -140,8 +140,8 @@
                     <filter icon="terp-check" string="Invoiced" domain="[('state','=','invoiced')]"/>
                     <filter icon="gtk-convert" string="Posted" domain="[('state','=','done')]"/>
                     <separator orientation="vertical"/>
-                    <filter icon="terp-go-month" string="Today" domain="[('date_order','&gt;=',datetime.date.today().strftime('%%Y-%%m-%%d 00:00:00')),('date_order','&lt;=',datetime.date.today().strftime('%%Y-%%m-%%d 23:59:59'))]"/>
-                    <filter icon="gtk-go-forward" string="Yesterday" domain="[('date_order','&lt;',datetime.date.today().strftime('%%Y-%%m-%%d 00:00:00')),('date_order','&gt;=',(datetime.date.today() - relativedelta(days=1)).strftime('%%Y-%%m-%%d 00:00:00'))]"/>
+                    <filter icon="terp-go-month" string="Today" domain="[('date_order','&gt;=',datetime.date.today().strftime('%%Y-%%m-%%d 05:00:00')),('date_order','&lt;=',datetime.date.today().strftime('%%Y-%%m-%%d 18:59:59'))]"/>
+                    <filter icon="gtk-go-forward" string="Yesterday" domain="[('date_order','&lt;',datetime.date.today().strftime('%%Y-%%m-%%d 05:00:00')),('date_order','&gt;=',(datetime.date.today() - relativedelta(days=1)).strftime('%%Y-%%m-%%d 05:00:00'))]"/>
                     <separator orientation="vertical"/>
                     <field name="name"/>
                     <field name="user_id"/>

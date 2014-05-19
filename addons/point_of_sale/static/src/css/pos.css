@@ -318,8 +318,6 @@
 }
 .point-of-sale #categories {
     border-bottom: 1px solid #cecbcb;
-    max-height: 114px;    
-    overflow: auto;
 }
 .point-of-sale #categories h4 {
     display: inline-block;

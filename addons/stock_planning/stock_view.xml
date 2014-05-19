@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openerp>
+	<data>
+		
+		<record model='ir.ui.view' id='stock_warehouse_planning_form_view'>
+			<field name='name'>Stock Warehouse Form Inherit Stock Planning</field>
+			<field name='model'>stock.warehouse</field>
+			<field name='inherit_id' ref='stock.view_warehouse'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/field[@name='lot_output_id']" position="after">
+					<field name="supply_warehouse_id"/>
+					
+				</xpath>
+			</field>
+		</record>
+		
+	</data>
+</openerp>
