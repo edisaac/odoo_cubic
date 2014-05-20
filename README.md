@@ -22,6 +22,30 @@ there are several options:
   rebuild a branch from them
 * Replay the branch by hand
 
+Other way to migrate your repository is:
+
+1) Install bzr-fastimport
+
+    $ sudo apt-get install bzr-fastimport
+
+2) Move into your bazzar branch local directory
+
+3) Initialice your local branch directory with git
+
+    $ git init
+
+4) Run the next command to migrate your bzr to git
+
+    $ bzr fast-export --git-branch=master . | git fast-import
+
+5) Check your logs on git
+
+    $ git log
+
+6) Push your new git branch to github or other
+
+    $ git push https://...
+
 
 System Requirements
 -------------------
