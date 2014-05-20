@@ -18,7 +18,7 @@
                         <field name="product_id"
                             on_change="onchange_method(advance_payment_method, product_id)"
                             context="{'search_default_services': 1}"
-                            attrs="{'invisible': [('advance_payment_method','!=','fixed')]}"/>
+                            attrs="{'invisible': [('advance_payment_method', 'not in', ('fixed','percentage'))]}"/>
                         <label for="amount" attrs="{'invisible': [('advance_payment_method', 'not in', ('fixed','percentage'))]}"/>
                         <div attrs="{'invisible': [('advance_payment_method', 'not in', ('fixed','percentage'))]}">
                             <field name="amount"

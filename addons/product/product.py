@@ -24,7 +24,7 @@ import re
 
 from _common import ceiling
 
-from openerp import tools, SUPERUSER_ID
+from openerp import tools
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 
@@ -131,10 +131,10 @@ class product_uom(osv.osv):
         'name': fields.char('Unit of Measure', size=64, required=True, translate=True),
         'category_id': fields.many2one('product.uom.categ', 'Category', required=True, ondelete='cascade',
             help="Conversion between Units of Measure can only occur if they belong to the same category. The conversion will be made based on the ratios."),
-        'factor': fields.float('Ratio', required=True,digits=(12, 12),
+        'factor': fields.float('Ratio', required=True,digits=(12, 10),
             help='How much bigger or smaller this unit is compared to the reference Unit of Measure for this category:\n'\
                     '1 * (reference unit) = ratio * (this unit)'),
-        'factor_inv': fields.function(_factor_inv, digits=(12,12),
+        'factor_inv': fields.function(_factor_inv, digits=(12,10),
             fnct_inv=_factor_inv_write,
             string='Ratio',
             help='How many times this Unit of Measure is bigger than the reference Unit of Measure in this category:\n'\
@@ -703,7 +703,7 @@ class product_product(osv.osv):
 
         res = {}
         product_uom_obj = self.pool.get('product.uom')
-        for product in self.browse(cr, SUPERUSER_ID, ids, context=context):
+        for product in self.browse(cr, uid, ids, context=context):
             res[product.id] = product[ptype] or 0.0
             if ptype == 'list_price':
                 res[product.id] = (res[product.id] * (product.price_margin or 1.0)) + \
@@ -728,7 +728,11 @@ class product_product(osv.osv):
         if not default:
             default = {}
 
-        product = self.read(cr, uid, id, ['name'], context=context)
+        # Craft our own `<name> (copy)` in en_US (self.copy_translation()
+        # will do the other languages).
+        context_wo_lang = context.copy()
+        context_wo_lang.pop('lang', None)
+        product = self.read(cr, uid, id, ['name'], context=context_wo_lang)
         default = default.copy()
         default.update(name=_("%s (copy)") % (product['name']))
 

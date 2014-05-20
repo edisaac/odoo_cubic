@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2013-06-07 19:36+0000\n"
-"PO-Revision-Date: 2014-05-17 04:51+0000\n"
+"PO-Revision-Date: 2014-03-05 10:43+0000\n"
 "Last-Translator: Ediz Duman <neps1192@gmail.com>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-05-18 05:53+0000\n"
-"X-Generator: Launchpad (build 17007)\n"
+"X-Launchpad-Export-Date: 2014-03-06 06:15+0000\n"
+"X-Generator: Launchpad (build 16948)\n"
 
 #. module: sale
 #: model:ir.model,name:sale.model_account_config_settings
@@ -53,7 +53,7 @@ msgstr "Gün"
 #: model:process.transition.action,name:sale.process_transition_action_cancelorder0
 #: view:sale.order:0
 msgid "Cancel Order"
-msgstr "Siparişi İptal Et"
+msgstr "Sipariş İptal et"
 
 #. module: sale
 #: code:addons/sale/wizard/sale_make_invoice_advance.py:101
@@ -161,7 +161,7 @@ msgstr "Varsayılan Ödeme Koşulu"
 #. module: sale
 #: field:sale.config.settings,group_uom:0
 msgid "Allow using different units of measures"
-msgstr "Farklı ölçü birimleri kullanmaya izin verme"
+msgstr "Farklı ölçü birimleri kullanmaya izin ver"
 
 #. module: sale
 #: selection:sale.advance.payment.inv,advance_payment_method:0
@@ -188,7 +188,7 @@ msgstr "Toplam Fiyat"
 #. module: sale
 #: field:sale.config.settings,group_invoice_so_lines:0
 msgid "Generate invoices based on the sales order lines"
-msgstr "Satış siparişi satırlarına göre fatura oluşturma"
+msgstr "Satış siparişi kalemlerine göre fatura oluştur"
 
 #. module: sale
 #: help:sale.make.invoice,grouped:0
@@ -286,7 +286,7 @@ msgstr "Tekliflerim"
 #. module: sale
 #: field:sale.config.settings,module_warning:0
 msgid "Allow configuring alerts by customer or products"
-msgstr "Müşteri veya ürünlere göre uyarıları yapılandırma"
+msgstr "Müşteri ya da ürünlere göre uyarıları yapılandırma"
 
 #. module: sale
 #: field:sale.shop,name:0
@@ -461,7 +461,7 @@ msgstr "KDV :"
 #. module: sale
 #: model:res.groups,name:sale.group_invoice_so_lines
 msgid "Enable Invoicing Sales order lines"
-msgstr "SatışSiparişi Satırında Faturalamayı Etkinleştirme"
+msgstr "SatışSiparişi Kalemlerini Faturalamayı Etkinleştir"
 
 #. module: sale
 #: selection:sale.report,month:0
@@ -676,7 +676,7 @@ msgstr "Satış Siparişi Kalemi"
 #. module: sale
 #: field:sale.config.settings,module_analytic_user_function:0
 msgid "One employee can have different roles per contract"
-msgstr "Bir çalışanın sözleşme başına farklı rollere sahip olma özelliği"
+msgstr "Bir çalışan her sözleşmede farklı rollere sahip olabilir"
 
 #. module: sale
 #: view:sale.order:0
@@ -988,7 +988,7 @@ msgstr "Geçerli fiyat listesi kalemi bulunamadı!:"
 #. module: sale
 #: field:sale.config.settings,module_sale_margin:0
 msgid "Display margins on sales orders"
-msgstr "Satış siparişlerinde karlılık oranını gösterme"
+msgstr "Satış siparişlerinde oranları görüntüle"
 
 #. module: sale
 #: help:sale.order,invoice_ids:0
@@ -1364,7 +1364,7 @@ msgstr ""
 #. module: sale
 #: view:sale.order:0
 msgid "Cancel Quotation"
-msgstr "Teklifi İptal Et"
+msgstr "Teklif İptal et"
 
 #. module: sale
 #: selection:sale.order,state:0
@@ -1417,7 +1417,7 @@ msgstr "Tedarik ve faturalamayı yürütür"
 #. module: sale
 #: field:sale.order,invoiced:0
 msgid "Paid"
-msgstr "Ödendi"
+msgstr "Ödenmdi"
 
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_order_report_all
@@ -1448,7 +1448,7 @@ msgstr ""
 #. module: sale
 #: field:sale.config.settings,group_discount_per_so_line:0
 msgid "Allow setting a discount on the sales order lines"
-msgstr "Satış sipariş satırında indirim uygulama"
+msgstr "Satış siparişi kalemlerine indirim uygulamanızı sağlar"
 
 #. module: sale
 #: field:sale.order,paypal_url:0
@@ -1458,7 +1458,7 @@ msgstr "Paypal Url"
 #. module: sale
 #: field:sale.config.settings,group_sale_pricelist:0
 msgid "Use pricelists to adapt your price per customers"
-msgstr "Her müşteriye farklı fiyat ayarlaması için fiyat listeleri kullanma"
+msgstr "Her müşteriye fiyat ayarlaması için fiyat listeleri kullanın"
 
 #. module: sale
 #: code:addons/sale/sale.py:185
@@ -1932,7 +1932,7 @@ msgstr "Tanımlı Müşteri Yok!"
 #. module: sale
 #: field:sale.order,partner_shipping_id:0
 msgid "Delivery Address"
-msgstr "Teslim Adresi"
+msgstr "Teslimat Adresi"
 
 #. module: sale
 #: selection:sale.order,state:0
@@ -1947,7 +1947,7 @@ msgstr "Depo Özellikleri"
 #. module: sale
 #: view:sale.order.line:0
 msgid "Cancel Line"
-msgstr "Satırı İptal Et"
+msgstr "Satırı İptal et"
 
 #. module: sale
 #: field:sale.order,message_ids:0
@@ -2258,7 +2258,7 @@ msgstr "İşlemdeki Satış Siparişleri"
 #. module: sale
 #: field:sale.config.settings,timesheet:0
 msgid "Prepare invoices based on timesheets"
-msgstr "Zaman çizelgelerine göre fatura hazırlama"
+msgstr "Zaman çizelgelerine göre fatura hazırla"
 
 #. module: sale
 #: help:sale.order,origin:0
@@ -2315,7 +2315,7 @@ msgstr "Satış Siparişi "
 #. module: sale
 #: field:sale.config.settings,module_account_analytic_analysis:0
 msgid "Use contracts management"
-msgstr "Sözleşme yönetimini kullanma"
+msgstr "Sözleşme yönetimi kullanma"
 
 #. module: sale
 #: help:sale.order,invoiced:0

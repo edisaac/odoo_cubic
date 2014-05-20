@@ -43,7 +43,7 @@
 				</record>
 	
 		<record model="account.tax.code.template" id="vat_code_IVA">
-			<field name="name">Impuesto General a las Ventas (IVA) Total a Pagar</field>
+			<field name="name">Impuesto Valor Agregado (IVA) Total a Pagar</field>
 			<field name="parent_id" ref="vat_code_tax"/>
 		</record>
 			<record model="account.tax.code.template" id="vat_code_IVA_pay_parent">

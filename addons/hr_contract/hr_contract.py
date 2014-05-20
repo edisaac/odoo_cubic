@@ -61,11 +61,13 @@ hr_contract_type()
 
 class hr_contract(osv.osv):
     _name = 'hr.contract'
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = 'Contract'
     _columns = {
         'name': fields.char('Contract Reference', size=64, required=True),
         'employee_id': fields.many2one('hr.employee', "Employee", required=True),
         'department_id': fields.related('employee_id','department_id', type='many2one', relation='hr.department', string="Department", readonly=True),
+        'company_id': fields.related('employee_id','company_id', type='many2one', relation='res.company', string="Company", readonly=True),
         'type_id': fields.many2one('hr.contract.type', "Contract Type", required=True),
         'job_id': fields.many2one('hr.job', 'Job Title'),
         'date_start': fields.date('Start Date', required=True),
@@ -99,6 +101,16 @@ class hr_contract(osv.osv):
     _constraints = [
         (_check_dates, 'Error! Contract start-date must be less than contract end-date.', ['date_start', 'date_end'])
     ]
+    
+    def onchange_employee(self, cr, uid, ids, employee_id, context=None):
+        res = {'value': {}}
+        if not employee_id:
+            return res
+        employee = self.pool.get('hr.employee').browse(cr, uid, employee_id, context=context)
+        res['value']['company_id'] = employee.company_id.id
+        res['value']['department_id'] = employee.department_id.id
+        return res
+    
 hr_contract()
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

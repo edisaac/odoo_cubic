@@ -106,7 +106,12 @@ class account_invoice(osv.osv):
             result[invoice.id] = 0.0
             if invoice.move_id:
                 for aml in invoice.move_id.line_id:
-                    if aml.account_id.type in ('receivable','payable'):
+                    is_residual = False
+                    if invoice.type in ('out_invoice','out_refund') and aml.account_id.type == 'receivable':
+                        is_residual = True
+                    elif invoice.type in ('in_invoice','in_refund') and aml.account_id.type == 'payable':
+                        is_residual = True
+                    if is_residual:
                         if aml.currency_id and aml.currency_id.id == invoice.currency_id.id:
                             result[invoice.id] += aml.amount_residual_currency
                         else:
@@ -240,7 +245,7 @@ class account_invoice(osv.osv):
             ],'Type', readonly=True, select=True, change_default=True, track_visibility='always'),
 
         'number': fields.related('move_id','name', type='char', readonly=True, size=64, relation='account.move', store=True, string='Number'),
-        'internal_number': fields.char('Invoice Number', size=32, readonly=True, help="Unique number of the invoice, computed automatically when the invoice is created."),
+        'internal_number': fields.char('Invoice Number', size=32, readonly=True, states={'draft':[('readonly',False)]}, help="Unique number of the invoice, computed automatically when the invoice is created."),
         'reference': fields.char('Invoice Reference', size=64, help="The partner reference of this invoice."),
         'reference_type': fields.selection(_get_reference_type, 'Payment Reference',
             required=True, readonly=True, states={'draft':[('readonly',False)]}),
@@ -337,7 +342,7 @@ class account_invoice(osv.osv):
         'sent': False,
     }
     _sql_constraints = [
-        ('number_uniq', 'unique(number, company_id, journal_id, type)', 'Invoice Number must be unique per Company!'),
+        ('number_uniq', 'unique(number, company_id, journal_id, type)', 'Invoice Number must be unique per Company!\nCheck if not exist the internal number in other information page.'),
     ]
 
 

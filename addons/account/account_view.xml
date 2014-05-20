@@ -176,7 +176,7 @@
                     </h1>
                     <group>
                         <group>
-                            <field name="parent_id"/>
+                            <field name="parent_id" domain="[('company_id','=',company_id)]"/>
                             <field name="type"/>
                             <field name="user_type"/>
                             <field name="active"/>
@@ -188,14 +188,14 @@
                             <field name="balance"/>
                         </group>
                         <group>
-                            <field name="tax_ids" domain="[('parent_id','=',False)]" widget="many2many_tags"/>
+                            <field name="tax_ids" domain="[('parent_id','=',False),('company_id','=',company_id)]" widget="many2many_tags"/>
                             <field name="reconcile"/>
                             <field name="child_consol_ids"
                                 attrs="{'invisible':[('type','!=','consolidation')]}"
                                 widget="many2many_tags"/>
                         </group>
                         <group groups="base.group_multi_currency">
-                            <field name="currency_id"/>
+                            <field name="currency_id" domain="['|',('company_id','=',False),('company_id','=',company_id)]"/>
                             <field name="currency_mode" attrs="{'readonly': [('currency_id','=',False)]}"/>
                         </group>
                     </group>
@@ -375,13 +375,16 @@
             <field name="model">account.journal</field>
             <field name="arch" type="xml">
                 <search string="Search Account Journal">
-                    <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Journal"/>
+                    <!--field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Journal"/-->
+                    <field name="name"/>
+                    <field name="code"/>
                     <filter domain="['|', ('type', '=', 'sale'), ('type', '=', 'sale_refund')]" string="Sale" icon="terp-camera_test"/>
                     <filter domain="['|', ('type', '=', 'purchase'), ('type', '=', 'purchase_refund')]" string="Purchase" icon="terp-purchase"/>
                     <filter domain="['|', ('type', '=', 'cash'), ('type', '=', 'bank')]" string="Liquidity" icon="terp-dolar"/>
                     <filter domain="['|', ('type', '=', 'general'), ('type', '=', 'situation')]" string="Others" icon="terp-stock"/>
                     <field name="user_id"/>
                     <group expand="0" string="Group By...">
+                    	<filter string="Company" context="{'group_by':'company_id'}" icon="terp-personal"/>
                         <filter string="User" context="{'group_by':'user_id'}" icon="terp-personal"/>
                         <filter string="Type" context="{'group_by':'type'}" icon="terp-stock_symbol-selection"/>
                     </group>
@@ -403,9 +406,9 @@
                             <field name="type"/>
                         </group>
                         <group>
-                            <field name="default_debit_account_id" attrs="{'required':[('type','in', ('cash', 'bank'))]}" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]"/>
-                            <field name="default_credit_account_id" attrs="{'required':[('type','in',('cash', 'bank'))]}" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]"/>
-                            <field name="currency" groups="base.group_multi_currency"/>
+                            <field name="default_debit_account_id" attrs="{'required':[('type','in', ('cash', 'bank'))]}" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation'),('company_id','=',company_id)]"/>
+                            <field name="default_credit_account_id" attrs="{'required':[('type','in',('cash', 'bank'))]}" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation'),('company_id','=',company_id)]"/>
+                            <field name="currency" groups="base.group_multi_currency"  domain="['|',('company_id','=',False),('company_id','=',company_id)]"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
@@ -414,7 +417,7 @@
                             <group>
                                 <group>
                                     <field name="user_id"/>
-                                    <field name="sequence_id" required="0"/>
+                                    <field name="sequence_id" required="0" domain="['|',('company_id','=',False),('company_id','=',company_id)]"/>
                                 </group>
                                 <group>
                                     <field name="centralisation"/>
@@ -428,14 +431,14 @@
                             <separator colspan="4" string="Accounts Type Allowed (empty for no control)"/>
                             <field colspan="4" name="type_control_ids" nolabel="1"/>
                             <separator colspan="4" string="Accounts Allowed (empty for no control)"/>
-                            <field colspan="4" name="account_control_ids" nolabel="1"/>
+                            <field colspan="4" name="account_control_ids" nolabel="1" domain="['|',('company_id','=',False),('company_id','=',company_id)]"/>
                         </page>
                         <page string="Cash Registers">
                             <group>
                                 <group string="Accounts">
-                                    <field name="profit_account_id" domain="[('type','!=','view')]"/>
-                                    <field name="loss_account_id" domain="[('type','!=','view')]"/>
-                                    <field name="internal_account_id" domain="[('type','!=','view')]"/>
+                                    <field name="profit_account_id" domain="[('type','!=','view'),('company_id','=',company_id)]"/>
+                                    <field name="loss_account_id" domain="[('type','!=','view'),('company_id','=',company_id)]"/>
+                                    <field name="internal_account_id" domain="[('type','!=','view'),('company_id','=',company_id)]"/>
                                 </group>
                                 <group string="Miscellaneous">
                                     <field name="with_last_closing_balance"/>
@@ -519,6 +522,7 @@
                     <field name="journal_id"/>
                     <field name="balance_start"/>
                     <field name="balance_end_real"/>
+                    <field name="total_entry_encoding"/>
                     <field name="balance_end" invisible="1"/>
                     <field name="state"/>
                 </tree>
@@ -546,7 +550,7 @@
         <record id="view_bank_statement_form" model="ir.ui.view">
             <field name="name">account.bank.statement.form</field>
             <field name="model">account.bank.statement</field>
-            <field name="priority">1</field>
+            <field name="priority">10</field>
             <field name="arch" type="xml">
                 <form string="Bank Statement" version="7.0">
                 <header>
@@ -922,7 +926,7 @@
                                 <field name="child_depend"/>
                             </group>
                             <group string="Invoices">
-                                  <field name="account_collected_id" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]"/>
+                                  <field name="account_collected_id" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation'), ('company_id', '=', company_id)]"/>
                                   <field name="account_analytic_collected_id" domain="[('type','&lt;&gt;','view'), ('company_id', '=', company_id)]" groups="analytic.group_analytic_accounting"/>
 
                                   <field name="base_code_id"/>
@@ -932,7 +936,7 @@
 
                             </group>
                             <group string="Refunds">
-                                  <field name="account_paid_id" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation')]"/>
+                                  <field name="account_paid_id" domain="[('type','&lt;&gt;','view'),('type','&lt;&gt;','consolidation'), ('company_id', '=', company_id)]"/>
                                   <field name="account_analytic_paid_id" domain="[('type','&lt;&gt;','view'), ('company_id', '=', company_id)]" groups="analytic.group_analytic_accounting"/>
 
                                   <field name="ref_base_code_id"/>
@@ -1115,7 +1119,7 @@
                     <field name="partner_id" on_change="onchange_partner_id(move_id, partner_id, account_id, debit, credit, date, journal_id)"/>
                     <field name="account_id" options='{"no_open":True}' domain="[('journal_id','=',journal_id), ('company_id', '=', company_id)]" on_change="onchange_account_id(account_id, partner_id, context)"/>
                     <field name="account_tax_id" options='{"no_open":True}' invisible="context.get('journal_type', False) not in ['sale','sale_refund','purchase','purchase_refund','general']"/>
-                    <field name="analytic_account_id" groups="analytic.group_analytic_accounting" domain="[('type','not in',['view','template'])]" invisible="not context.get('analytic_journal_id',False)"/>
+                    <field name="analytic_account_id" groups="analytic.group_analytic_accounting" domain="[('type','not in',['view','template']),('company_id','=',company_id)]" invisible="not context.get('analytic_journal_id',False)"/>
                     <field name="move_id" required="0"/>
                     <field name="debit" sum="Total Debit"/>
                     <field name="credit" sum="Total Credit"/>
@@ -1269,8 +1273,8 @@
                     </h1>
                     <group>
                         <group>
-                            <field name="journal_id"/>
-                            <field name="period_id"/>
+                            <field name="journal_id" domain="[('company_id','=',company_id)]"/>
+                            <field name="period_id" domain="[('company_id','=',company_id)]"/>
                             <field name="company_id" required="1" groups="base.group_multi_company"/>
                             <field name="partner_id" invisible="1"/>
                         </group>
@@ -2256,7 +2260,10 @@
             <field name="arch" type="xml">
                 <form string="Statement" version="7.0">
                 <header>
-                    <button name="button_confirm_cash" states="open" string="Close CashBox" type="object" class="oe_highlight"/>
+                    <button name="button_confirm_cash" string="Close CashBox" type="object" class="oe_highlight"
+                    	attrs="{'invisible':['|',('difference','!=',0.0),('state','!=','open')]}"/>
+                    <button name="button_confirm_cash" string="Close CashBox" type="object" class="oe_highlight"
+                    	attrs="{'invisible':['|',('difference','==',0.0),('state','!=','open')]}" confirm="The end balance calculated and the real end balance are different, you want create a adjusted line automatically?"/>
                     <button name="button_open" states="draft" string="Open CashBox" type="object" class="oe_highlight"/>
                     <button name="button_cancel" states="confirm,open" string="Cancel CashBox" type="object"/>
                     <field name="state" widget="statusbar" nolabel="1" statusbar_visible="draft,confirm"/>
@@ -2266,9 +2273,10 @@
                     <h1><field name="name" class="oe_inline" attrs="{'invisible':[('name','=','/')]}"/></h1>
                     <group>
                         <group>
-                            <field name="journal_id" on_change="onchange_journal_id(journal_id)" widget="selection" domain="[('type', '=', 'cash')]" />
+                            <field name="journal_id" on_change="onchange_journal_id(journal_id,line_ids,balance_end_real,opening_details_ids,context)" widget="selection" 
+                            	domain="[('type', '=', 'cash')]"/>
+                            <field name="cash_control" invisible="1"/>
                             <field name="user_id" readonly="1" string="Responsible"/>
-                            <field name="total_entry_encoding"/>
                             <field name='company_id' widget="selection" groups="base.group_multi_company" />
                         </group>
                         <group>
@@ -2280,7 +2288,8 @@
                     </group>
                     <notebook>
                         <page string="Cash Transactions" attrs="{'invisible': [('state','=','draft')]}">
-                            <field name="line_ids" context="{'date':date}">
+                            <field name="line_ids" context="{'date':date}"
+                            	on_change="onchange_details(closing_details_ids,line_ids,cash_control,balance_start,balance_end_real,context)">
                                 <tree editable="bottom" string="Statement lines">
                                     <field name="sequence" invisible="1"/>
                                     <field name="date"/>
@@ -2311,21 +2320,25 @@
                         </page>
                         <page string="Cash Control">
                             <group col="2" expand="1">
-                                <field name="opening_details_ids" nolabel="1" colspan="4" attrs="{'invisible' : [('state', '!=', 'draft')]}">
+                                <field name="opening_details_ids" nolabel="1" colspan="4" 
+                                	attrs="{'invisible':['|',('state', '!=', 'draft'),('cash_control','=',False)]}"
+                                	on_change="onchange_details(opening_details_ids,line_ids,cash_control,balance_start,balance_end_real,context)">
                                     <tree string="Opening Cashbox Lines" editable="bottom">
                                         <field name="pieces"/>
                                         <field name="number_opening" string="Opening Unit Numbers" on_change="on_change_sub_opening(pieces, number_opening, parent.balance_end)"/>
-                                        <field name="subtotal_opening" string="Opening Subtotal"/>
+                                        <field name="subtotal_opening" string="Opening Subtotal" sum="Opening Amount"/>
                                     </tree>
                                 </field>
-                                <field name="closing_details_ids" nolabel="1" colspan="4" attrs="{'invisible' : [('state', '=', 'draft')]}">
+                                <field name="closing_details_ids" nolabel="1" colspan="4" 
+                                	attrs="{'invisible' : ['|',('state', '=', 'draft'),('cash_control','=',False)]}"
+                                	on_change="onchange_details(closing_details_ids,line_ids,cash_control,balance_start,balance_end_real,context)">
                                     <tree string="Closing Cashbox Lines" editable="bottom">
                                         <field name="pieces" readonly="1" />
                                         <field name="number_opening" string="Opening Unit Numbers" readonly="1" />
-                                        <field name="subtotal_opening" string="Opening Subtotal" readonly="1" />
+                                        <field name="subtotal_opening" string="Opening Subtotal" readonly="1" sum="Opening Amount"/>
 
                                         <field name="number_closing" string="Closing Unit Numbers" on_change="on_change_sub_closing(pieces, number_closing, parent.balance_end)"/>
-                                        <field name="subtotal_closing" string="Closing Subtotal"/>
+                                        <field name="subtotal_closing" string="Closing Subtotal" sum="Closing Amount"/>
                                     </tree>
                                 </field>
                             </group>
@@ -2337,12 +2350,26 @@
                     <group col="6" colspan="4">
                         <group col="2" colspan="2">
                             <separator string="Opening Balance" colspan="4"/>
-                            <field name="balance_start" readonly="1" string="Opening Cash Control" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="balance_start" string="Opening Cash Control" widget="monetary" options="{'currency_field': 'currency_id'}"
+                            	attrs="{'readonly':['|','|',('cash_control','=',True),('state','!=','draft'),('previus_id','!=',False)]}"/>
                             <field name="last_closing_balance" readonly="1" string="Last Closing Balance" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                            <field name="total_entry_encoding" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="total_entry_encoding" widget="monetary" options="{'currency_field': 'currency_id'}"
+                            	attrs="{'invisible':[('state','==','draft')]}"/>
+                            <div>
+                                <label for="previus_id"/>
+                                <button name="button_previus_id" states="draft,open"
+                                    string="(update)" class="oe_link oe_edit_only"
+                                    type="object" help="Recompute start balance and opening details from previus statement"/>
+                            </div>
+                            <field name="previus_id" nolabel="1" domain="[('journal_id','=',journal_id),('next_id','=',False),('state','!=','cancel')]"
+                            	on_change="onchange_previus_id(previus_id, journal_id, opening_details_ids, context)"/>
                         </group>
                         <group string="Closing Balance">
                             <field name="balance_end" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="balance_end_real" widget="monetary" options="{'currency_field': 'currency_id'}"
+                            	attrs="{'readonly':[('cash_control','=',True)],'invisible':[('state','==','draft')]}"/>
+                            <field name="difference" invisible="1"/>
+                            <field name="next_id"/>
                         </group>
                     </group>
                 </sheet>

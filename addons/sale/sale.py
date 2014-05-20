@@ -386,6 +386,9 @@ class sale_order(osv.osv):
         invoice_vals.update(self._inv_get(cr, uid, order, context=context))
         return invoice_vals
 
+    def _get_preinvoice_copy_defaults(self, cr, uid, preline, context=None):
+        return {'invoice_id': False, 'price_unit': -preline.price_unit}
+
     def _make_invoice(self, cr, uid, order, lines, context=None):
         inv_obj = self.pool.get('account.invoice')
         obj_invoice_line = self.pool.get('account.invoice.line')
@@ -400,7 +403,7 @@ class sale_order(osv.osv):
         for preinv in order.invoice_ids:
             if preinv.state not in ('cancel',) and preinv.id not in from_line_invoice_ids:
                 for preline in preinv.invoice_line:
-                    inv_line_id = obj_invoice_line.copy(cr, uid, preline.id, {'invoice_id': False, 'price_unit': -preline.price_unit})
+                    inv_line_id = obj_invoice_line.copy(cr, uid, preline.id, self._get_preinvoice_copy_defaults(cr, uid, preline, context=context))
                     lines.append(inv_line_id)
         inv = self._prepare_invoice(cr, uid, order, lines, context=context)
         inv_id = inv_obj.create(cr, uid, inv, context=context)
@@ -869,7 +872,8 @@ class sale_order_line(osv.osv):
         product_uom_obj = self.pool.get('product.uom')
         partner_obj = self.pool.get('res.partner')
         product_obj = self.pool.get('product.product')
-        context = {'lang': lang, 'partner_id': partner_id}
+        context.update({'lang': lang, 'partner_id': partner_id})
+        context_partner = context.copy()
         if partner_id:
             lang = partner_obj.browse(cr, uid, partner_id).lang
         context_partner = {'lang': lang, 'partner_id': partner_id}

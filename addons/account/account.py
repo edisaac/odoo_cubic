@@ -748,7 +748,7 @@ class account_journal(osv.osv):
         'company_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
     }
     _sql_constraints = [
-        ('code_company_uniq', 'unique (code, company_id)', 'The code of the journal must be unique per company !'),
+        ('code_company_uniq', 'unique (code, type, company_id)', 'The code of the journal must be unique per company and type !'),
         ('name_company_uniq', 'unique (name, company_id)', 'The name of the journal must be unique per company !'),
     ]
 
@@ -800,8 +800,8 @@ class account_journal(osv.osv):
         seq = {
             'name': vals['name'],
             'implementation':'no_gap',
-            'prefix': prefix + "/%(year)s/",
-            'padding': 4,
+            'prefix': prefix + "-",
+            'padding': 6,
             'number_increment': 1
         }
         if 'company_id' in vals:
@@ -1294,7 +1294,7 @@ class account_move(osv.osv):
                 new_name = False
                 journal = move.journal_id
 
-                if invoice and invoice.internal_number:
+                if invoice and invoice.internal_number and invoice.internal_number != '/':
                     new_name = invoice.internal_number
                 else:
                     if journal.sequence_id:
@@ -1545,7 +1545,7 @@ class account_move(osv.osv):
             amount = 0
             line_ids = []
             line_draft_ids = []
-            company_id = None
+            company_id = move.company_id.id
             for line in move.line_id:
                 amount += line.debit - line.credit
                 line_ids.append(line.id)
@@ -1555,7 +1555,7 @@ class account_move(osv.osv):
                 if not company_id:
                     company_id = line.account_id.company_id.id
                 if not company_id == line.account_id.company_id.id:
-                    raise osv.except_osv(_('Error!'), _("Cannot create moves for different companies."))
+                    raise osv.except_osv(_('Error!'), _("Cannot create moves for different companies. Account %s - %sd (%s), Company %s")%(line.account_id.code,line.account_id.name,line.account_id.company_id.name,move.company_id.name))
 
                 if line.account_id.currency_id and line.currency_id:
                     if line.account_id.currency_id.id != line.currency_id.id and (line.account_id.currency_id.id != line.account_id.company_id.currency_id.id):
@@ -2067,8 +2067,6 @@ class account_tax(osv.osv):
                 amount = amount2
                 child_tax = self._unit_compute(cr, uid, tax.child_ids, amount, product, partner, quantity)
                 res.extend(child_tax)
-                for child in child_tax:
-                    amount2 += child.get('amount', 0.0)
                 if tax.child_depend:
                     for r in res:
                         for name in ('base','ref_base'):

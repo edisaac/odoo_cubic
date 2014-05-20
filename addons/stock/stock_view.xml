@@ -734,7 +734,7 @@
                     <field name="date"/>
                     <field name="min_date"/>
                     <field name="invoice_state"/>
-                    <field name="stock_journal_id" widget="selection"/>
+                    <field name="stock_journal_id"/>
                     <field name="state"/>
                 </tree>
             </field>
@@ -766,7 +766,8 @@
                             <field name="partner_id" on_change="onchange_partner_in(partner_id)"/>
                             <field name="backorder_id" readonly="1" attrs="{'invisible': [('backorder_id','=',False)]}"/>
                             <field name="invoice_state" string="Invoice Control" groups="account.group_account_invoice" attrs="{'invisible':[('invoice_state', '=', 'none')]}"/>
-                            <field name="stock_journal_id" widget="selection" groups="account.group_account_user"/>
+                            <field name="stock_journal_id" groups="account.group_account_user"
+                            	domain="['|',('type','=',type),('type','=',False),('company_id','=',company_id)]"/>
                         </group>
                         <group>
                             <field name="date"/>
@@ -776,7 +777,7 @@
                     </group>
                     <notebook>
                         <page string="Products">
-                            <field name="move_lines" string="Stock Move" context="{'address_in_id': partner_id, 'form_view_ref':'stock.view_move_picking_form', 'tree_view_ref':'stock.view_move_picking_tree', 'picking_type': 'internal'}" options='{"reload_on_button": true}'/>
+                            <field name="move_lines" context="{'address_in_id': partner_id, 'form_view_ref':'stock.view_move_picking_form', 'tree_view_ref':'stock.view_move_picking_tree', 'picking_type': 'internal'}" options='{"reload_on_button": true}'/>
                             <field name="note" placeholder="Add an internal note..." class="oe_inline"/>
                         </page>
                         <page string="Additional Info">
@@ -910,7 +911,7 @@
                     <field name="partner_id" on_change="onchange_partner_in(partner_id)" string="Customer" domain="[('customer','=',True)]" />
                 </xpath>
                 <xpath expr="//field[@name='move_lines']" position="replace">
-                    <field name="move_lines" string="Stock Move" context="{'address_out_id': partner_id, 'picking_type': 'out', 'form_view_ref':'stock.view_move_picking_form', 'tree_view_ref':'stock.view_move_picking_tree'}" options='{"reload_on_button": true}'/>
+                    <field name="move_lines" context="{'address_out_id': partner_id, 'picking_type': 'out', 'form_view_ref':'stock.view_move_picking_form', 'tree_view_ref':'stock.view_move_picking_tree'}" options='{"reload_on_button": true}'/>
                 </xpath>
                 <xpath expr="/form/sheet" position="after">
                     <div class="oe_chatter">
@@ -1011,7 +1012,7 @@
                     <field name="date"/>
                     <field name="min_date"/>
                     <field name="invoice_state" groups="account.group_account_invoice"/>
-                    <field name="stock_journal_id" widget="selection" groups="account.group_account_user"/>
+                    <field name="stock_journal_id" groups="account.group_account_user"/>
                     <field name="state"/>
                 </tree>
             </field>
@@ -1037,7 +1038,7 @@
                     <field name="partner_id" on_change="onchange_partner_in(partner_id)" string="Supplier" domain="[('supplier','=',True)]" context="{'default_supplier':1,'default_customer':0}"/>
                 </xpath>
                 <xpath expr="//field[@name='move_lines']" position="replace">
-                    <field name="move_lines" string="Stock Move" context="{'address_in_id': partner_id, 'picking_type': 'in', 'form_view_ref':'stock.view_move_picking_form', 'tree_view_ref':'stock.view_move_picking_tree'}" options='{"reload_on_button": true}'/>
+                    <field name="move_lines" context="{'address_in_id': partner_id, 'picking_type': 'in', 'form_view_ref':'stock.view_move_picking_form', 'tree_view_ref':'stock.view_move_picking_tree'}" options='{"reload_on_button": true}'/>
                 </xpath>
                 <xpath expr="/form/sheet" position="after">
                     <div class="oe_chatter">
@@ -1324,7 +1325,7 @@
 
                             <group string="Locations" groups="stock.group_locations">
                                 <field name="location_id" domain="[('usage','&lt;&gt;','view')]"/>
-                                <field name="location_dest_id" domain="[('usage','in', ['internal', 'supplier', 'customer'])]" groups="stock.group_locations"/>
+                                <field name="location_dest_id" domain="[('usage','=','internal')]" groups="stock.group_locations"/>
                             </group>
 
                             <group groups="stock.group_tracking_lot" string="Traceability">
@@ -1680,8 +1681,10 @@
             <field name="model">stock.journal</field>
             <field name="arch" type="xml">
                 <tree string="Stock Journal">
-                    <field name="name"/>
+                	<field name="name"/>
+                	<field name="type"/>
                     <field name="user_id"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
                 </tree>
             </field>
         </record>
@@ -1691,8 +1694,14 @@
             <field name="arch" type="xml">
                 <form string="Stock Journal" version="7.0">
                     <group>
-                        <field name="name"/>
-                        <field name="user_id"/>
+                    	<group>
+	                    	<field name="name"/>
+	                        <field name="type"/>	
+                    	</group>
+                        <group>
+                        	<field name="user_id"/>
+                        	<field name="company_id" groups="base.group_multi_company"/>
+                        </group>
                     </group>
                 </form>
             </field>

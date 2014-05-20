@@ -139,10 +139,13 @@ class account_move_line(osv.osv):
                 sign = (move_line.debit - move_line.credit) < 0 and -1 or 1
             line_total_in_company_currency =  move_line.debit - move_line.credit
             context_unreconciled = context.copy()
+            nb_inv_in_partial_rec = 0.0
             if move_line.reconcile_partial_id:
                 for payment_line in move_line.reconcile_partial_id.line_partial_ids:
                     if payment_line.id == move_line.id:
                         continue
+                    if move_line.account_id.type == payment_line.account_id.type:
+                        nb_inv_in_partial_rec += 1.0
                     if payment_line.currency_id and move_line.currency_id and payment_line.currency_id.id == move_line.currency_id.id:
                             move_line_total += payment_line.amount_currency
                     else:
@@ -154,9 +157,9 @@ class account_move_line(osv.osv):
                             move_line_total += (payment_line.debit - payment_line.credit)
                     line_total_in_company_currency += (payment_line.debit - payment_line.credit)
 
-            result = move_line_total
+            result = move_line_total #nb_inv_in_partial_rec and move_line_total / nb_inv_in_partial_rec or move_line_total
             res[move_line.id]['amount_residual_currency'] =  sign * (move_line.currency_id and self.pool.get('res.currency').round(cr, uid, move_line.currency_id, result) or result)
-            res[move_line.id]['amount_residual'] = sign * line_total_in_company_currency
+            res[move_line.id]['amount_residual'] = sign * line_total_in_company_currency  #/ nb_inv_in_partial_rec
         return res
 
     def default_get(self, cr, uid, fields, context=None):
@@ -585,8 +588,10 @@ class account_move_line(osv.osv):
     def _check_company_id(self, cr, uid, ids, context=None):
         lines = self.browse(cr, uid, ids, context=context)
         for l in lines:
-            if l.company_id != l.account_id.company_id or l.company_id != l.period_id.company_id:
-                return False
+            if l.company_id != l.account_id.company_id:
+                raise osv.except_osv(_('Error!'), _('The account %s - %s, must belong to the company %s.') % (l.account_id.code, l.account_id.name, l.company_id.name))
+            if l.company_id != l.period_id.company_id:
+                raise osv.except_osv(_('Error!'), _('the Period %s, must belong to the company %s.') % (l.period_id.name,l.company_id.name))
         return True
 
     def _check_date(self, cr, uid, ids, context=None):
@@ -850,15 +855,21 @@ class account_move_line(osv.osv):
                    (tuple(ids), ))
         r = cr.fetchall()
         #TODO: move this check to a constraint in the account_move_reconcile object
-        if len(r) != 1:
+        if context.get('restrict_only_one_account', True) and len(r) != 1:
+            if context.has_key('restrict_only_one_account'):
+                raise osv.except_osv(_('Error'), _('Entries are not of the same account or already reconciled ! \n You could use the invoice swap check on the partner form to avoid this message.'))
+            else:
+                raise osv.except_osv(_('Error'), _('Entries are not of the same account or already reconciled ! '))
+        elif len(r) == 0:
             raise osv.except_osv(_('Error'), _('Entries are not of the same account or already reconciled ! '))
         if not unrec_lines:
             raise osv.except_osv(_('Error!'), _('Entry is already reconciled.'))
         account = account_obj.browse(cr, uid, account_id, context=context)
         if not account.reconcile:
             raise osv.except_osv(_('Error'), _('The account is not defined to be reconciled !'))
-        if r[0][1] != None:
-            raise osv.except_osv(_('Error!'), _('Some entries are already reconciled.'))
+        for r0 in r:
+            if r0[1] != None:
+                raise osv.except_osv(_('Error!'), _('Some entries are already reconciled.'))
 
         if (not currency_obj.is_zero(cr, uid, account.company_id.currency_id, writeoff)) or \
            (account.currency_id and (not currency_obj.is_zero(cr, uid, account.currency_id, currency))):
@@ -1029,7 +1040,7 @@ class account_move_line(osv.osv):
             if opening_reconciliation:
                 obj_move_rec.write(cr, uid, unlink_ids, {'opening_reconciliation': False})
             obj_move_rec.unlink(cr, uid, unlink_ids)
-            if len(all_moves) >= 2:
+            if all_moves:
                 obj_move_line.reconcile_partial(cr, uid, all_moves, 'auto',context=context)
         return True
 

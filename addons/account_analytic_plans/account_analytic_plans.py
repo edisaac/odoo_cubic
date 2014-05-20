@@ -62,7 +62,8 @@ class account_analytic_line(osv.osv):
 
     _columns = {
         'amount_currency': fields.function(_get_amount, string="Amount Currency", type="float", store=True, help="The amount expressed in the related account currency if not equal to the company one.", readonly=True),
-        'percentage': fields.float('Percentage')
+        'percentage': fields.float('Percentage'),
+        'analytics_id': fields.many2one('account.analytic.plan.instance','Analytics Distribution'),
     }
 
 account_analytic_line()
@@ -331,6 +332,9 @@ class account_move_line(osv.osv):
             del(data['analytics_id'])
         return data
 
+    def post_analytic_line_create(self, cr, uid, analytic_line_id, move_line, analytic_plans_line, amount, context=None):
+        return True
+    
     def create_analytic_lines(self, cr, uid, ids, context=None):
         if context is None:
             context = {}
@@ -341,7 +345,7 @@ class account_move_line(osv.osv):
                if not line.journal_id.analytic_journal_id:
                    raise osv.except_osv(_('No Analytic Journal!'),_("You have to define an analytic journal on the '%s' journal.") % (line.journal_id.name,))
 
-               toremove = analytic_line_obj.search(cr, uid, [('move_id','=',line.id)], context=context)
+               toremove = analytic_line_obj.search(cr, uid, [('move_id','=',line.id),('analytics_id','=',line.analytics_id.id)], context=context)
                if toremove:
                     analytic_line_obj.unlink(cr, uid, toremove, context=context)
                for line2 in line.analytics_id.account_ids:
@@ -359,9 +363,11 @@ class account_move_line(osv.osv):
                        'move_id': line.id,
                        'journal_id': line.journal_id.analytic_journal_id.id,
                        'ref': line.ref,
-                       'percentage': line2.rate
+                       'percentage': line2.rate,
+                       'analytics_id': line2.plan_id.id,
                    }
-                   analytic_line_obj.create(cr, uid, al_vals, context=context)
+                   analytic_line_id = analytic_line_obj.create(cr, uid, al_vals, context=context)
+                   self.post_analytic_line_create(cr, uid, analytic_line_id, line, line2, amt, context=context)
         return True
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
@@ -395,8 +401,8 @@ class account_invoice(osv.osv):
         iml = invoice_line_obj.move_line_get(cr, uid, inv.id, context=context)
 
         for il in iml:
+            il['analytic_lines'] = []
             if il.get('analytics_id', False):
-
                 if inv.type in ('in_invoice', 'in_refund'):
                     ref = inv.reference
                 else:
@@ -406,7 +412,6 @@ class account_invoice(osv.osv):
                 ctx.update({'date': inv.date_invoice})
                 amount_calc = cur_obj.compute(cr, uid, inv.currency_id.id, company_currency, il['price'], context=ctx) * sign
                 qty = il['quantity']
-                il['analytic_lines'] = []
                 for line2 in obj_move_line.account_ids:
                     amt = amount_calc * (line2.rate/100)
                     qtty = qty* (line2.rate/100)
@@ -423,8 +428,27 @@ class account_invoice(osv.osv):
                         'ref': ref,
                     }
                     il['analytic_lines'].append((0, 0, al_vals))
+            if il['account_analytic_id']:
+                if inv.type in ('in_invoice', 'in_refund'):
+                    ref = inv.reference
+                else:
+                    ref = self._convert_ref(cr, uid, inv.number)
+                if not inv.journal_id.analytic_journal_id:
+                    raise osv.except_osv(_('No Analytic Journal!'),_("You have to define an analytic journal on the '%s' journal!") % (inv.journal_id.name,))
+                il['analytic_lines'].append((0,0, {
+                    'name': il['name'],
+                    'date': inv['date_invoice'],
+                    'account_id': il['account_analytic_id'],
+                    'unit_amount': il['quantity'],
+                    'amount': cur_obj.compute(cr, uid, inv.currency_id.id, company_currency, il['price'], context={'date': inv.date_invoice}) * sign,
+                    'product_id': il['product_id'],
+                    'product_uom_id': il['uos_id'],
+                    'general_account_id': il['account_id'],
+                    'journal_id': inv.journal_id.analytic_journal_id.id,
+                    'ref': ref,
+                }))
         return iml
-
+    
 account_invoice()
 
 class account_analytic_plan(osv.osv):
@@ -470,6 +494,17 @@ class account_bank_statement(osv.osv):
         result = super(account_bank_statement,self)._prepare_bank_move_line(cr, uid, st_line, 
             move_id, amount, company_currency_id, context=context)
         result['analytics_id'] = st_line.analytics_id.id
+        return result
+
+    def create_move_from_st_line(self, cr, uid, st_line_id, company_currency_id, st_line_number, context=None):
+        account_move_line_pool = self.pool.get('account.move.line')
+        account_bank_statement_line_pool = self.pool.get('account.bank.statement.line')
+        st_line = account_bank_statement_line_pool.browse(cr, uid, st_line_id, context=context)
+        result = super(account_bank_statement,self).create_move_from_st_line(cr, uid, st_line_id, company_currency_id, st_line_number, context=context)
+        move = st_line.move_ids and st_line.move_ids[0] or False
+        if move:
+            for line in move.line_id:
+                st_line.account_id.id == line.account_id.id and account_move_line_pool.write(cr, uid, [line.id], {'analytics_id':st_line.analytics_id.id}, context=context)
         return result
 
     def button_confirm_bank(self, cr, uid, ids, context=None):

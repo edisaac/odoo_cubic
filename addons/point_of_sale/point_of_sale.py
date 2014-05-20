@@ -537,7 +537,7 @@ class pos_order(osv.osv):
             try:
                 wf_service.trg_validate(uid, 'pos.order', order_id, 'paid', cr)
             except Exception:
-                _logger.error('ERROR: Could not fully process the POS Order', exc_info=True)
+                _logger.error('ERROR: Could not mark POS Order as Paid.', exc_info=True)
         return order_ids
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -670,7 +670,8 @@ class pos_order(osv.osv):
     }
 
     def create(self, cr, uid, values, context=None):
-        values['name'] = self.pool.get('ir.sequence').get(cr, uid, 'pos.order')
+        if values['name'] == '/': 
+            values['name'] = self.pool.get('ir.sequence').get(cr, uid, 'pos.order')
         return super(pos_order, self).create(cr, uid, values, context=context)
 
     def test_paid(self, cr, uid, ids, context=None):
@@ -692,6 +693,8 @@ class pos_order(osv.osv):
         move_obj = self.pool.get('stock.move')
 
         for order in self.browse(cr, uid, ids, context=context):
+            if not order.state=='draft':
+                continue
             addr = order.partner_id and partner_obj.address_get(cr, uid, [order.partner_id.id], ['delivery']) or {}
             picking_id = picking_obj.create(cr, uid, {
                 'origin': order.name,
@@ -921,6 +924,12 @@ class pos_order(osv.osv):
     def create_account_move(self, cr, uid, ids, context=None):
         return self._create_account_move_line(cr, uid, ids, None, None, context=context)
 
+    def get_account_move_create(self, cr, uid, order, context=None):
+        return {
+            'ref' : order.name,
+            'journal_id': order.sale_journal.id,
+        }
+    
     def _create_account_move_line(self, cr, uid, ids, session=None, move_id=None, context=None):
         # Tricky, via the workflow, we only have one id in the ids variable
         """Create a account move line of order grouped by products or not."""
@@ -966,10 +975,7 @@ class pos_order(osv.osv):
 
             if move_id is None:
                 # Create an entry for the sale
-                move_id = account_move_obj.create(cr, uid, {
-                    'ref' : order.name,
-                    'journal_id': order.sale_journal.id,
-                }, context=context)
+                move_id = account_move_obj.create(cr, uid, self.get_account_move_create(cr, uid, order, context=context), context=context)
 
             def insert_data(data_type, values):
                 # if have_to_group_by:
@@ -1134,8 +1140,8 @@ class pos_order(osv.osv):
         return self.write(cr, uid, ids, {'state': 'payment'}, context=context)
 
     def action_paid(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids, {'state': 'paid'}, context=context)
         self.create_picking(cr, uid, ids, context=context)
+        self.write(cr, uid, ids, {'state': 'paid'}, context=context)
         return True
 
     def action_cancel(self, cr, uid, ids, context=None):

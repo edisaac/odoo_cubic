@@ -377,7 +377,8 @@ class account_bank_statement(osv.osv):
 
     def balance_check(self, cr, uid, st_id, journal_type='bank', context=None):
         st = self.browse(cr, uid, st_id, context=context)
-        if not ((abs((st.balance_end or 0.0) - st.balance_end_real) < 0.0001) or (abs((st.balance_end or 0.0) - st.balance_end_real) < 0.0001)):
+        balance_end_real = journal_type == 'cash' and st.total_entry_encoding + st.balance_start or st.balance_end_real
+        if not ((abs((st.balance_end or 0.0) - balance_end_real) < 0.0001) or (abs((st.balance_end or 0.0) - balance_end_real) < 0.0001)):
             raise osv.except_osv(_('Error!'),
                     _('The statement balance is incorrect !\nThe expected balance (%.2f) is different than the computed one. (%.2f)') % (st.balance_end_real, st.balance_end))
         return True

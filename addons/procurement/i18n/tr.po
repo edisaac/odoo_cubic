@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2013-06-07 19:37+0000\n"
-"PO-Revision-Date: 2014-05-17 04:51+0000\n"
+"PO-Revision-Date: 2013-11-30 15:08+0000\n"
 "Last-Translator: Ediz Duman <neps1192@gmail.com>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-05-18 05:53+0000\n"
-"X-Generator: Launchpad (build 17007)\n"
+"X-Launchpad-Export-Date: 2013-12-01 05:45+0000\n"
+"X-Generator: Launchpad (build 16856)\n"
 
 #. module: procurement
 #: model:ir.ui.menu,name:procurement.menu_stock_sched
@@ -121,7 +121,7 @@ msgstr "Şirket"
 #. module: procurement
 #: field:procurement.order,product_uos_qty:0
 msgid "UoS Quantity"
-msgstr "Satış Birim Miktarı"
+msgstr "Satış Birimi Miktarı"
 
 #. module: procurement
 #: view:procurement.order:0
@@ -158,12 +158,12 @@ msgstr "Tedarikleri Hesapla"
 #. module: procurement
 #: field:procurement.order,message:0
 msgid "Latest error"
-msgstr "En Son Hata"
+msgstr "Enson hata"
 
 #. module: procurement
 #: field:stock.warehouse.orderpoint,product_min_qty:0
 msgid "Minimum Quantity"
-msgstr "En Az Miktar"
+msgstr "Enaz Miktar"
 
 #. module: procurement
 #: help:mrp.property,composition:0
@@ -173,7 +173,7 @@ msgstr "Sadece bilgi amaçlıdır, hesaplamalarda kullanılmaz."
 #. module: procurement
 #: field:stock.warehouse.orderpoint,procurement_id:0
 msgid "Latest procurement"
-msgstr "En Son Tedarik"
+msgstr "Enson tedarik"
 
 #. module: procurement
 #: field:procurement.order,message_ids:0
@@ -183,7 +183,7 @@ msgstr "Mesajlar"
 #. module: procurement
 #: view:procurement.order:0
 msgid "Cancel Procurement"
-msgstr "Tedarik İptal Et"
+msgstr "Tedarik İptal et"
 
 #. module: procurement
 #: view:product.product:0
@@ -193,7 +193,7 @@ msgstr "Ürünler"
 #. module: procurement
 #: selection:procurement.order,state:0
 msgid "Cancelled"
-msgstr "İptal Edildi"
+msgstr "İptal edildi"
 
 #. module: procurement
 #: view:procurement.order:0
@@ -224,7 +224,7 @@ msgstr "Stoklanabilir ürünler"
 #: code:addons/procurement/procurement.py:138
 #, python-format
 msgid "Invalid Action!"
-msgstr "Geçersiz İşlem!"
+msgstr "Geçersiz Eylem!"
 
 #. module: procurement
 #: help:procurement.order,message_summary:0
@@ -299,7 +299,7 @@ msgstr "Onayla"
 #. module: procurement
 #: view:stock.warehouse.orderpoint:0
 msgid "Quantity Multiple"
-msgstr "Çoklu Miktar"
+msgstr "Çok Miktarlı"
 
 #. module: procurement
 #: help:procurement.order,origin:0
@@ -318,7 +318,7 @@ msgstr "İşlenecek Tedarik Emirleri"
 #. module: procurement
 #: model:ir.model,name:procurement.model_stock_warehouse_orderpoint
 msgid "Minimum Inventory Rule"
-msgstr "En Az Envanter Kuralı"
+msgstr "Enaz Envanter Kuralı"
 
 #. module: procurement
 #: code:addons/procurement/procurement.py:370
@@ -384,7 +384,7 @@ msgstr "Tedarik Hesapla"
 #. module: procurement
 #: field:res.company,schedule_range:0
 msgid "Scheduler Range Days"
-msgstr "Zamanlayıcı Kapsama Günleri"
+msgstr "Planlamacı Aralığı Günleri"
 
 #. module: procurement
 #: view:make.procurement:0
@@ -541,7 +541,7 @@ msgstr "İlgili Tedarik Emirleri"
 #. module: procurement
 #: field:procurement.order,message_unread:0
 msgid "Unread Messages"
-msgstr "Okunmamış Mesajlar"
+msgstr "Okunmamış mesajlar"
 
 #. module: procurement
 #: selection:mrp.property,composition:0
@@ -606,7 +606,7 @@ msgstr ""
 #. module: procurement
 #: view:procurement.order:0
 msgid "Procurement Lines"
-msgstr "Tedarik Satırları"
+msgstr "Tedarik Kalemleri"
 
 #. module: procurement
 #: view:product.product:0
@@ -684,7 +684,7 @@ msgstr ""
 #. module: procurement
 #: field:stock.warehouse.orderpoint,product_max_qty:0
 msgid "Maximum Quantity"
-msgstr "En Çok Miktar"
+msgstr "Ençok Miktar"
 
 #. module: procurement
 #: field:procurement.order,message_is_follower:0
@@ -705,7 +705,7 @@ msgstr "Etkin"
 #. module: procurement
 #: model:process.node,name:procurement.process_node_procureproducts0
 msgid "Procure Products"
-msgstr "Ürün Tedarikleri"
+msgstr "Ürün Tedarik et"
 
 #. module: procurement
 #: code:addons/procurement/procurement.py:312
@@ -778,7 +778,7 @@ msgstr "Şirketler"
 #. module: procurement
 #: view:procurement.order:0
 msgid "Extra Information"
-msgstr "Ek Bilgisi"
+msgstr "Ek Bilgiler"
 
 #. module: procurement
 #: field:procurement.order,message_summary:0
@@ -793,7 +793,7 @@ msgstr "Mkt. Çarpanı 0'dan büyük olmalıdır."
 #. module: procurement
 #: selection:stock.warehouse.orderpoint,logic:0
 msgid "Order to Max"
-msgstr "En Çoğa Sipariş Yap"
+msgstr "Ençoğa Sipariş yap"
 
 #. module: procurement
 #: field:procurement.order,date_close:0
@@ -819,7 +819,7 @@ msgstr ""
 #. module: procurement
 #: field:mrp.property,composition:0
 msgid "Properties composition"
-msgstr "Bileşen Özellikleri"
+msgstr "Bileşim Özellikleri"
 
 #. module: procurement
 #: code:addons/procurement/procurement.py:311
@@ -852,7 +852,7 @@ msgstr "Tedarik Çalıştır"
 #. module: procurement
 #: selection:procurement.order,state:0
 msgid "Done"
-msgstr "Biten"
+msgstr "Yapıldı"
 
 #. module: procurement
 #: view:make.procurement:0
@@ -904,7 +904,7 @@ msgstr "Tüm Planlamacıları Hesapla"
 #. module: procurement
 #: view:procurement.order:0
 msgid "Late"
-msgstr "Geciken"
+msgstr "Geç"
 
 #. module: procurement
 #: view:board.board:0
@@ -920,7 +920,7 @@ msgstr "Sipariş Noktaları"
 #. module: procurement
 #: field:product.product,orderpoint_ids:0
 msgid "Minimum Stock Rules"
-msgstr "En Az Stok Kuralları"
+msgstr "Enaz Stok Kuralları"
 
 #. module: procurement
 #: view:make.procurement:0
@@ -984,7 +984,7 @@ msgstr "Yürütülüyor"
 #: selection:procurement.order,procure_method:0
 #: selection:product.template,procure_method:0
 msgid "Make to Order"
-msgstr "Sipariş Verme"
+msgstr "Sipariş Ver"
 
 #. module: procurement
 #: field:product.template,supply_method:0
@@ -1057,7 +1057,7 @@ msgstr ""
 #. module: procurement
 #: view:procurement.order:0
 msgid "Search Procurement"
-msgstr "Tedarik Arama"
+msgstr "Tedarik Ara"
 
 #. module: procurement
 #: help:procurement.order,message:0

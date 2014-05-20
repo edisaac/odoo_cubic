@@ -81,7 +81,7 @@
                                 attrs="{'invisible': [('line_ids','=',False),('state', 'not in', ('in_progress'))]}"/>
                         </div>
                         <separator string="Quotations"/>
-                        <field name="purchase_ids" readonly="1">
+                        <field name="purchase_ids" readonly="0">
                             <tree string="Purchase Order">
                                 <field name="name" string="Reference"/>
                                 <field name="date_order" string="Order Date"/>
@@ -112,7 +112,7 @@
         <field name="name">purchase.requisition.tree</field>
         <field name="model">purchase.requisition</field>
         <field name="arch" type="xml">
-            <tree fonts="bold:message_unread==True" colors="grey:state == 'cancel';red:date_end and date_end&lt;current_date;black:date_end&gt;current_date;" string="Purchase Requisition">
+            <tree fonts="bold:message_unread==True" colors="grey:state == 'cancel';blue:state == 'draft';red:state != 'done' and date_end and date_end&lt;current_date;black:date_end&gt;current_date;" string="Purchase Requisition">
                 <field name="message_unread" invisible="1"/>
                 <field name="name"/>
                 <field name="date_start"/>

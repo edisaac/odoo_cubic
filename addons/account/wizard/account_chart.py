@@ -28,6 +28,7 @@ class account_chart(osv.osv_memory):
     _name = "account.chart"
     _description = "Account chart"
     _columns = {
+        'company_id': fields.many2one('res.company',string='Company'),
         'fiscalyear': fields.many2one('account.fiscalyear', \
                                     'Fiscal year',  \
                                     help='Keep empty for all open fiscal years'),
@@ -50,14 +51,14 @@ class account_chart(osv.osv_memory):
                 SELECT * FROM (SELECT p.id
                                FROM account_period p
                                LEFT JOIN account_fiscalyear f ON (p.fiscalyear_id = f.id)
-                               WHERE f.id = %s
+                               WHERE f.id = %s and p.special = False
                                ORDER BY p.date_start ASC
                                LIMIT 1) AS period_start
                 UNION ALL
                 SELECT * FROM (SELECT p.id
                                FROM account_period p
                                LEFT JOIN account_fiscalyear f ON (p.fiscalyear_id = f.id)
-                               WHERE f.id = %s
+                               WHERE f.id = %s and special = False
                                AND p.date_start < NOW()
                                ORDER BY p.date_stop DESC
                                LIMIT 1) AS period_stop''', (fiscalyear_id, fiscalyear_id))
@@ -103,6 +104,7 @@ class account_chart(osv.osv_memory):
     _defaults = {
         'target_move': 'posted',
         'fiscalyear': _get_fiscalyear,
+        'company_id': lambda s,cr,u,c={}: s.pool.get('res.users').browse(cr,u,u,c).company_id.id,
     }
 
 account_chart()

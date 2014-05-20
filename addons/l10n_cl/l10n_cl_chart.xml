@@ -70,7 +70,7 @@
             <record id="113" model="account.account.template"><field name="name">Activo Circulante - Fondos fijos</field><field name="code">113</field><field name="reconcile" eval="False"/><field ref="account_account_type_view" name="user_type"/><field name="type">view</field><field ref="11" name="parent_id"/></record>
             <record id="113_001" model="account.account.template"><field name="name">Activo Circulante - Fondos fijos / caja chica 01 CLP</field><field name="code">113.001</field><field name="reconcile" eval="False"/><field ref="account_account_type_BG_ACC_10" name="user_type"/><field name="type">liquidity</field><field ref="113" name="parent_id"/></record>
             <record id="114" model="account.account.template"><field name="name">Activo Circulante - Bancos</field><field name="code">114</field><field name="reconcile" eval="False"/><field ref="account_account_type_view" name="user_type"/><field name="type">view</field><field ref="11" name="parent_id"/></record>
-            <record id="114_001" model="account.account.template"><field name="name">Activo Circulante.../ BCO. CTA CTE CLP</field><field name="code">114.001</field><field name="reconcile" eval="True"/><field ref="account_account_type_BG_ACC_10" name="user_type"/><field name="type">liquidity</field><field ref="114" name="parent_id"/></record>
+            <record id="114_001" model="account.account.template"><field name="name">Activo Circulante.../ BCO. CTA CTE CLP</field><field name="code">114.001</field><field name="reconcile" eval="False"/><field ref="account_account_type_BG_ACC_10" name="user_type"/><field name="type">liquidity</field><field ref="114" name="parent_id"/></record>
             <record id="115" model="account.account.template"><field name="name">Activo Circulante - Valores a Depositar </field><field name="code">115</field><field name="reconcile" eval="False"/><field ref="account_account_type_BG_ACC_10" name="user_type"/><field name="type">other</field><field ref="11" name="parent_id"/></record>
             <record id="116" model="account.account.template"><field name="name">Activo Circulante - Recaudaciones a Depositar </field><field name="code">116</field><field name="reconcile" eval="False"/><field ref="account_account_type_BG_ACC_10" name="user_type"/><field name="type">other</field><field ref="11" name="parent_id"/></record>
             <record id="12" model="account.account.template"><field name="name">Documentos por Cobrar</field><field name="code">12</field><field name="reconcile" eval="True"/><field ref="account_account_type_view" name="user_type"/><field name="type">view</field><field ref="_1_BG" name="parent_id"/></record>
@@ -254,7 +254,7 @@
         <field name="model">account.chart.template</field>
         <field name="key">default</field>
         <field name="res_id" ref="cl_chart_template"/>
-        <field name="value" ref="base.AUD"/>
+        <field name="value" ref="base.CLP"/>
     </record>
 
   </data>

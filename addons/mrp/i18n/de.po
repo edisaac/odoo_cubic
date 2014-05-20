@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2013-06-07 19:36+0000\n"
-"PO-Revision-Date: 2014-05-01 17:39+0000\n"
-"Last-Translator: Rudolf Schnapka <rs@techno-flex.de>\n"
+"PO-Revision-Date: 2014-01-20 09:00+0000\n"
+"Last-Translator: Matthias Fax <matthias.fax@greensolid.de>\n"
 "Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-05-02 06:46+0000\n"
-"X-Generator: Launchpad (build 16985)\n"
+"X-Launchpad-Export-Date: 2014-01-21 06:20+0000\n"
+"X-Generator: Launchpad (build 16901)\n"
 
 #. module: mrp
 #: help:mrp.config.settings,module_mrp_repair:0
@@ -47,7 +47,7 @@ msgstr "Anzahl Zyklen"
 #. module: mrp
 #: help:mrp.production,location_src_id:0
 msgid "Location where the system will look for components."
-msgstr "Lagerort für Komponenten der Produktion."
+msgstr "Maßgeblicher Lagerort für Verfügbarkeit von Waren."
 
 #. module: mrp
 #: field:mrp.production,workcenter_lines:0
@@ -112,7 +112,7 @@ msgstr "Für Lager- und Verbrauchsprodukte"
 #: help:mrp.production,message_unread:0
 #: help:mrp.production.workcenter.line,message_unread:0
 msgid "If checked new messages require your attention."
-msgstr "Wenn markiert, erfordern neue Nachrichten Ihr Handeln."
+msgstr "Als zu erledigen markieren"
 
 #. module: mrp
 #: help:mrp.routing.workcenter,cycle_nbr:0
@@ -196,7 +196,7 @@ msgstr ""
 #. module: mrp
 #: field:change.production.qty,product_qty:0
 msgid "Product Qty"
-msgstr "Produktmenge"
+msgstr "Anzahl"
 
 #. module: mrp
 #: view:mrp.production:0
@@ -357,12 +357,12 @@ msgstr "Verwalte Arbeitspläne"
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_product_produce
 msgid "Product Produce"
-msgstr "Produkt fertigen"
+msgstr "Produkt zu fertigen"
 
 #. module: mrp
 #: constraint:mrp.bom:0
 msgid "Error ! You cannot create recursive BoM."
-msgstr "Fehler! Sie dürfen keine rekursiven Stücklisten erstellen"
+msgstr "Fehler! Sie können keine rekursiven Stücklisten erstellen"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_routing_workcenter
@@ -419,7 +419,7 @@ msgstr "Referenz muss je Unternehmen eindeutig sein"
 #: report:mrp.production.order:0
 #, python-format
 msgid "Quantity"
-msgstr "Menge"
+msgstr "Anzahl"
 
 #. module: mrp
 #: help:mrp.workcenter,product_id:0
@@ -427,8 +427,8 @@ msgid ""
 "Fill this product to easily track your production costs in the analytic "
 "accounting."
 msgstr ""
-"Tragen Sie hier ein Produkt ein, zur Verfolgung der Fertigungskosten in der "
-"Kostenstellenrechnung."
+"Tragen Sie hier ein Produkt ein, zur Verfolgung der Arbeitskosten auf einer "
+"Kostenstelle."
 
 #. module: mrp
 #: field:mrp.workcenter,product_id:0
@@ -595,7 +595,7 @@ msgstr "Produkttyp ist Service (Dienstleistung)"
 #. module: mrp
 #: help:mrp.workcenter,costs_cycle:0
 msgid "Specify Cost of Work Center per cycle."
-msgstr "Arbeitsplatzkosten je Zyklus"
+msgstr "Kosten des Arbeitsplatzes je Zyklus"
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_bom0
@@ -611,7 +611,7 @@ msgstr "Für Dienstleistungsprodukte."
 #: model:process.node,note:mrp.process_node_orderrfq0
 #: model:process.node,note:mrp.process_node_rfq0
 msgid "Request for Quotation."
-msgstr "Angebotsanfrage"
+msgstr "Anfrage für Angebot"
 
 #. module: mrp
 #: view:change.production.qty:0
@@ -661,7 +661,7 @@ msgstr "Bestandswert"
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.action_product_bom_structure
 msgid "Product BoM Structure"
-msgstr "Produkt-Stücklistenstruktur"
+msgstr "Struktur Stückliste"
 
 #. module: mrp
 #: view:mrp.production:0
@@ -677,12 +677,12 @@ msgstr "Bestimmt die Reihenfolge der angezeigten Arbeitsplätze"
 #. module: mrp
 #: field:mrp.bom,child_complete_ids:0
 msgid "BoM Hierarchy"
-msgstr "Stücklistenhierachie"
+msgstr "Stückliste Hierachie"
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_stockproduction0
 msgid "To Produce"
-msgstr "Zu fertigen"
+msgstr "Zu produzieren"
 
 #. module: mrp
 #: help:mrp.config.settings,module_stock_no_autopicking:0
@@ -721,7 +721,7 @@ msgstr "Komponenten"
 #. module: mrp
 #: field:mrp.workcenter,time_start:0
 msgid "Time before prod."
-msgstr "Vorbereitungszeit"
+msgstr "Vorbereitung"
 
 #. module: mrp
 #: help:mrp.routing,active:0
@@ -747,7 +747,7 @@ msgstr "Verbrauchte Produkte"
 #: model:ir.model,name:mrp.model_mrp_workcenter_load
 #: model:ir.model,name:mrp.model_report_workcenter_load
 msgid "Work Center Load"
-msgstr "Arbeitsplatzauslastung"
+msgstr "Arbeitsplatz Auslastung"
 
 #. module: mrp
 #: code:addons/mrp/procurement.py:55
@@ -931,13 +931,13 @@ msgstr "Warnung!"
 #. module: mrp
 #: report:mrp.production.order:0
 msgid "Printing date"
-msgstr "Druckdatum"
+msgstr "Datum Druck"
 
 #. module: mrp
 #: model:process.node,name:mrp.process_node_orderrfq0
 #: model:process.node,name:mrp.process_node_rfq0
 msgid "RFQ"
-msgstr "Angebotsanfrage"
+msgstr "Anfrage Angebot"
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_producttostockrules0
@@ -1119,8 +1119,7 @@ msgid ""
 "You must first cancel related internal picking attached to this "
 "manufacturing order."
 msgstr ""
-"BItte zuerst die interne Kommissionierung dieses Fertigungsauftrags "
-"stornieren!"
+"BItte zuerst den internen Lieferschein dieses Fertigungsauftrags stornieren!"
 
 #. module: mrp
 #: model:process.node,name:mrp.process_node_minimumstockrule0
@@ -1156,12 +1155,12 @@ msgstr "Kurzbez."
 #. module: mrp
 #: report:mrp.production.order:0
 msgid "No. Of Hours"
-msgstr "Stundenanzahl"
+msgstr "Anzahl Stunden"
 
 #. module: mrp
 #: view:mrp.property:0
 msgid "Property Group"
-msgstr "Merkmalsgruppe"
+msgstr "Fertigungsmerkmale Gruppe"
 
 #. module: mrp
 #: field:mrp.config.settings,group_mrp_routings:0
@@ -1171,7 +1170,7 @@ msgstr "Verwalte Arbeitspläne und Arbeitsaufträge "
 #. module: mrp
 #: model:process.node,note:mrp.process_node_production0
 msgid "Manufacturing Plan."
-msgstr "Produktionsplanung"
+msgstr "Fertigungsplanung"
 
 #. module: mrp
 #: view:mrp.routing:0
@@ -1195,8 +1194,8 @@ msgid ""
 "subcontracting demand for instance."
 msgstr ""
 "Wenn einem Dienstleistungsprodukt 'Einkauf' als Beschaffungsmethode "
-"zugewiesen wird, wird eine Anfrage für die Fremdvergabe an externe "
-"Dienstleister erstellt."
+"zugewiesen wird, wird eine Anfrage für eine Fremdvergabe an Lieferanten "
+"erstellt."
 
 #. module: mrp
 #: view:mrp.production:0
@@ -1211,7 +1210,7 @@ msgstr "Beschaffe an Lager"
 #. module: mrp
 #: report:bom.structure:0
 msgid "BOM Name"
-msgstr "Stücklistenbezeichnung"
+msgstr "Stückliste Bezeichnung"
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.act_product_manufacturing_open
@@ -1250,7 +1249,7 @@ msgstr "Bezeichnung"
 #. module: mrp
 #: report:mrp.production.order:0
 msgid "Production Order N° :"
-msgstr "Fertigungsauftragsnummer:"
+msgstr "Fertigung Auftragsnummer:"
 
 #. module: mrp
 #: field:mrp.product.produce,mode:0
@@ -1363,7 +1362,7 @@ msgstr ""
 #. module: mrp
 #: field:mrp.workcenter,costs_journal_id:0
 msgid "Analytic Journal"
-msgstr "Kostenstellenjournal"
+msgstr "Kostenstellen Journal"
 
 #. module: mrp
 #: code:addons/mrp/report/price.py:139
@@ -1390,8 +1389,8 @@ msgid ""
 "products are typically procured manually or through a minimum stock rule."
 msgstr ""
 "Das System wartet bis das Produkt als Bestand im Lager verfügbar ist. Diese "
-"Produkte werden typischerweise manuell oder über Meldebestandsregeln "
-"beschafft."
+"Produkte werden typischerweise manuell bestellt oder es werden über die "
+"Meldebestandsregeln Bestellvorschläge erstellt."
 
 #. module: mrp
 #: view:mrp.routing:0
@@ -1488,7 +1487,7 @@ msgstr "Priorität"
 #: model:ir.model,name:mrp.model_stock_picking
 #: field:mrp.production,picking_id:0
 msgid "Picking List"
-msgstr "Kommissionierschein"
+msgstr "Pickliste"
 
 #. module: mrp
 #: help:mrp.production,bom_id:0
@@ -1556,7 +1555,7 @@ msgstr "Definieren von Hersteller "
 #: model:ir.actions.act_window,name:mrp.action_view_mrp_product_price_wizard
 #: view:mrp.product_price:0
 msgid "Product Cost Structure"
-msgstr "Produktkostenstruktur"
+msgstr "Produkte Kostenübersicht"
 
 #. module: mrp
 #: code:addons/mrp/report/price.py:139
@@ -1577,12 +1576,12 @@ msgstr "Suche nach Arbeitsplatz"
 #. module: mrp
 #: view:mrp.bom:0
 msgid "BoM Structure"
-msgstr "Stücklistenstruktur"
+msgstr "Stückliste Struktur"
 
 #. module: mrp
 #: field:mrp.production,date_start:0
 msgid "Start Date"
-msgstr "Anfangsdatum"
+msgstr "Start Datum"
 
 #. module: mrp
 #: field:mrp.workcenter,costs_hour_account_id:0
@@ -1634,7 +1633,7 @@ msgstr ""
 #. module: mrp
 #: view:report.workcenter.load:0
 msgid "Work Center Loads"
-msgstr "Arbeitsplätzeauslastung"
+msgstr "Arbeitsplatz Auslastungen"
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.mrp_property_action
@@ -1660,7 +1659,7 @@ msgstr "Meldebestandregel Material"
 #. module: mrp
 #: view:mrp.production:0
 msgid "Extra Information"
-msgstr "Zusatzinformation"
+msgstr "Extra Information"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_change_production_qty
@@ -1670,12 +1669,12 @@ msgstr "Ändere die Mengen für die Produkte"
 #. module: mrp
 #: model:process.node,note:mrp.process_node_productionorder0
 msgid "Drives the procurement orders for raw material."
-msgstr "Löst Beschaffungsaufträge für Komponenten aus."
+msgstr "Löst Beschaffungsaufträge für Komponenten aus ."
 
 #. module: mrp
 #: field:mrp.production.product.line,product_uos_qty:0
 msgid "Product UOS Quantity"
-msgstr "Produktmenge in VE"
+msgstr "Produkt VE Menge"
 
 #. module: mrp
 #: field:mrp.workcenter,costs_general_account_id:0
@@ -1685,7 +1684,7 @@ msgstr "Sachkonto"
 #. module: mrp
 #: report:mrp.production.order:0
 msgid "SO Number"
-msgstr "Auftragsnummer"
+msgstr "Auftrag Nummer"
 
 #. module: mrp
 #: code:addons/mrp/mrp.py:505
@@ -1722,7 +1721,7 @@ msgstr "Verantwortlicher"
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.mrp_production_action2
 msgid "Manufacturing Orders To Start"
-msgstr "Auszuführende Fertigungsaufträge"
+msgstr "Startbereit für Fertigung"
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.mrp_workcenter_action
@@ -1847,7 +1846,7 @@ msgstr ""
 #. module: mrp
 #: field:mrp.production,date_finished:0
 msgid "End Date"
-msgstr "Enddatum"
+msgstr "Ende Datum"
 
 #. module: mrp
 #: field:mrp.workcenter,resource_id:0
@@ -1957,7 +1956,7 @@ msgstr "Dienstleistung"
 #. module: mrp
 #: selection:mrp.production,state:0
 msgid "Cancelled"
-msgstr "Abgebrochen"
+msgstr "Storniert"
 
 #. module: mrp
 #: view:mrp.production:0
@@ -1971,8 +1970,8 @@ msgid ""
 "lines (in the \"Work Centers\" tab).\n"
 "                This installs the module mrp_operations."
 msgstr ""
-"Hierdurch können Sie Status, das Anfangsdatum, das voraussichtliche Enddatum "
-"für die einzelnen Arbeitsaufträge (im Aktenreiter Arbeitsaufträge) "
+"Hierdurch können Sie Status, das geplante Datum, das voraussichtliche Ende "
+"Datum für die einzelnen Arbeitsaufträge (im Aktenreiter Arbeitsaufträge) "
 "definieren. \n"
 "Es wird das Modul mrp_operations installiert."
 

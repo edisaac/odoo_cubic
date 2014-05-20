@@ -419,13 +419,13 @@ class sale_order(osv.osv):
             if line.product_id:
                 if line.product_id.type in ('product', 'consu'):
                     if not picking_id:
-                        picking_id = picking_obj.create(cr, uid, self._prepare_order_picking(cr, uid, order, context=context))
-                    move_id = move_obj.create(cr, uid, self._prepare_order_line_move(cr, uid, order, line, picking_id, date_planned, context=context))
+                        picking_id = picking_obj.create(cr, uid, self._prepare_order_picking(cr, uid, order, context=context), context=context)
+                    move_id = move_obj.create(cr, uid, self._prepare_order_line_move(cr, uid, order, line, picking_id, date_planned, context=context), context=context)
                 else:
                     # a service has no stock move
                     move_id = False
 
-                proc_id = procurement_obj.create(cr, uid, self._prepare_order_line_procurement(cr, uid, order, line, move_id, date_planned, context=context))
+                proc_id = procurement_obj.create(cr, uid, self._prepare_order_line_procurement(cr, uid, order, line, move_id, date_planned, context=context), context=context)
                 proc_ids.append(proc_id)
                 line.write({'procurement_id': proc_id})
                 self.ship_recreate(cr, uid, order, line, move_id, proc_id)
@@ -618,13 +618,13 @@ class sale_order_line(osv.osv):
         res_packing = self.product_packaging_change(cr, uid, ids, pricelist, product, qty, uom, partner_id, packaging, context=context)
         res['value'].update(res_packing.get('value', {}))
         warning_msgs = res_packing.get('warning') and res_packing['warning']['message'] or ''
-        compare_qty = float_compare(product_obj.virtual_available, qty, precision_rounding=uom2.rounding)
+        compare_qty = float_compare(product_obj.virtual_available * uom2.factor, qty * product_obj.uom_id.factor, precision_rounding=product_obj.uom_id.rounding)
         if (product_obj.type=='product') and int(compare_qty) == -1 \
-           and (product_obj.procure_method=='make_to_stock'):
+          and (product_obj.procure_method=='make_to_stock'):
             warn_msg = _('You plan to sell %.2f %s but you only have %.2f %s available !\nThe real stock is %.2f %s. (without reservations)') % \
-                    (qty, uom2.name,
-                     max(0,product_obj.virtual_available), uom2.name,
-                     max(0,product_obj.qty_available), uom2.name)
+                    (qty, uom2 and uom2.name or product_obj.uom_id.name,
+                     max(0,product_obj.virtual_available), product_obj.uom_id.name,
+                     max(0,product_obj.qty_available), product_obj.uom_id.name)
             warning_msgs += _("Not enough stock ! : ") + warn_msg + "\n\n"
 
         #update of warning messages

@@ -92,6 +92,10 @@ class bank(osv.osv):
                 new_code = 1
                 while True:
                     code = _('BNK')+str(new_code)
+                    #YT 19/02/2013
+                    if len(code) > jour_obj._columns['code'].size:
+                        code = code[:(jour_obj._columns['code'].size-len(str(new_code)))] + str(new_code)
+                    
                     ids = jour_obj.search(cr, uid, [('code','=',code)], context=context)
                     if not ids:
                         break

@@ -44,7 +44,7 @@ class invoice(osv.osv):
                 'payment_expected_currency': inv.currency_id.id,
                 'default_partner_id': self.pool.get('res.partner')._find_accounting_partner(inv.partner_id).id,
                 'default_amount': inv.type in ('out_refund', 'in_refund') and -inv.residual or inv.residual,
-                'default_reference': inv.name,
+                'default_name': inv.number + " (Pending: %d %s - Amount: %d %s"%(inv.residual,inv.currency_id.name,inv.amount_total,inv.currency_id.name),
                 'close_after_process': True,
                 'invoice_type': inv.type,
                 'invoice_id': inv.id,

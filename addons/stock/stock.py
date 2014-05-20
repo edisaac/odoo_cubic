@@ -57,9 +57,15 @@ class stock_journal(osv.osv):
     _columns = {
         'name': fields.char('Stock Journal', size=32, required=True),
         'user_id': fields.many2one('res.users', 'Responsible'),
+        'company_id': fields.many2one('res.company', 'Company', required=True, 
+                                          select=1, help="Company related to this journal"),
+        'type': fields.selection([('in','Journal In'),
+                                  ('out','Journal Out'),
+                                  ('internal','Internal Journal')], string="Type Journal"),
     }
     _defaults = {
-        'user_id': lambda s, c, u, ctx: u
+        'user_id': lambda s, c, u, ctx: u,
+        'company_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
     }
 
 stock_journal()
@@ -636,7 +642,17 @@ class stock_picking(osv.osv):
             vals['name'] = self.pool.get('ir.sequence').get(cr, user, seq_obj_name)
         new_id = super(stock_picking, self).create(cr, user, vals, context)
         return new_id
-
+    
+    def _check_name(self, cr, uid, ids, context=None):
+        for picking in self.browse(cr, uid, ids, context=context):
+            if picking.name in ('/','\\'):
+                continue
+            picking_ids = self.search(cr, uid, [('company_id','=',picking.company_id.id),
+                                                ('name','=',picking.name)], context=context)
+            if len(picking_ids)>1:
+                return False
+        return True
+    
     _columns = {
         'name': fields.char('Reference', size=64, select=True, states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
         'origin': fields.char('Source Document', size=64, states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}, help="Reference of the document", select=True),
@@ -691,9 +707,27 @@ class stock_picking(osv.osv):
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'stock.picking', context=c)
     }
     _sql_constraints = [
-        ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per Company!'),
+        ('name_uniq', 'unique(id,name,company_id)', 'Reference must be unique per Company!'),
     ]
-
+    _constraints = [
+        (_check_name, 'Reference must be unique per Company!', ['name', 'company_id']),
+    ]
+    
+    def name_get(self, cursor, user, ids, context=None):
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        if not ids:
+            return []
+        res = []
+        data_picking = self.browse(cursor, user, ids, context=context)
+        for picking in data_picking:
+            if picking.name=='/':
+                name = '*' + str(picking.id)
+            else:
+                name = picking.name
+            res.append((picking.id, name))
+        return res
+    
     def action_process(self, cr, uid, ids, context=None):
         if context is None:
             context = {}
@@ -1921,7 +1955,7 @@ class stock_move(osv.osv):
                 break
 
         if product_uos and product_uom and (product_uom != product_uos):
-            result['product_qty'] = product_uos_qty / uos_coeff['uos_coeff']
+            result['product_qty'] = uos_coeff['uos_coeff'] and product_uos_qty / uos_coeff['uos_coeff'] or 0.0
         else:
             result['product_qty'] = product_uos_qty
         return {'value': result, 'warning': warning}
@@ -2129,7 +2163,7 @@ class stock_move(osv.osv):
         @return: List of ids.
         """
         moves = self.browse(cr, uid, ids, context=context)
-        self.write(cr, uid, ids, {'state': 'confirmed'})
+        self.write(cr, uid, ids, {'state': 'confirmed'}, context=context)
         self.create_chained_picking(cr, uid, moves, context)
         return []
 
@@ -2322,9 +2356,7 @@ class stock_move(osv.osv):
 
         # if product is set to average price and a specific value was entered in the picking wizard,
         # we use it
-        if move.location_dest_id.usage != 'internal' and move.product_id.cost_method == 'average':
-            reference_amount = qty * move.product_id.standard_price
-        elif move.product_id.cost_method == 'average' and move.price_unit:
+        if move.product_id.cost_method == 'average' and move.price_unit:
             reference_amount = qty * move.price_unit
             reference_currency_id = move.price_currency_id.id or reference_currency_id
 

@@ -38,7 +38,8 @@ class sale_advance_payment_inv(osv.osv_memory):
         'qtty': fields.float('Quantity', digits=(16, 2), required=True),
         'product_id': fields.many2one('product.product', 'Advance Product',
             help="""Select a product of type service which is called 'Advance Product'.
-                You may have to create it and set it as a default value on this field."""),
+                You may have to create it and set it as a default value on this field.
+                This product must be associated to a payable account."""),
         'amount': fields.float('Advance Amount', digits_compute= dp.get_precision('Account'),
             help="The amount to be invoiced in advance."),
     }
@@ -59,7 +60,7 @@ class sale_advance_payment_inv(osv.osv_memory):
 
     def onchange_method(self, cr, uid, ids, advance_payment_method, product_id, context=None):
         if advance_payment_method == 'percentage':
-            return {'value': {'amount':0, 'product_id':False }}
+            return {'value': {'amount':0 }}
         if product_id:
             product = self.pool.get('product.product').browse(cr, uid, product_id, context=context)
             return {'value': {'amount': product.list_price}}
@@ -104,6 +105,8 @@ class sale_advance_payment_inv(osv.osv_memory):
                 inv_amount = sale.amount_total * wizard.amount / 100
                 if not res.get('name'):
                     res['name'] = _("Advance of %s %%") % (wizard.amount)
+                else:
+                    res['name'] = res.get('name') + " (" + _("Advance of %s %%") % (wizard.amount) + ")" 
             else:
                 inv_amount = wizard.amount
                 if not res.get('name'):

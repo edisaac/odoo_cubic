@@ -716,9 +716,8 @@ class crm_lead(base_stage, format_address, osv.osv):
 
         return True
 
-    def _lead_create_contact(self, cr, uid, lead, name, is_company, parent_id=False, context=None):
-        partner = self.pool.get('res.partner')
-        vals = {'name': name,
+    def _lead_create_contact_vals(self, cr, uid, lead, name, is_company, parent_id=False, context=None):
+        return {'name': name,
             'user_id': lead.user_id.id,
             'comment': lead.description,
             'section_id': lead.section_id.id or False,
@@ -738,6 +737,10 @@ class crm_lead(base_stage, format_address, osv.osv):
             'is_company': is_company,
             'type': 'contact'
         }
+
+    def _lead_create_contact(self, cr, uid, lead, name, is_company, parent_id=False, context=None):
+        partner = self.pool.get('res.partner')
+        vals = self._lead_create_contact_vals(cr, uid, lead, name, is_company, parent_id=parent_id, context=context)
         partner = partner.create(cr, uid, vals, context=context)
         return partner
 

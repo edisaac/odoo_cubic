@@ -95,11 +95,6 @@ class hr_holidays_status(osv.osv):
     def name_get(self, cr, uid, ids, context=None):
         if not ids:
             return []
-
-        if not context.get('employee_id',False):
-            # leave counts is based on empoyee_id, would be inaccurate if not based on correct employee
-            return super(hr_holidays_status, self).name_get(cr, uid, ids, context=context)
-
         res = []
         for record in self.browse(cr, uid, ids, context=context):
             name = record.name
@@ -137,7 +132,7 @@ class hr_holidays(osv.osv):
                 result[hol.id] = hol.number_of_days_temp
         return result
 
-    def _check_date(self, cr, uid, ids):
+    def _check_date(self, cr, uid, ids, context=None):
         for holiday in self.browse(cr, uid, ids):
             holiday_ids = self.search(cr, uid, [('date_from', '<=', holiday.date_to), ('date_to', '>=', holiday.date_from), ('employee_id', '=', holiday.employee_id.id), ('id', '<>', holiday.id)])
             if holiday_ids:

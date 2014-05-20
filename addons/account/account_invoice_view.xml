@@ -182,7 +182,7 @@
                             <field domain="[('company_id', '=', company_id), ('type', '=', 'payable')]"
                                 name="account_id" groups="account.group_account_user"/>
                             <field name="journal_id" groups="account.group_account_user"
-                                on_change="onchange_journal_id(journal_id, context)" widget="selection"/>
+                                on_change="onchange_journal_id(journal_id, context)" domain="[('company_id','=',company_id)]"/>
                             <field name="currency_id" groups="base.group_multi_currency"/>
                             <field name="check_total" groups="account.group_supplier_inv_check_total"/>
                         </group>
@@ -273,6 +273,8 @@
                                     <field name="credit"/>
                                     <field name="amount_currency"/>
                                     <field name="currency_id" groups="base.group_multi_currency"/>
+                                    <field name="reconcile_id" groups="base.group_user"/>
+                                    <field name="reconcile_partial_id" groups="base.group_user"/>
                                 </tree>
                             </field>
                         </page>
@@ -328,7 +330,7 @@
                         <group>
                             <field name="date_invoice"/>
                             <field name="journal_id" groups="account.group_account_user"
-                                on_change="onchange_journal_id(journal_id, context)" widget="selection"/>
+                                on_change="onchange_journal_id(journal_id, context)" domain="[('company_id','=',company_id),('type','=','sale')]"/>
                             <field domain="[('company_id', '=', company_id),('type','=', 'receivable')]"
                                 name="account_id" groups="account.group_account_user"/>
 
@@ -405,6 +407,7 @@
                                     <field name="origin" groups="base.group_user"/>
                                     <field name="name" string="Customer Reference"/>
                                     <field name="move_id" groups="account.group_account_user"/>
+                                    <field name="internal_number"/>
                                 </group>
                             </group>
                             <field name="tax_line">
@@ -432,6 +435,8 @@
                                     <field name="credit"/>
                                     <field name="amount_currency" groups="base.group_multi_currency"/>
                                     <field name="currency_id" groups="base.group_multi_currency"/>
+                                    <field name="reconcile_id" groups="base.group_user"/>
+                                    <field name="reconcile_partial_id" groups="base.group_user"/>
                                 </tree>
                             </field>
                         </page>

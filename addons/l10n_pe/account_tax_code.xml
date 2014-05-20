@@ -48,6 +48,7 @@
         </record>
             <record model="account.tax.code.template" id="vat_code_igv_pay">
                 <field name="name">Impuesto Pagado</field>
+                <field name="sign">-1.0</field>
                 <field name="parent_id" ref="vat_code_igv"/>
             </record>
                 <record model="account.tax.code.template" id="vat_code_igv_pay_18">
