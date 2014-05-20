@@ -157,7 +157,7 @@ DOMAIN_OPERATORS = (NOT_OPERATOR, OR_OPERATOR, AND_OPERATOR)
 # operators are also used. In this case its right operand has the form (subselect, params).
 TERM_OPERATORS = ('=', '!=', '<=', '<', '>', '>=', '=?', '=like', '=ilike',
                   'like', 'not like', 'ilike', 'not ilike', 'in', 'not in',
-                  'child_of')
+                  'child_of', '=*')
 
 # A subset of the above operators, with a 'negative' semantic. When the
 # expressions 'in NEGATIVE_TERM_OPERATORS' or 'not in NEGATIVE_TERM_OPERATORS' are used in the code
@@ -430,10 +430,6 @@ def select_distinct_from_where_not_null(cr, select_field, from_table):
     cr.execute('SELECT distinct("%s") FROM "%s" where "%s" is not null' % (select_field, from_table, select_field))
     return [r[0] for r in cr.fetchall()]
 
-def get_unaccent_wrapper(cr):
-    if openerp.modules.registry.RegistryManager.get(cr.dbname).has_unaccent:
-        return lambda x: "unaccent(%s)" % (x,)
-    return lambda x: x
 
 # --------------------------------------------------
 # ExtendedLeaf class for managing leafs and contexts
@@ -635,7 +631,7 @@ class expression(object):
             :attr list expression: the domain expression, that will be normalized
                 and prepared
         """
-        self._unaccent = get_unaccent_wrapper(cr)
+        self.has_unaccent = openerp.modules.registry.RegistryManager.get(cr.dbname).has_unaccent
         self.joins = []
         self.root_model = table
 
@@ -1035,37 +1031,33 @@ class expression(object):
                         sql_operator = sql_operator[4:] if sql_operator[:3] == 'not' else '='
                         inselect_operator = 'not inselect'
 
-                    unaccent = self._unaccent if sql_operator.endswith('like') else lambda x: x
-
-                    trans_left = unaccent('value')
-                    quote_left = unaccent(_quote(left))
-                    instr = unaccent('%s')
-
+                    subselect = '( SELECT res_id'          \
+                             '    FROM ir_translation'  \
+                             '   WHERE name = %s'       \
+                             '     AND lang = %s'       \
+                             '     AND type = %s'
+                    instr = ' %s'
+                    #Covering in,not in operators with operands (%s,%s) ,etc.
                     if sql_operator == 'in':
-                        # params will be flatten by to_sql() => expand the placeholders
-                        instr = '(%s)' % ', '.join(['%s'] * len(right))
+                        instr = ','.join(['%s'] * len(right))
+                        subselect += '     AND value ' + sql_operator + ' ' + " (" + instr + ")"   \
+                             ') UNION ('                \
+                             '  SELECT id'              \
+                             '    FROM "' + working_model._table + '"'       \
+                             '   WHERE "' + left + '" ' + sql_operator + ' ' + " (" + instr + "))"
+                    else:
+                        subselect += '     AND value ' + sql_operator + instr +   \
+                             ') UNION ('                \
+                             '  SELECT id'              \
+                             '    FROM "' + working_model._table + '"'       \
+                             '   WHERE "' + left + '" ' + sql_operator + instr + ")"
 
-                    subselect = """(SELECT res_id
-                                      FROM ir_translation
-                                     WHERE name = %s
-                                       AND lang = %s
-                                       AND type = %s
-                                       AND {trans_left} {operator} {right}
-                                   ) UNION (
-                                    SELECT id
-                                      FROM "{table}"
-                                     WHERE {left} {operator} {right}
-                                   )
-                                """.format(trans_left=trans_left, operator=sql_operator,
-                                           right=instr, table=working_model._table, left=quote_left)
-
-                    params = (
-                        working_model._name + ',' + left,
-                        context.get('lang') or 'en_US',
-                        'model',
-                        right,
-                        right,
-                    )
+                    params = [working_model._name + ',' + left,
+                              context.get('lang', False) or 'en_US',
+                              'model',
+                              right,
+                              right,
+                             ]
                     push(create_substitution_leaf(leaf, ('id', inselect_operator, (subselect, params)), working_model))
 
                 else:
@@ -1174,6 +1166,13 @@ class expression(object):
                 query, params = self.__leaf_to_sql(
                     create_substitution_leaf(eleaf, (left, '=', right), model))
 
+        elif operator == '=*':
+            #YT 26/09/2013
+            # '=*' behaves like '=' in other cases but add all elements with null values
+            query, params = self.__leaf_to_sql(
+                    create_substitution_leaf(eleaf, (left, '=', right), model))
+            query = '(%s OR %s."%s" IS NULL)' % (query[0]=='(' and query[1:-1] or query, table_alias, left)
+            
         elif left == 'id':
             query = '%s.id %s %%s' % (table_alias, operator)
             params = right
@@ -1181,15 +1180,15 @@ class expression(object):
         else:
             need_wildcard = operator in ('like', 'ilike', 'not like', 'not ilike')
             sql_operator = {'=like': 'like', '=ilike': 'ilike'}.get(operator, operator)
-            cast = '::text' if  sql_operator.endswith('like') else ''
 
             if left in model._columns:
                 format = need_wildcard and '%s' or model._columns[left]._symbol_set[0]
-                unaccent = self._unaccent if sql_operator.endswith('like') else lambda x: x
-                column = '%s.%s' % (table_alias, _quote(left))
-                query = '(%s%s %s %s)' % (unaccent(column), cast, sql_operator, unaccent(format))
+                if self.has_unaccent and sql_operator in ('ilike', 'not ilike'):
+                    query = '(unaccent(%s."%s") %s unaccent(%s))' % (table_alias, left, sql_operator, format)
+                else:
+                    query = '(%s."%s" %s %s)' % (table_alias, left, sql_operator, format)
             elif left in MAGIC_COLUMNS:
-                    query = "(%s.\"%s\"%s %s %%s)" % (table_alias, left, cast, sql_operator)
+                    query = "(%s.\"%s\" %s %%s)" % (table_alias, left, sql_operator)
                     params = right
             else:  # Must not happen
                 raise ValueError("Invalid field %r in domain term %r" % (left, leaf))

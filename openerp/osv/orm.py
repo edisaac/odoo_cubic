@@ -466,12 +466,7 @@ class browse_record(object):
                         else:
                             new_data[field_name] = browse_null()
                     elif field_column._type in ('one2many', 'many2many') and len(result_line[field_name]):
-                        new_data[field_name] = self._list_class(
-                            (browse_record(self._cr, self._uid, id, self._table.pool.get(field_column._obj),
-                                           self._cache, context=self._context, list_class=self._list_class,
-                                           fields_process=self._fields_process)
-                               for id in result_line[field_name]),
-                            context=self._context)
+                        new_data[field_name] = self._list_class([browse_record(self._cr, self._uid, id, self._table.pool.get(field_column._obj), self._cache, context=self._context, list_class=self._list_class, fields_process=self._fields_process) for id in result_line[field_name]], self._context)
                     elif field_column._type == 'reference':
                         if result_line[field_name]:
                             if isinstance(result_line[field_name], browse_record):
@@ -1542,7 +1537,7 @@ class BaseModel(object):
             fun, msg, fields = constraint
             # We don't pass around the context here: validation code
             # must always yield the same results.
-            if not fun(self, cr, uid, ids):
+            if not fun(self, cr, uid, ids, context=context):
                 # Check presence of __call__ directly instead of using
                 # callable() because it will be deprecated as of Python 3.0
                 if hasattr(msg, '__call__'):
@@ -1559,7 +1554,7 @@ class BaseModel(object):
                 )
                 self._invalids.update(fields)
         if error_msgs:
-            raise except_orm('ValidateError', '\n'.join(error_msgs))
+            raise except_orm('ValidateError', 'On %s (%s,%s)\n\n'%(self._description,self._name,str(ids)) + '\n'.join(error_msgs))
         else:
             self._invalids.clear()
 
@@ -3922,8 +3917,10 @@ class BaseModel(object):
         """Verify the returned rows after applying record rules matches
            the length of `ids`, and raise an appropriate exception if it does not.
         """
+        if context is None:
+            context = {}
         ids, result_ids = set(ids), set(result_ids)
-        missing_ids = ids - result_ids
+        missing_ids = not (result_ids.issubset(ids) and result_ids) and ids - result_ids #YT 3/3/2013 #ids - result_ids
         if missing_ids:
             # Attempt to distinguish record rule restriction vs deleted records,
             # to provide a more specific error message - check if the missinf
@@ -3932,10 +3929,10 @@ class BaseModel(object):
                 # the missing ids are (at least partially) hidden by access rules
                 if uid == SUPERUSER_ID:
                     return
-                _logger.warning('Access Denied by record rules for operation: %s, uid: %s, model: %s', operation, uid, self._name)
+                _logger.warning('Access Denied by record rules for operation: %s, uid: %s, model: %s, ids: %s, ids with rules: %s, missing ids: %s', operation, uid, self._name, ids, result_ids, missing_ids)
                 raise except_orm(_('Access Denied'),
-                                 _('The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n\n(Document type: %s, Operation: %s)') % \
-                                    (self._description, operation))
+                                 _('The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n\n(Document type: %s, Operation: %s), ids:%s\n%s') % \
+                                    (self._description, operation,ids,context.has_key('_compute_domain_rules') and 'Rules:'+str([rl.get('name')+' Groups:'+str(rl.get('groups') or 'Global') for rl in context.get('_compute_domain_rules',[])]) or ''))
             else:
                 # If we get here, the missing_ids are not in the database
                 if operation in ('read','unlink'):
@@ -4067,13 +4064,9 @@ class BaseModel(object):
                 ir_values_obj.unlink(cr, uid, ir_value_ids, context=context)
 
         for order, object, store_ids, fields in result_store:
-            if object == self._name:
-                effective_store_ids = list(set(store_ids) - set(ids))
-            else:
-                effective_store_ids = store_ids
-            if effective_store_ids:
+            if object != self._name:
                 obj = self.pool.get(object)
-                cr.execute('select id from '+obj._table+' where id IN %s', (tuple(effective_store_ids),))
+                cr.execute('select id from '+obj._table+' where id IN %s', (tuple(store_ids),))
                 rids = map(lambda x: x[0], cr.fetchall())
                 if rids:
                     obj._store_set_values(cr, uid, rids, fields, context)
@@ -4588,7 +4581,7 @@ class BaseModel(object):
         if isinstance(select, (int, long)):
             return browse_record(cr, uid, select, self, cache, context=context, list_class=self._list_class, fields_process=fields_process)
         elif isinstance(select, list):
-            return self._list_class((browse_record(cr, uid, id, self, cache, context=context, list_class=self._list_class, fields_process=fields_process) for id in select), context=context)
+            return self._list_class([browse_record(cr, uid, id, self, cache, context=context, list_class=self._list_class, fields_process=fields_process) for id in select], context=context)
         else:
             return browse_null()
 
