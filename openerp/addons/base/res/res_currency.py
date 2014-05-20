@@ -151,7 +151,7 @@ class res_currency(osv.osv):
            :param float amount: the amount to round
            :return: rounded float
         """
-        return float_round(amount, precision_rounding=currency.rounding)
+        return round(float_round(amount, precision_rounding=currency.rounding), currency.accuracy)
 
     def compare_amounts(self, cr, uid, currency, amount1, amount2):
         """Compare ``amount1`` and ``amount2`` after rounding them according to the

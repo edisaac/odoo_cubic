@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: openobject-server\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2013-06-07 19:35+0000\n"
-"PO-Revision-Date: 2014-05-17 09:03+0000\n"
+"PO-Revision-Date: 2014-02-02 18:57+0000\n"
 "Last-Translator: Ralf Hilgenstock <rh@dialoge.info>\n"
 "Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-05-18 05:53+0000\n"
-"X-Generator: Launchpad (build 17007)\n"
+"X-Launchpad-Export-Date: 2014-02-03 05:55+0000\n"
+"X-Generator: Launchpad (build 16916)\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_check_writing
@@ -527,7 +527,7 @@ msgstr ""
 #: code:addons/orm.py:2649
 #, python-format
 msgid "Invalid group_by"
-msgstr "Ungültiges group_by Argument"
+msgstr "Fehler bei group_by Argument"
 
 #. module: base
 #: field:ir.module.category,child_ids:0
@@ -549,7 +549,7 @@ msgstr "Langzeitprojekt Portal"
 #: field:ir.model.data,date_update:0
 #: field:ir.model.relation,date_update:0
 msgid "Update Date"
-msgstr "Datum aktualisieren"
+msgstr "Update des Datums"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_action_rule
@@ -819,7 +819,7 @@ msgstr "Verkauf & Einkauf"
 #. module: base
 #: view:res.partner:0
 msgid "Put an internal note..."
-msgstr "Eine interne Mitteilung verfassen"
+msgstr "Eine Mitteilung verfassen"
 
 #. module: base
 #: view:ir.translation:0
@@ -1256,7 +1256,7 @@ msgstr "Oman"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp
 msgid "MRP"
-msgstr "Material- und Ressourcenplanung"
+msgstr "Bedarfsplanung"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_attendance
@@ -3308,38 +3308,6 @@ msgid ""
 "and\n"
 "directly integrated in the core accounting. \n"
 msgstr ""
-"\n"
-"Fügen Sie in Rechnungen eine zusätzliche Auswertungsebene für "
-"Konsolidierungen hinzu \n"
-"============================================================================="
-"==\n"
-"\n"
-"Standardmäßig können Kunden- und Lieferantenrechnungen an einen Kontakt\n"
-"innerhalb des Unternehmens gebunden werden, in der Datenstruktur ist \n"
-"das Unternehmen jedoch nicht fest mit einer Rechnung verknüpft. Journale "
-"sind\n"
-"hingegen immer fest auf ein Unternehmen bezogen und nicht auf Kontakte,\n"
-"so dass kreditorische und debitorische Konten immer korrekt behandelt "
-"werden\n"
-"und auf Unternehmensebene korrekt konsolidiert werden. \n"
-"\n"
-"Wenn viele verschiedene Kontakte/Abteilungen unter einer Unternehmensmutter\n"
-"konsolidiert werden, kann dies das Berichtswesen erschweren; Berichte "
-"basieren \n"
-"unmittelbar auf der Datenbankstruktur und liefern daher nicht die "
-"notwendige\n"
-"konsolidierte/aggregierte Dimension.\n"
-"\n"
-"Dieses Modul löst das Problem, indem eine explizite Referenz auf das "
-"Unternehmen\n"
-"in die Rechnungen eingebracht wird, welche automatisch aus dem Kontakt der \n"
-"Rechnung ermittelt wird. Dieser neue Bezug wird nun zum Gruppieren in Listen "
-"\n"
-"und in der Rechnungsübersicht nach Partnern verwendet.\n"
-"\n"
-"Hinweis: Mit großer Wahrscheinlichkeit wird dieses Modul in der nächsten\n"
-"Hauptversion von OpenERP in den Kern der Finanzmodule verankert und somit \n"
-"entfallen. \n"
 
 #. module: base
 #: model:res.country,name:base.ai
@@ -6874,7 +6842,7 @@ msgstr "Isle of Man"
 #. module: base
 #: help:ir.actions.client,res_model:0
 msgid "Optional model, mostly used for needactions."
-msgstr "Optionales Modell, meist für Bedarfsaktionen verwandt"
+msgstr "Dieses ist ein optionales Krokodil"
 
 #. module: base
 #: code:addons/base/module/module.py:306
@@ -6895,7 +6863,7 @@ msgstr "Bedingungstyp"
 #. module: base
 #: field:res.company,child_ids:0
 msgid "Child Companies"
-msgstr "Tochterunternehmen"
+msgstr "untergeordnete Gesellschaften"
 
 #. module: base
 #: model:res.country,name:base.ni
@@ -8879,7 +8847,7 @@ msgstr ""
 #. module: base
 #: field:ir.ui.menu,needaction_enabled:0
 msgid "Target model uses the need action mechanism"
-msgstr "Ziel-Modell nutzt den need_action Mechanismus"
+msgstr ""
 
 #. module: base
 #: help:ir.model.fields,relation:0
@@ -9570,7 +9538,7 @@ msgstr "Nächste Nummer dieser Sequenz"
 #: view:res.partner:0
 #: view:res.users:0
 msgid "Tags..."
-msgstr "Schlagworte …"
+msgstr "Tags..."
 
 #. module: base
 #: view:res.partner:0
@@ -10261,53 +10229,6 @@ msgid ""
 "of creation of distribution models.\n"
 "        "
 msgstr ""
-"\n"
-"Dieses Modul ermöglicht die Verwendung mehrerer Umlagepläne gemäß der "
-"Kostenstelle.\n"
-"============================================================================="
-"============\n"
-"\n"
-"Hier werden mehrere Buchungen angelegt, wenn die Rechnung oder\n"
-"die Buchungen genehmigt werden.\n"
-"\n"
-"Zum Beispiel können Sie die folgene Kostenstellenstruktur definieren:\n"
-"--------------------------------------------------------------------------\n"
-"* **Projekte**\n"
-"* Projekt 1\n"
-"+ TeilProj 1.1\n"
-"\n"
-"+ TeilProj 1.2\n"
-"\n"
-"* Projekt 2\n"
-"\n"
-"* **Verkäufer**\n"
-"* Erik\n"
-"\n"
-"* Fabien\n"
-"\n"
-"Wir haben hier zwei Pläne: Projekte und Verkäufer. Eine Rechnungsposition "
-"muss Kosten auf beide Pläne umlegen können: TeilProj 1.1 und Fabien. Die "
-"Beträge können auch aufgeteilt werden.\n"
-"\n"
-"Das folgende Beispiel zeigt den Fall einer Rechnung, die beide Teilprojekte "
-"betrifft und einem Verkäufer zugeordent ist:\n"
-"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-"~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-"**Plan1:**\n"
-"\n"
-"* TeilProjekt 1.1 : 50%\n"
-"\n"
-"* TeilProjekt 1.2 : 50%\n"
-"\n"
-"**Plan2:**\n"
-"Erik: 100%\n"
-"\n"
-"Wenn diese Rechnungsposition bestätigt wird, wird sie drei "
-"Kostenstellenbuchungen für eine Finanzbuchung erzeugen.\n"
-"\n"
-"Der Umlageplan prüft die minimale bzw. maximale Umlage zum Zeitpunkt der "
-"Anlage des Umlageschlüssels.\n"
-"        "
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_sequence
@@ -10555,7 +10476,7 @@ msgstr "Zielobjekt"
 #. module: base
 #: selection:ir.model.fields,select_level:0
 msgid "Always Searchable"
-msgstr "Immer  durchsuchbar"
+msgstr "immer eine Suche anzeigen"
 
 #. module: base
 #: help:res.country.state,code:0
@@ -11277,9 +11198,6 @@ msgid ""
 "related to a model that uses the need_action mechanism, this field is set to "
 "true. Otherwise, it is false."
 msgstr ""
-"Wenn der Menüeintrag eine act_window -Aktion ist und diese Aktion mit dem "
-"need_action -Mechanismus agiert, ist dieses Feld auf Wahr gesetzt. "
-"Anderenfalls ist es Falsch."
 
 #. module: base
 #: code:addons/orm.py:3961
@@ -11822,7 +11740,7 @@ msgstr "Benutzer-Interface"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_byproduct
 msgid "MRP Byproducts"
-msgstr "MRP Kuppelprodukte"
+msgstr "MRP nach Produkten"
 
 #. module: base
 #: field:res.request,ref_partner_id:0
@@ -12003,7 +11921,7 @@ msgstr "Beim Entfernen"
 #: code:addons/base/ir/ir_model.py:347
 #, python-format
 msgid "Model %s does not exist!"
-msgstr "Modell %s existiert nicht!"
+msgstr "Modul %s existiert nicht!"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_jit
@@ -12172,7 +12090,7 @@ msgstr "Island"
 #: model:ir.actions.act_window,name:base.ir_action_window
 #: model:ir.ui.menu,name:base.menu_ir_action_window
 msgid "Window Actions"
-msgstr "Fenster öffnen/schließen …"
+msgstr "Schließe/Öffne Fenster..."
 
 #. module: base
 #: model:ir.module.module,description:base.module_portal_project_issue
@@ -12185,8 +12103,8 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Diese Anwendung fügt Ihrem Portal ein Menü und Funktionen hinzu, wenn "
-"project_issue und das Portal installiert sind.\n"
+"Diese Anwendung fügt Ihrem Portal ein Menü und Funktionen für Probleme "
+"hinzu, wenn project_issue und das Portal installiert sind.\n"
 "============================================================================="
 "=====================\n"
 "    "
@@ -12263,7 +12181,7 @@ msgstr "Neue Sprache (leere Übersetzungsvorlage)"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_report_company
 msgid "Invoice Analysis per Company"
-msgstr "Rechnungsprüfung je Unternehmen"
+msgstr ""
 
 #. module: base
 #: help:ir.actions.server,email:0
@@ -13951,7 +13869,7 @@ msgstr "Mehrstufig"
 #. module: base
 #: model:ir.module.module,summary:base.module_crm
 msgid "Leads, Opportunities, Phone Calls"
-msgstr "Leads, Chancen, Telefonate"
+msgstr "Leads, Opportunities, Telefonate"
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_knowledge_management
@@ -14087,7 +14005,7 @@ msgstr ""
 #. module: base
 #: view:ir.module.module:0
 msgid "Search modules"
-msgstr "Suche nach Modulen"
+msgstr "Suche Module"
 
 #. module: base
 #: model:res.country,name:base.by
@@ -14206,17 +14124,6 @@ msgid ""
 "              </p>\n"
 "            "
 msgstr ""
-"<p class=\"oe_view_nocontent_create\">\n"
-"    Klicken Sie, um eine neue Partner-Kategorie anzulegen.\n"
-"</p><p>\n"
-"    Verwalten Sie Partnerkategorien, um diese besser zu klassifizieren und "
-"für Analysezwecke.\n"
-"    Ein Partner kann mehreren Kategorien angehören und Kategorien können "
-"hierarchisch strukturiert sein; \n"
-"    ein Partner einer Kategorie gehört auch seiner Übergeordbeten Kategorie "
-"an.\n"
-"</p>\n"
-"            "
 
 #. module: base
 #: field:ir.actions.act_window,filter:0
@@ -14237,11 +14144,6 @@ msgid ""
 "a new contact should be created under that new company. You can use the "
 "\"Discard\" button to abandon this change."
 msgstr ""
-"Das Unternehmen eines Kontaktes sollte nur geändert werden, wenn dieses nie "
-"korrekt gepflegt wurde. Wenn ein bestehender Kontakt für ein Unternehmen zu "
-"arbeiten beginnt, sollte dieser in diesem (möglicherweise neuen) Unternehmen "
-"neu angelegt werden. Sie können \"abbrechen\" wählen, um diese Änderung zu "
-"verwerfen."
 
 #. module: base
 #: help:res.partner,customer:0
@@ -14251,12 +14153,12 @@ msgstr "Markieren, wenn der Kontakt ein Kunde ist."
 #. module: base
 #: view:ir.actions.server:0
 msgid "Trigger Configuration"
-msgstr "Auslöser konfigurieren"
+msgstr "Auslösung konfigurieren"
 
 #. module: base
 #: view:base.language.install:0
 msgid "Load"
-msgstr "Laden"
+msgstr "Lade"
 
 #. module: base
 #: model:ir.module.module,description:base.module_warning
@@ -14349,7 +14251,7 @@ msgstr "An"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr
 msgid "Employee Directory"
-msgstr "Mitarbeiterverzeichnis"
+msgstr "Angestelltenverzeichnis"
 
 #. module: base
 #: field:ir.cron,args:0
@@ -14764,7 +14666,7 @@ msgstr "Minute: %(min)s"
 #. module: base
 #: model:ir.ui.menu,name:base.menu_ir_cron
 msgid "Scheduler"
-msgstr "Terminplaner"
+msgstr "Scheduler"
 
 #. module: base
 #: model:ir.module.module,description:base.module_event_moodle
@@ -14963,7 +14865,7 @@ msgstr "Falklandinseln"
 #: code:addons/base/ir/ir_actions.py:606
 #, python-format
 msgid "Please specify an action to launch!"
-msgstr "Geben Sie bitte eine zu startende Aktion an."
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.lb
@@ -15650,7 +15552,7 @@ msgstr ""
 #: code:addons/base/ir/ir_model.py:295
 #, python-format
 msgid "Size of the field can never be less than 0 !"
-msgstr "Die Größe des Feldes darf niemals kleiner als 0 sein!"
+msgstr ""
 
 #. module: base
 #: help:ir.actions.server,sequence:0
@@ -16421,7 +16323,7 @@ msgstr "Startaktion"
 #: field:ir.model,modules:0
 #: field:ir.model.fields,modules:0
 msgid "In Modules"
-msgstr "In Modulen"
+msgstr "In Anwendungen"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_contacts
@@ -16946,7 +16848,7 @@ msgstr ""
 #. module: base
 #: view:ir.rule:0
 msgid "Record rules"
-msgstr "Regel aufzeichnen"
+msgstr "Aufzeichnung Regel"
 
 #. module: base
 #: help:workflow.transition,act_to:0
@@ -17725,7 +17627,7 @@ msgstr "Helpdesk"
 #. module: base
 #: field:ir.rule,perm_write:0
 msgid "Apply for Write"
-msgstr "Zum Schreiben anwenden"
+msgstr ""
 
 #. module: base
 #: field:ir.ui.menu,parent_left:0
@@ -18107,7 +18009,7 @@ msgstr ""
 #: field:ir.model,access_ids:0
 #: view:ir.model.access:0
 msgid "Access"
-msgstr "Zugriff"
+msgstr "Datenzugriffsfehler"
 
 #. module: base
 #: code:addons/base/res/res_company.py:165
@@ -18539,7 +18441,7 @@ msgstr "Land"
 #. module: base
 #: model:res.partner.category,name:base.res_partner_category_15
 msgid "Wholesaler"
-msgstr "Großhändler"
+msgstr "Wiederverkäufer"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_base_vat
@@ -18958,7 +18860,7 @@ msgstr ""
 #. module: base
 #: field:ir.actions.server,mobile:0
 msgid "Mobile No"
-msgstr "Mobil-Nummer"
+msgstr "Handy-Nr."
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_by_category
@@ -18982,12 +18884,12 @@ msgstr "SXW Inhalt"
 #. module: base
 #: field:ir.attachment,file_size:0
 msgid "File Size"
-msgstr "Dateigröße"
+msgstr "Datei Grösse"
 
 #. module: base
 #: help:ir.sequence,prefix:0
 msgid "Prefix value of the record for the sequence"
-msgstr "Präfixwert des Datensatzes für Sequenz"
+msgstr "Präfix einer Folgen"
 
 #. module: base
 #: model:res.country,name:base.sc
@@ -19198,7 +19100,7 @@ msgstr "Funktion"
 #. module: base
 #: field:ir.ui.menu,parent_right:0
 msgid "Parent Right"
-msgstr "Oberkonto Rechts"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_customer_relationship_management
@@ -19208,8 +19110,8 @@ msgid ""
 msgstr ""
 "Verwalten Sie Ihre Beziehungen zu Interessenten und Kunden. Nutzen Sie dabei "
 "\r\n"
-"Leads = Interessenten, Vorverhandlungen, \r\n"
-"Opportunities = Chancen, Gelegenheiten, \r\n"
+"Leads = Vorverhandlungen, \r\n"
+"Opportunities = Gelegenheiten, \r\n"
 "Requests = Anfragen oder \r\n"
 "Issues = Problembearbeitungen."
 
@@ -19273,7 +19175,7 @@ msgstr "Bedarfsmeldungen"
 #. module: base
 #: selection:ir.actions.act_window,target:0
 msgid "Inline Edit"
-msgstr "Eingebettet Bearbeiten"
+msgstr ""
 
 #. module: base
 #: selection:ir.cron,interval_type:0
@@ -19326,7 +19228,7 @@ msgstr "Kontext"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_mrp
 msgid "Sales and MRP Management"
-msgstr "Verkauf und Fertigungsplanung"
+msgstr "Verkaufs- und Fertigungsplanung"
 
 #. module: base
 #: model:ir.actions.act_window,help:base.action_partner_form
@@ -19376,7 +19278,7 @@ msgstr "Exportbezeichnung"
 #: code:addons/base/ir/ir_sequence.py:259
 #, python-format
 msgid "Invalid prefix or suffix for sequence '%s'"
-msgstr "Ungültiges Prä- oder Suffix für die Folge '%s'"
+msgstr ""
 
 #. module: base
 #: help:res.partner,type:0

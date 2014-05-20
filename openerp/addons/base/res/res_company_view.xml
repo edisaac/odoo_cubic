@@ -67,7 +67,7 @@
                                     <field name="phone" on_change="onchange_footer(custom_footer, phone, fax, email, website, vat, company_registry, bank_ids)"/>
                                     <field name="fax" on_change="onchange_footer(custom_footer, phone, fax, email, website, vat, company_registry, bank_ids)"/>
                                     <field name="email" on_change="onchange_footer(custom_footer, phone, fax, email, website, vat, company_registry, bank_ids)"/>
-                                    <field name="vat" on_change="onchange_footer(custom_footer, phone, fax, email, website, vat, company_registry, bank_ids)"/>
+                                    <field name="vat" required="1" on_change="onchange_footer(custom_footer, phone, fax, email, website, vat, company_registry, bank_ids)"/>
                                     <field name="company_registry" on_change="onchange_footer(custom_footer, phone, fax, email, website, vat, company_registry, bank_ids)"/>
                                 </group>
                             </group>
@@ -93,7 +93,7 @@
                         <page string="Configuration">
                             <group>
                                 <group name="account_grp" string="Accounting">
-                                    <field name="currency_id"/>
+                                    <field name="currency_id" domain="[('company_id','=',id)]"/>
                                 </group>
                             </group>
                         </page>

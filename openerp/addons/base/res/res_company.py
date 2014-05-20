@@ -243,13 +243,16 @@ class res_company(osv.osv):
     #
     def cache_restart(self, cr):
         self._get_company_children.clear_cache(self)
-
+    
+    def _get_partner_create(self, cr, uid, vals, context=None):
+        return {'name': vals['name'], 'is_company':True, 'image': vals.get('logo', False)}
+    
     def create(self, cr, uid, vals, context=None):
         if not vals.get('name', False) or vals.get('partner_id', False):
             self.cache_restart(cr)
             return super(res_company, self).create(cr, uid, vals, context=context)
         obj_partner = self.pool.get('res.partner')
-        partner_id = obj_partner.create(cr, uid, {'name': vals['name'], 'is_company':True, 'image': vals.get('logo', False)}, context=context)
+        partner_id = obj_partner.create(cr, uid, self._get_partner_create(cr, uid, vals, context=context), context=context)
         vals.update({'partner_id': partner_id})
         self.cache_restart(cr)
         company_id = super(res_company, self).create(cr, uid, vals, context=context)

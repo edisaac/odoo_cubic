@@ -104,7 +104,8 @@ class ir_rule(osv.osv):
     ]
 
     @tools.ormcache()
-    def _compute_domain(self, cr, uid, model_name, mode="read"):
+    def _compute_domain(self, cr, uid, model_name, mode="read", context=None):
+        context = context or {}
         if mode not in self._MODES:
             raise ValueError('Invalid mode: %r' % (mode,))
 
@@ -125,6 +126,7 @@ class ir_rule(osv.osv):
             user = self.pool.get('res.users').browse(cr, SUPERUSER_ID, uid)
             global_domains = []                 # list of domains
             group_domains = {}                  # map: group -> list of domains
+            context['_compute_domain_rules'] = [] #Used to show a comprensive rule error message
             for rule in self.browse(cr, SUPERUSER_ID, rule_ids):
                 # read 'domain' as UID to have the correct eval context for the rule.
                 rule_domain = self.read(cr, uid, rule.id, ['domain'])['domain']
@@ -134,6 +136,7 @@ class ir_rule(osv.osv):
                         group_domains.setdefault(group, []).append(dom)
                 if not rule.groups:
                     global_domains.append(dom)
+                context['_compute_domain_rules'].append({'id':rule.id,'name':rule.name,'domain':dom,'groups':[g.name for g in rule.groups], 'model':rule.model_id.name})
             # combine global domains and group domains
             if group_domains:
                 group_domain = expression.OR(map(expression.OR, group_domains.values()))
@@ -147,7 +150,7 @@ class ir_rule(osv.osv):
         self._compute_domain.clear_cache(self)
 
     def domain_get(self, cr, uid, model_name, mode='read', context=None):
-        dom = self._compute_domain(cr, uid, model_name, mode)
+        dom = self._compute_domain(cr, uid, model_name, mode, context)
         if dom:
             # _where_calc is called as superuser. This means that rules can
             # involve objects on which the real uid has no acces rights.
