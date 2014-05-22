@@ -1,0 +1,237 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* contact_annotation
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 5.2dev\n"
+"Report-Msgid-Bugs-To: support@openerp.com\n"
+"POT-Creation-Date: 2010-06-30 18:30:18+0000\n"
+"PO-Revision-Date: 2010-06-30 18:30:18+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: contact_annotation
+#: field:contact.annotation_type.group_access,group_id:0
+msgid "Group"
+msgstr ""
+
+#. module: contact_annotation
+#: help:contact.type_annotation,informer_functions:0
+msgid "Perms for informer function over contact to create that annotation type"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation,partner_id:0
+msgid "Main Employer"
+msgstr ""
+
+#. module: contact_annotation
+#: model:ir.model,name:contact_annotation.model_contact_annotation
+msgid "A contact note limited in time."
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.annotation:0
+#: field:contact.annotation,valid_to:0
+msgid "Valid to"
+msgstr ""
+
+#. module: contact_annotation
+#: constraint:ir.actions.act_window:0
+msgid "Invalid model name in the action definition."
+msgstr ""
+
+#. module: contact_annotation
+#: model:ir.model,name:contact_annotation.model_contact_annotation_type_function_access
+msgid "contact.annotation_type.function_access"
+msgstr ""
+
+#. module: contact_annotation
+#: constraint:ir.model:0
+msgid "The Object name must start with x_ and not contain any special character !"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation,informer:0
+msgid "Informer"
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.annotation:0
+#: field:contact.annotation,anno_type:0
+#: field:contact.annotation_type.function_access,contact_type_annotation_id:0
+#: field:contact.annotation_type.group_access,contact_type_annotation_id:0
+msgid "Type"
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.annotation:0
+#: model:ir.actions.act_window,name:contact_annotation.contact_annotation_list_act
+#: model:ir.ui.menu,name:contact_annotation.contact_annotation_mi
+msgid "Annotations"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation_type.function_access,perm_create:0
+#: field:contact.annotation_type.group_access,perm_create:0
+msgid "Create Access"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation_type.function_access,function_id:0
+msgid "Function"
+msgstr ""
+
+#. module: contact_annotation
+#: help:contact.type_annotation,states:0
+msgid "States (letters from A-Z, words separates with comas, prefix - if retire state of annotations superseded. )"
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.type_annotation:0
+#: field:contact.type_annotation,informer_functions:0
+msgid "Informer functions"
+msgstr ""
+
+#. module: contact_annotation
+#: model:ir.model,name:contact_annotation.model_contact_type_annotation
+msgid "contact.type_annotation"
+msgstr ""
+
+#. module: contact_annotation
+#: model:ir.model,name:contact_annotation.model_contact_annotation_type_group_access
+msgid "contact.annotation_type.group_access"
+msgstr ""
+
+#. module: contact_annotation
+#: help:contact.type_annotation,perms_groups:0
+msgid "Group which users could create and modify that annotation type"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation,comment:0
+msgid "Commment"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.type_annotation,perms_groups:0
+msgid "Groups"
+msgstr ""
+
+#. module: contact_annotation
+#: model:ir.module.module,shortdesc:contact_annotation.module_meta_information
+msgid "Contact Annotation"
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.annotation:0
+msgid "Annotation"
+msgstr ""
+
+#. module: contact_annotation
+#: constraint:ir.ui.view:0
+msgid "Invalid XML for View Architecture!"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation,user_id:0
+msgid "Responsible"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation_type.function_access,name:0
+#: field:contact.annotation_type.group_access,name:0
+#: field:contact.type_annotation,name:0
+msgid "Name"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation,creation_date:0
+msgid "Creation date"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation_type.function_access,perm_unlink:0
+#: field:contact.annotation_type.group_access,perm_unlink:0
+msgid "Delete Permission"
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.annotation:0
+#: field:contact.annotation,valid_from:0
+msgid "Valid from"
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.annotation:0
+#: field:contact.annotation,contact_id:0
+msgid "Contact"
+msgstr ""
+
+#. module: contact_annotation
+#: model:ir.actions.act_window,name:contact_annotation.contact_type_annotation_list_act
+#: model:ir.ui.menu,name:contact_annotation.contact_type_annotation_mi
+msgid "Annotation Types"
+msgstr ""
+
+#. module: contact_annotation
+#: code:addons/contact_annotation/contact_annotation.py:0
+#, python-format
+msgid "Error"
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.type_annotation:0
+msgid "Group access"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.type_annotation,code:0
+msgid "Code"
+msgstr ""
+
+#. module: contact_annotation
+#: code:addons/contact_annotation/contact_annotation.py:0
+#, python-format
+msgid "Not granted!"
+msgstr ""
+
+#. module: contact_annotation
+#: model:ir.ui.menu,name:contact_annotation.annotations_mi
+msgid "Annotations Management"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.type_annotation,states:0
+msgid "States"
+msgstr ""
+
+#. module: contact_annotation
+#: view:contact.type_annotation:0
+msgid "Annotation types"
+msgstr ""
+
+#. module: contact_annotation
+#: model:ir.module.module,description:contact_annotation.module_meta_information
+msgid "\n"
+"Contact annotation management. Initialy created to support school_base module.\n"
+""
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation_type.function_access,perm_read:0
+#: field:contact.annotation_type.group_access,perm_read:0
+msgid "Read Access"
+msgstr ""
+
+#. module: contact_annotation
+#: field:contact.annotation_type.function_access,perm_write:0
+#: field:contact.annotation_type.group_access,perm_write:0
+msgid "Write Access"
+msgstr ""
+

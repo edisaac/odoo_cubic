@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openerp>
+	<data>
+        <menuitem
+            id="annotations_mi"
+            name="Annotations Management" icon="terp-project" />
+
+        <record id="contact_annotations_manager_group" model="res.groups">
+            <field name="name">Contact Annotations Manager</field>
+        </record>
+
+
+<!-- contact.annotation -->
+        <record model="ir.ui.view" id="contact_annotation_tree_view">
+            <field name="name">contact.annotation.tree.all</field>
+            <field name="model">contact.annotation</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Annotation">
+                    <field name="contact_id" string="Contact" />
+                    <field name="anno_type" string="Type" />
+                    <field name="valid_from" string="Valid from" />
+                    <field name="valid_to" string="Valid to" />
+                    <field name="informer" />
+                    <field name="creation_date" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="contact_annotation_form_view">
+            <field name="name">contact.annotation.form.all</field>
+            <field name="model">contact.annotation</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Annotations">
+                    <field name="contact_id" string="Contact" />
+                    <field name="anno_type" string="Type" />
+                    <field name="valid_from" string="Valid from" />
+                    <field name="valid_to" string="Valid to" />
+                    <field name="informer" />
+                     <field name="creation_date" />
+                   <newline />
+                    <field name="comment" />
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="contact_annotation_list_act">
+            <field name="name">Annotations</field>
+            <field name="res_model">contact.annotation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+        </record>
+		<record id="ir_actions_act_window_view_contact_annotation_0" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_annotation_list_act" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="contact_annotation_tree_view" />
+			<field eval="0" name="sequence" />
+		</record>
+
+		<record id="ir_actions_act_window_view_contact_annotation_1" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_annotation_list_act" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="contact_annotation_form_view" />
+			<field eval="1" name="sequence" />
+		</record>
+
+        <menuitem
+            id="contact_annotation_mi"
+            parent="annotations_mi" icon="STOCK_EDIT"
+            action="contact_annotation_list_act" sequence="90" />
+
+<!-- contact.partner.function -->
+
+        <record model="ir.ui.view" id="contact_partner_function_tree_view">
+            <field name="name">contact.partner.function.tree.all</field>
+            <field name="model">contact.partner.function</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Contact-Partner functions">
+                    <field name="contact_id" string="Contact" />
+                    <field name="partner_id" string="Partner" />
+                    <field name="function_id" string="Function" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="contact_partner_function_form_view">
+            <field name="name">contact.partner.function.form.all</field>
+            <field name="model">contact.partner.function</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Contact-Partner function">
+                    <field name="contact_id" string="Contact" />
+                    <field name="partner_id" string="Partner" />
+                    <field name="function_id" string="Function" />
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="contact_partner_function_list_act">
+            <field name="name">Contact-Partner function</field>
+            <field name="res_model">contact.partner.function</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+        </record>
+		<record id="ir_actions_act_window_view_contact_partner_function_0" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_partner_function_list_act" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="contact_partner_function_tree_view" />
+			<field eval="0" name="sequence" />
+		</record>
+
+		<record id="ir_actions_act_window_view_contact_partner_function_1" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_partner_function_list_act" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="contact_partner_function_form_view" />
+			<field eval="1" name="sequence" />
+		</record>
+
+        <menuitem
+            id="contact_partner_function_mi"
+            parent="annotations_mi" icon="STOCK_EDIT"
+            action="contact_partner_function_list_act" sequence="70" />
+
+<!-- contact.annotation.state -->
+
+        <record model="ir.ui.view" id="contact_annotation_state_form_view">
+            <field name="name">contact.annotation.state.form.all</field>
+            <field name="model">contact.annotation.state</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Contact State">
+                    <field name="name" />
+                    <field name="code" />
+                    <field name="valid" />
+                    <field name="group_ids" />
+                    <field name="function_ids" />
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="contact_annotation_state_tree_view">
+            <field name="name">contact.annotation.state.form.all</field>
+            <field name="model">contact.annotation.state</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Contact States">
+                    <field name="name" />
+                    <field name="code" />
+                    <field name="valid" />
+                    <field name="group_ids" />
+                    <field name="function_ids" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="contact_annotation_state_list_act">
+            <field name="name">Contact States</field>
+            <field name="res_model">contact.annotation.state</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+		<record id="ir_actions_act_window_view_contact_annotation_state_0" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_annotation_state_list_act" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="contact_annotation_state_tree_view" />
+			<field eval="0" name="sequence" />
+		</record>
+
+		<record id="ir_actions_act_window_view_contact_annotation_state_1" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_annotation_state_list_act" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="contact_annotation_state_form_view" />
+			<field eval="1" name="sequence" />
+		</record>
+        <menuitem
+            id="contact_annotation_states_mi"
+            parent="annotations_mi" icon="STOCK_EDIT"
+            action="contact_annotation_state_list_act" sequence="90" />
+
+
+
+<!-- contact.annotation.function -->
+
+        <record model="ir.ui.view" id="contact_annotation_function_tree_view">
+            <field name="name">contact.annotation.function.tree.all</field>
+            <field name="model">contact.annotation.function</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Contact functions">
+                    <field name="name" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="contact_annotation_function_form_view">
+            <field name="name">contact.annotation.function.form.all</field>
+            <field name="model">contact.annotation.function</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Contact function">
+                    <field name="name" />
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="contact_annotation_function_list_act">
+            <field name="name">Contact functions</field>
+            <field name="res_model">contact.annotation.function</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+        </record>
+		<record id="ir_actions_act_window_view_contact_annotation_function_0" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_annotation_function_list_act" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="contact_annotation_function_tree_view" />
+			<field eval="0" name="sequence" />
+		</record>
+
+		<record id="ir_actions_act_window_view_contact_annotation_function_1" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_annotation_function_list_act" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="contact_annotation_function_form_view" />
+			<field eval="1" name="sequence" />
+		</record>
+
+        <menuitem
+            id="contact_annotation_function_mi"
+            parent="annotations_mi" icon="STOCK_EDIT"
+            action="contact_annotation_function_list_act" sequence="60" />
+
+<!-- contact.type_annotation -->
+
+        <record model="ir.ui.view" id="contact_type_annotation_tree_view">
+            <field name="name">contact.type_annotation.tree.all</field>
+            <field name="model">contact.type_annotation</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Annotation types">
+                    <field name="name" />
+                    <field name="states" />
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="contact_type_annotation_form_view">
+            <field name="name">contact.type_annotation.form.all</field>
+            <field name="model">contact.type_annotation</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Annotation types">
+                    <field name="name" />
+                    <field name="states" />
+                    <notebook>
+                        <page string="States">
+                            <field name="data_states" nolabel="1">
+                                <tree string="States" editable="bottom" >
+                                    <field name="op" />
+                                    <field name="state_id" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Informer functions">
+                            <field name="perms_functions" nolabel="1">
+                                <tree string="Informer functions" editable="bottom" >
+                                    <field name="function_id" />
+                                    <field name="perm_create" />
+                                    <field name="perm_read" />
+                                    <field name="perm_write" />
+                                    <field name="perm_unlink" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Group access">
+                            <field name="perms_groups" nolabel="1" >
+                                <tree string="Group access" editable="bottom" >
+                                    <field name="group_id" />
+                                    <field name="perm_create" />
+                                    <field name="perm_read" />
+                                    <field name="perm_write" />
+                                    <field name="perm_unlink" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="contact_type_annotation_list_act">
+            <field name="name">Annotation Types</field>
+            <field name="res_model">contact.type_annotation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+        </record>
+		<record id="ir_actions_act_window_view_contact_type_annotation_0" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_type_annotation_list_act" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="contact_type_annotation_tree_view" />
+			<field eval="0" name="sequence" />
+		</record>
+
+		<record id="ir_actions_act_window_view_contact_type_annotation_1" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_type_annotation_list_act" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="contact_type_annotation_form_view" />
+			<field eval="1" name="sequence" />
+		</record>
+
+        <menuitem
+            id="contact_type_annotation_mi"
+            parent="annotations_mi" icon="STOCK_EDIT"
+            action="contact_type_annotation_list_act" sequence="80" />
+
+
+<!--  state_range2 -->
+        <record model="ir.ui.view" id="contact_state_range2_form_view">
+            <field name="name">contact.state_range2.form.all</field>
+            <field name="model">contact.state_range2</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="State range">
+                    <field name="lstate" />
+                    <field name="contact_id" />
+                    <field name="datetime_from" />
+                    <field name="datetime_to" />
+                    <field name="annotation_ids" colspan="4" />
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="contact_state_range2_tree_view">
+            <field name="name">contact.state_range2.tree.all</field>
+            <field name="model">contact.state_range2</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="Planning state changes">
+                    <field name="lstate" />
+                    <field name="contact_id" />
+                    <field name="datetime_from" />
+                    <field name="datetime_to" />
+                    <field name="annotation_ids" colspan="4" />
+                </tree>
+            </field>
+        </record>
+
+
+        <record model="ir.actions.act_window" id="contact_state_range2_list_act">
+            <field name="name">State ranges</field>
+            <field name="res_model">contact.state_range2</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+		<record id="ir_actions_act_window_view_contact_state_range2_1" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_state_range2_list_act" />
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="contact_state_range2_form_view" />
+			<field eval="20" name="sequence" />
+		</record>
+		<record id="ir_actions_act_window_view_contact_state_range2_0" model="ir.actions.act_window.view">
+			<field name="act_window_id" ref="contact_state_range2_list_act" />
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="contact_state_range2_tree_view" />
+			<field eval="10" name="sequence" />
+		</record>
+
+        <menuitem
+            id="state_range_mi"
+            parent="annotations_mi" icon="STOCK_EDIT"
+            action="contact_state_range2_list_act" sequence="90" />
+
+
+    </data>
+
+    <data>
+
+    </data>
+
+
+</openerp>

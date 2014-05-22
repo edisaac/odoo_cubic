@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model='ir.ui.view' id='pos_invoicing_stock_move_tree_view'>
+			<field name='name'>POS Invoicing Stock Move Tree Inherit</field>
+			<field name='model'>stock.move</field>
+			<field name='inherit_id' ref='stock.view_move_tree_reception_picking'/>
+			<field name='type'>tree</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/tree/field[@name='prodlot_id']" position="replace">
+					<field name="prodlot_id" groups="base.group_extended" invisible="1"/>
+                    <field name="delivery_date"/>
+				</xpath>
+				<xpath expr="/tree/field[@name='tracking_id']" position="replace">
+						<field name="tracking_id" groups="base.group_extended" invisible="1"/>
+						<field name="time_id"/>
+						<field name="pos_order_id"/>
+				</xpath>
+
+			</field>
+		</record>
+		<record model='ir.ui.view' id='pos_delivery_picking_out_form_view'>
+			<field name='name'>POS Delivery Picking Out Form Inherit</field>
+			<field name='model'>stock.picking</field>
+			<field name='inherit_id' ref='stock.view_picking_out_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/group/group/field[@name='address_id']" position="replace">
+					<field name="partner_id" invisible="0"/>
+					<field name="address_id" on_change="onchange_partner_in(address_id)" 
+							domain="[('partner_id','=',partner_id)]" colspan="4"/>
+				</xpath>
+			</field>
+		</record>
+		<record model='ir.ui.view' id='pos_delivery_picking_form_view'>
+			<field name='name'>POS Delivery Picking Form Inherit</field>
+			<field name='model'>stock.picking</field>
+			<field name='inherit_id' ref='stock.view_picking_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/group/group/field[@name='address_id']" position="replace">
+					<field name="partner_id" invisible="1"/>
+					<field name="address_id" on_change="onchange_partner_in(address_id)" 
+							domain="[('partner_id','=',partner_id)]" colspan="4"/>
+				</xpath>
+			</field>
+		</record>		
+	</data>
+</openerp>
+

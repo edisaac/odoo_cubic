@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+                <record id="action_pos_paymentF" model="ir.actions.act_window">
+                        <field name="name">Payment</field>
+                        <field name="type">ir.actions.act_window</field>
+                        <field name="res_model">pos.make.payment</field>
+                        <field name="view_type">form</field>
+                        <field name="view_mode">form</field>
+                        <field name="target">new</field>
+                        <field name="context">{'report_name': 'pos.receipt.invoice','invoice':1}</field>
+                </record>
+		<record id="action_pos_paymentB" model="ir.actions.act_window">
+                        <field name="name">Payment</field>
+                        <field name="type">ir.actions.act_window</field>
+                        <field name="res_model">pos.make.payment</field>
+                        <field name="view_type">form</field>
+                        <field name="view_mode">form</field>
+                        <field name="target">new</field>
+                        <field name="context">{'report_name': 'pos.receipt.ticket','invoice':0}</field>
+                </record>
+                <record id="action_pos_paymentF2" model="ir.actions.act_window">
+                        <field name="name">Payment</field>
+                        <field name="type">ir.actions.act_window</field>
+                        <field name="res_model">pos.make.payment</field>
+                        <field name="view_type">form</field>
+                        <field name="view_mode">form</field>
+                        <field name="target">new</field>
+                        <field name="context">{'report_name': 'pos.receipt2.invoice','invoice':1}</field>
+                </record>
+                <record id="action_pos_paymentB2" model="ir.actions.act_window">
+                        <field name="name">Payment</field>
+                        <field name="type">ir.actions.act_window</field>
+                        <field name="res_model">pos.make.payment</field>
+                        <field name="view_type">form</field>
+                        <field name="view_mode">form</field>
+                        <field name="target">new</field>
+                        <field name="context">{'report_name': 'pos.receipt2.ticket','invoice':0}</field>
+                </record>
+		<record model='ir.ui.view' id='view_pos_invoicing_form'>
+			<field name='name'>POS Invoicing Form</field>
+			<field name='model'>pos.order</field>
+			<field name='inherit_id' ref='point_of_sale.view_pos_pos_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+                                <xpath expr="/form/group/field[@name='partner_id']" position="replace"></xpath>
+				<xpath expr="/form/group/field[@name='name']" position="before">
+                                        <field name="partner_id" on_change="onchange_partner_id(partner_id)" context="{'search_default_customer':1}" attrs="{'readonly': [('state','in',('paid','done','invoiced'))],'required': [('state','in',('draft'))]}"/>
+                                </xpath>
+				<xpath expr="/form/group/button[@name='action_invoice']" position="after">
+					<field name="invoice_address_id"/>
+				</xpath>
+                                <xpath expr="/form/notebook/page[@string='Sale Order']/group/button[@name='%(point_of_sale.action_pos_payment)d']" position="replace">
+                                        <field name="online" invisible="1"/>
+                                        <button name="%(action_pos_paymentB)d" string="Boleta" icon="gtk-apply" type="action" states="draft" attrs="{'invisible':[('online','=',False)]}"/>
+                                        <button name="%(action_pos_paymentF)d" string="Factura" icon="gtk-apply" type="action" states="draft" attrs="{'invisible':[('online','=',False)],'readonly':[('partner_id','=',False)]}"/>
+                                        <button name="%(action_pos_paymentB2)d" string="Boleta Tienda" icon="gtk-apply" type="action" states="draft" attrs="{'invisible':[('online','=',True)]}"/>
+                                        <button name="%(action_pos_paymentF2)d" string="Factura Tienda" icon="gtk-apply" type="action" states="draft" attrs="{'invisible':[('online','=',True)],'readonly':[('partner_id','=',False)]}"/>
+
+					<button name="action_cancel" string="Cancel" type="object" icon="gtk-cancel" states="paid,invoiced"/>
+                                </xpath>
+                                <xpath expr="/form/notebook/page[@string='Payment']/field[@name='statement_ids']/tree/field[@name='journal_id']" position="after">
+                                        <field name="name"/>
+                                </xpath>
+				<xpath expr="/form/notebook/page[@string='Extra Info']/group/separator[@string='Accounting Information']" position="after">
+					<field name="tax_id" colspan="3"/>
+					<field name="tax_name" colspan="3"/>
+				</xpath>
+			</field>
+		</record>
+		<record model='ir.ui.view' id='view_pos_invoicing_filter'>
+			<field name='name'>POS Invoicing Filter</field>
+			<field name='model'>pos.order</field>
+			<field name='inherit_id' ref='point_of_sale.view_pos_order_filter'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/search/field[@name='user_id']" position="after">
+					<field name="partner_id"/>
+				</xpath>
+			</field>
+		</record>
+		<record model='ir.ui.view' id='view_partner_inherit'>
+                        <field name='name'>Partner Events Inherit</field>
+                        <field name='model'>res.partner</field>
+                        <field name='inherit_id' ref='base.view_partner_form'/>
+                        <field name='type'>form</field>
+                        <field name='arch' type='xml'>
+                                <xpath expr="/form/group/group/field[@name='lang']" position="after">
+                                        <field name="birthday"/>
+                                </xpath>
+                                
+                        </field>
+                </record>  
+	</data>
+</openerp>

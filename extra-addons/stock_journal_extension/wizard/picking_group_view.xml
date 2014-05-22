@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_picking_group" model="ir.ui.view">
+            <field name="name">Merger Pickings</field>
+            <field name="model">stock.picking.group</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+               <form string="Merge pickings">
+                    <separator string="Are you sure you want to merge these pickings ?" colspan="4"/>
+                       <newline/>
+                    <label string="
+Please note that: &#10; &#10;
+Pickings will only be merged if: &#10;
+* Pickings are in draft or confirm &#10;
+* Pickings belong to the same address &#10;
+* Pickings are have same stock location, same stock journal &#10; &#10;
+Lines will only be merged if: &#10;
+* Order lines are exactly the same except for the product,quantity and unit &#10;
+" colspan="4"/>                
+                    <newline/>                    
+                    <separator string="" colspan="4" />
+                    <button special="cancel" string="Cancel" icon="gtk-cancel"/>
+                    <button name="merge_pickings" string="Merge pickings" type="object" icon="gtk-convert"/>
+                </form>
+            </field>
+        </record>
+
+        <act_window name="Merge Pickings"
+            res_model="stock.picking.group"
+            src_model="stock.picking"
+            view_mode="form"
+            target="new"
+            multi="True"        
+            key2="client_action_multi"    
+            groups="base.group_extended"
+            id="action_view_picking_group"/>    
+            
+    </data>
+</openerp>

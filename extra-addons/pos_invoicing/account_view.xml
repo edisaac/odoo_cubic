@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        
+        <record id="view_account_mournal_form_pos_inherit" model="ir.ui.view">
+            <field name="name">Account Journal POS Inherit</field>
+            <field name="model">account.journal</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="point_of_sale.view_account_journal_pos_user_form"/>
+            <field name="arch" type="xml">
+                 <xpath expr="/form/notebook/page[@string='Point of Sale']/group"  position="after">
+                    <separator colspan="4" string="Users"/>
+                    <field name="journal_users" nolabel="1" colspan="4"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_cash_statement_pos_invoicing_tree" model="ir.ui.view">
+            <field name="name">account.bank.statement.tree.inherit</field>
+            <field name="model">account.bank.statement</field>
+            <field name="type">tree</field>
+            <field name="inherit_id" ref="account.view_cash_statement_tree"/>
+            <field name="arch" type="xml">
+                <field name="balance_end" position="replace">
+                    <!--field name="balance_end_cash"/-->
+                    <field name="balance_end" invisible="1"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</openerp>

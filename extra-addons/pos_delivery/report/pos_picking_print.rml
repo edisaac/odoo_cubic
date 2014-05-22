@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<document filename="test.pdf">
+  <template pageSize="(22.5cm,18.6cm)" title="Test" author="Martin Simon" rotation="0">
+    <pageTemplate id="first">
+      <frame id="first" x1="0.0cm" y1="0.0cm" width="21.3cm" height="18.6cm"/>
+    </pageTemplate>
+  </template>
+  <stylesheet>
+    <blockTableStyle id="Standard_Outline">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Tabla1">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Tabla2">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Tabla3">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="header_tabla_productos">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="tabla_productos">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="footer_tabla_productos">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="footer_orden">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <initialize>
+      <paraStyle name="all" alignment="justify"/>
+    </initialize>
+    <paraStyle name="P1" fontName="Helvetica-Bold" fontSize="11.0" />
+    <paraStyle name="P2" fontName="Helvetica-Bold" fontSize="11.0" leading="13"/>
+    <paraStyle name="P3" fontName="Helvetica-Bold" fontSize="11.0" leading="11"/>
+    <paraStyle name="P4" fontName="Helvetica-Bold" fontSize="11.0" leading="13"/>
+    <paraStyle name="P5" fontName="Helvetica-Bold" fontSize="10.0" leading="13"/>
+    <images/>
+  </stylesheet>
+  <story>
+[[repeatIn(objects,'picking')]][[ setLang(picking.address_id.partner_id.lang) ]]
+    <blockTable colWidths="20.5cm" rowHeights="2.6cm,3.8cm,6.0cm" style="Tabla1">
+      <tr>
+        <td>
+          <blockTable colWidths="0.5cm,16.0cm,4.0cm" rowHeights="1.7cm,0.5cm" style="Tabla2">
+			<tr>
+			<td>
+                <para style="P4">
+                  <font color="white"> </font>
+                </para>
+              </td>
+			</tr>
+            <tr>
+              <td>
+                <para style="P4">
+                  <font color="white"> </font>
+                </para>
+              </td>
+              <td>
+                <para style="P4">[[day(picking.pos_order_id.date_order)]] [[ month(picking.pos_order_id.date_order)]] [[year(picking.pos_order_id.date_order)]]</para>
+              </td>
+              <td>
+                <para style="P4">[[picking.origin]]</para>
+              </td>
+            </tr>
+          </blockTable>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <blockTable colWidths="1.8cm,17.0cm" rowHeights="0.4cm,0.4cm,0.4cm,0.4cm,0.4cm" style="Tabla3">
+            <tr>
+              <td>
+                <para style="P4">
+                  <font color="white"> </font>
+                </para>
+              </td>
+              <td>
+                <para style="P4">[[ picking.pos_order_id.shiping_address_id and picking.pos_order_id.shiping_address_id.name ]]</para>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <para style="P4">
+                  <font color="white"> </font>
+                </para>
+              </td>
+              <td>
+                <para style="P5">[[ picking.pos_order_id.shiping_address_id and picking.pos_order_id.shiping_address_id.street or ''  ]] - [[ (picking.pos_order_id.shiping_address_id and picking.address_id.street2) or '' ]]</para>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <para style="P4">
+                  <font color="white"> </font>
+                </para>
+              </td>
+              <td>
+		 <blockTable colWidths="6.3cm,15.0cm" rowHeights="0.4cm" style="Tabla3">
+			 <tr>
+				 <td>
+                <para style="P4">
+                  <font color="white"> </font>
+                </para>
+              </td>
+				 <td>
+                <para style="P4">[[picking.pos_order_id.shiping_address_id.district_id.name]] - [[ (picking.pos_order_id.shiping_address_id and picking.pos_order_id.shiping_address_id.state_id and picking.pos_order_id.shiping_address_id.state_id.name) or '' ]]</para>
+                </td>
+              </tr>
+          </blockTable>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <para style="P4">
+                  <font color="white"> </font>
+                </para>
+              </td>
+              <td>
+                <para style="P4">[[picking.pos_order_id.shiping_address_id.address_ref]]</para>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <para style="P4">
+                  <font color="white"> </font>
+                </para>
+              </td>
+              <td>
+              <blockTable colWidths="6cm,11.0cm" rowHeights="0.6cm">
+                 <tr>
+                    <td>
+                       <para style="P4">
+                         <font color="white"> </font>
+                       </para>
+                    </td>
+                    <td>
+                       <para style="P4">[[picking.pos_order_id.greeting_date ]] [[ picking.pos_order_id.time_id.name ]]</para>
+                    </td>
+                 </tr>
+              </blockTable>             
+              </td>
+            </tr>
+          </blockTable>
+          <para style="Table Contents">
+            <font color="white"> </font>
+          </para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <blockTable colWidths="3.3cm,16.0cm" rowHeights="0.6cm" style="tabla_productos">
+            <tr>
+              <td>
+                <para style="P4">[[repeatIn(picking.move_lines,'move_lines')]] [[formatLang(move_lines.product_qty, digits=2)]]</para>
+              </td>
+              <td>
+                <para style="P4">[[ move_lines.product_id.name ]][[ move_lines.product_id.variants or '']]</para>
+              </td>
+            </tr>
+          </blockTable>
+        </td>
+      </tr>
+    </blockTable>
+  </story>
+</document>

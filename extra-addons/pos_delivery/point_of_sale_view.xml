@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model='ir.ui.view' id='view_pos_invoicing_form'>
+			<field name='name'>POS Delivery Form</field>
+			<field name='model'>pos.order</field>
+			<field name='inherit_id' ref='point_of_sale.view_pos_pos_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/group/button[@name='action_invoice']" position="after">
+					<field name="shiping_address_id" required="1"/>
+				</xpath>
+				<xpath expr="/form/notebook/page[@string='Sale Order']/group/button[@name='button_dummy']" position="after">
+					<button name="%(action_pos_delivery_cost)d" states="draft" string="Delivery Costs" type="action" icon="gtk-add" context="{'pos_order_id':active_id}"/>
+				</xpath>
+				<xpath expr="/form/notebook/page[@string='Extra Info']/group/field[@name='picking_id']" position="replace">
+					<separator string="Delivery" colspan="2"/>
+					
+					<field name="picking_print" invisible="1"/>
+					<group colspan="2" col="4">
+						<field name="picking_id" readonly="1" groups="base.group_extended"/>
+						<button name="%(pos_picking_action)d" string="Re-Print Picking" type="action" icon="gtk-print" attrs="{'invisible':[('picking_print','=',False)]}"/>
+						<button name="%(pos_picking_action)d" string="Print Picking" type="action" icon="gtk-apply" attrs="{'readonly':[('picking_id','=',False)],'invisible':[('picking_print','=',True)]}"/>
+					</group>
+					<group colspan="2" col="4">
+					    <field name="carrier_id" readonly="1"/>
+					    <field name="delivered"/>
+					</group>
+					<group colspan="2" col="8">
+						<field name="route_state"/>
+						<field name="visit_date"/>
+						<field name="visit_note"/>
+					</group>
+					<separator string="Greating" colspan="2"/>
+					<field name="greeting" nolabel="1" colspan="2" attrs="{'readonly':[('delivered','=',True)]}"/>
+					<field name="greeting_print" invisible="1"/>
+					<group colspan="2" col="6">
+						<field name="greeting_date" attrs="{'readonly':[('delivered','=',True)]}"/>
+						<field name="time_id" attrs="{'readonly':[('delivered','=',True)]}"/>
+						<button name="%(pos_greeting_action)d" string="Re-Print Greeting" type="action" icon="gtk-print" attrs="{'invisible':[('greeting_print','=',False)]}"/>
+						<button name="%(pos_greeting_action)d" string="Print Greeting" type="action" icon="gtk-apply" attrs="{'readonly':[('picking_id','=',False)],'invisible':[('greeting_print','=',True)]}"/>
+					</group>
+				</xpath>
+			</field>
+		</record>
+
+                <record model='ir.ui.view' id='view_pos_delivery_tree'>
+                        <field name='name'>POS Delivery Tree</field>
+                        <field name='model'>pos.order</field>
+                        <field name='inherit_id' ref='point_of_sale.view_pos_order_tree'/>
+                        <field name='type'>form</field>
+                        <field name='arch' type='xml'>
+                                <xpath expr="/tree/field[@name='date_order']" position="after">
+                                        <field name="greeting_date"/>
+                                        <field name="time_id"/>
+                                </xpath>
+                               <xpath expr="/tree/field[@name='state']" position="after">
+                                        <field name="route_state"/>
+                                        <field name="shiping_address_id"/>
+                                </xpath>
+
+                        </field>
+                </record>
+
+                <record model='ir.ui.view' id='view_pos_delivery_filter'>
+                        <field name='name'>POS Delivery Filter</field>
+                        <field name='model'>pos.order</field>
+                        <field name='inherit_id' ref='point_of_sale.view_pos_order_filter'/>
+                        <field name='type'>search</field>
+                        <field name='arch' type='xml'>
+                                <xpath expr="/search/filter[@string='Yesterday']" position="after">
+                                    <separator orientation="vertical"/>
+
+                                </xpath>
+                        </field>
+                </record>
+		<record model='ir.ui.view' id='view_partner_inherit'>
+                        <field name='name'>Partner Events Inherit</field>
+                        <field name='model'>res.partner</field>
+                        <field name='inherit_id' ref='base.view_partner_form'/>
+                        <field name='type'>form</field>
+                        <field name='arch' type='xml'>
+                                <xpath expr="/form/group/group/field[@name='lang']" position="after">
+                                        <field name="birthday"/>
+                                </xpath>
+                                <xpath expr="/form/notebook/page[@string='History']" position="before">
+                                        <page string="Important Dates">
+                                                <field name="event_ids" nolabel="1"/>
+                                        </page>
+                                </xpath>
+                        </field>
+                </record>
+	   	<record id="view_delivery_partner_events_tree" model="ir.ui.view">	
+	    <field name="name">Important Dates</field>
+		<field name="model">res.partner.events</field>
+		<field name="type">tree</field>
+		<field name="priority">100</field>
+		<field name="arch" type="xml">
+		    <tree string="Important Dates">
+				<field name="date"/>
+				<field name="description"/>	
+		    </tree>
+		</field>
+	    </record>
+	    <record id="view_delivery_partner_events_form" model="ir.ui.view">
+		<field name="name">Important date</field>
+		<field name="model">res.partner.events</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Important date">
+				<field name="date"/>
+				<field name="description"/>		
+			</form>
+		</field>
+	    </record>
+	    <record model="ir.actions.act_window" id="delivery_partner_events_list_action">
+		    <field name="name">Important dates</field>
+		    <field name="res_model">res.partner.events</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+	</data>
+</openerp>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+		<record model='ir.ui.view' id='view_sale_printer_tree'>
+			<field name='name'>Sale Shop Printer Tree</field>
+			<field name='model'>sale.printer</field>
+			<field name='type'>tree</field>
+			<field name='arch' type='xml'>
+					<tree>
+						<field name='name'/>
+						<field name='model'/>
+					</tree>
+			</field>
+		</record>
+		<record model='ir.ui.view' id='view_sale_printer_form'>
+			<field name='name'>Sale Shop Printer Form</field>
+			<field name='model'>sale.printer</field>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+					<form>
+						<field name='name' select="1"/>
+						<field name='model' select="1"/>
+						<field name='active'/>
+						<separator string="Sale Shops" colspan="4"/>
+						<field name='shop_ids' nolabel="1" colspan="4" widget="many2many"/>
+					</form>
+			</field>
+		</record>
+				
+	    <record model="ir.actions.act_window" id="sale_printer_list_action">
+		    <field name="name">Sale Shop Printers</field>
+		    <field name="res_model">sale.printer</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+	    <menuitem name='Sale Shop Printers' id = 'sale_printer_menu' parent='base.menu_sale_config_sales' sequence='300'	action="sale_printer_list_action"/>
+	    
+        <record id="view_shop_form_pos_inherit" model="ir.ui.view">
+            <field name="name">sale.shop.form.inherit</field>
+            <field name="model">sale.shop</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="sale.view_shop_form"/>
+            <field name="arch" type="xml">
+                 <xpath expr="/form/field[@name='project_id']"  position="after">
+                    <field name="sale_journal_id"/>
+                    <field name="invoice_journal_id"/>
+                    <field name="printer_id"/>
+                    <field name="online"/>
+                    <separator colspan="4" string="POS User Access"/>
+                    <field name="user_ids" nolabel="1" colspan="4" widget="many2many"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <record id="view_user_form_pos_inherit" model="ir.ui.view">
+            <field name="name">User Sale Shop POS Inherit</field>
+            <field name="model">res.user</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                 <xpath expr="/form/notebook/page[@string='User']/group/group/group/separator[@string='Default Filters']"  position="after">
+                    <field name="shop_id"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>

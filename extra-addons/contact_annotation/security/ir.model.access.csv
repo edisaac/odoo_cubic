@@ -1,0 +1,11 @@
+group_id,name,model_id,perm_create,perm_unlink,perm_write,perm_read
+Employee,contact.type_annotation,contact.type_annotation,False,False,False,True
+Employee,contact.partner.function,contact.partner.function,False,False,False,True
+Employee,contact.annotation.function,contact.annotation.function,False,False,False,True
+Employee,contact.annotation_type.function_access,contact.annotation_type.function_access,False,False,False,True
+Employee,contact.anno_type.state,contact.anno_type.state,False,False,False,True
+Employee,contact.annotation,contact.annotation,True,True,True,True
+Employee,contact.state_range2,contact.state_range2,True,True,False,True
+Employee,contact.state_range,contact.state_range,True,True,False,True
+Employee,contact.annotation.state,contact.annotation.state,False,False,False,True
+Employee,contact.planning_change_states,contact.planning_change_states,True,True,True,True

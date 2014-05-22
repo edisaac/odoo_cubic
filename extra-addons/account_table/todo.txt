@@ -1,0 +1,4 @@
+YT 15/12/2011
+
+- Access Rules
+- Analizar si se pone un secuenciador o element_integer

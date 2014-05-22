@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openerp>
+	<data>
+		
+		<record model='ir.ui.view' id='product_arancel_form_view'>
+			<field name='name'>Product Arancel Form Inherit</field>
+			<field name='model'>product.product</field>
+			<field name='inherit_id' ref='account.product_normal_form_view'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/notebook/page[@string='Accounting']/group[@name='properties']" position="inside">
+					
+					<!--separator string="Cost Center" colspan="2"/-->
+					<field name="arancel_id"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="product_arancel_list_action">
+			<field name="name">Arancel</field>
+			<field name="res_model">account.table</field>
+			<field name="domain">[('parent_id.code','=','arancel')]</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		
+		<menuitem name='Arancel' id = 'product_arancel_menu' parent='product.prod_config_main' sequence='250'	action="product_arancel_list_action"/>
+		
+	</data>
+</openerp>

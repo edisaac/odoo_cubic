@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+    <act_window id="act_window_report_pos_receipt"
+            name="Print Receipt"
+            src_model="pos.order"
+            res_model="pos.receipt"
+            view_mode="form"
+            key2="client_action_multi"
+            target="new"
+        />
+</data>
+</openerp>

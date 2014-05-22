@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+                <record model='ir.ui.view' id='view_pos_delivery_l10n_pe_tree'>
+                        <field name='name'>POS Delivery l10n_pe Tree</field>
+                        <field name='model'>pos.order</field>
+                        <field name='inherit_id' ref='point_of_sale.view_pos_order_tree'/>
+                        <field name='type'>tree</field>
+                        <field name='arch' type='xml'>
+                                <xpath expr="/tree/field[@name='date_order']" position="after">
+                                        <field name="shipping_district_id" invisible="1"/>
+                                </xpath>
+                        </field>
+                </record>
+                <record model='ir.ui.view' id='view_pos_delivery_l10n_pe_filter'>
+                        <field name='name'>POS Delivery l10n_pe List</field>
+                        <field name='model'>pos.order</field>
+                        <field name='inherit_id' ref='point_of_sale.view_pos_order_filter'/>
+                        <field name='type'>search</field>
+                        <field name='arch' type='xml'>
+                                <xpath expr="/search/group/filter[@string='Order Date']" position="after">
+                                       <separator string="" orientation="vertical"/>
+                                       <filter string="Delivery District" icon="terp-personal" domain="[]" context="{'group_by':'shipping_district_id'}"/>
+                                </xpath>
+                        </field>
+                </record>
+	</data>
+</openerp>
