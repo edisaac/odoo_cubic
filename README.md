@@ -1,5 +1,5 @@
-Acerca de este Fork de Odoo hecho por CubicERP
-==============================================
+Acerca de este Fork de Odoo
+===========================
 
 Este clon de Odoo fue creado para satisfacer los requerimientos de localización de nuestros clientes ubicados en sudamerica de habla hispana. Por lo tanto consideramos que si te encuentras en Panamá, Colombia, Ecuador, Perú, Chile, Argentina, Bolivia, Paraguay o Uruguay, entonces este clon puede ser de mucha utilidad para tu proyecto de implementación.
 
