@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data noupdate="True">
+		<!--currency PEN-->
+        <record id="PEN" model="res.currency">
+            <field name="name">PEN</field>
+            <field name="symbol">S/.</field>
+            <field name="rounding">0.01</field>
+            <field name="accuracy">4</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+        <record id="ratePEN" model="res.currency.rate">
+            <field name="rate">3.9244</field>
+            <field name="currency_id" ref="PEN"/>
+            <field eval="time.strftime('%Y-01-01')" name="name"/>
+        </record>
+
+		<!--Departamentos-->
+        <record model="res.country.state" id="01">
+            <field name="name">Lima</field>
+            <field name="code">LIM</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="02">
+            <field name="name">Amazonas</field>
+            <field name="code">AMA</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="03">
+            <field name="name">Cajamarca</field>
+            <field name="code">CAJ</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="04">
+            <field name="name">Tumbes</field>
+            <field name="code">TUM</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="05">
+            <field name="name">Piura</field>
+            <field name="code">PIU</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="06">
+            <field name="name">Lambayeque</field>
+            <field name="code">LAM</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="07">
+            <field name="name">La Libertad</field>
+            <field name="code">LAL</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="08">
+            <field name="name">Ancash</field>
+            <field name="code">ANC</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="09">
+            <field name="name">Ucayali</field>
+            <field name="code">UCA</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="10">
+            <field name="name">Loreto</field>
+            <field name="code">LOR</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="11">
+            <field name="name">San Martin</field>
+            <field name="code">SAN</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="12">
+            <field name="name">Ayacucho</field>
+            <field name="code">AYA</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="13">
+            <field name="name">Huanuco</field>
+            <field name="code">HUA</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="14">
+            <field name="name">Ica</field>
+            <field name="code">ICA</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="15">
+            <field name="name">Arequipa</field>
+            <field name="code">ARE</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="16">
+            <field name="name">Junin</field>
+            <field name="code">JUN</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="17">
+            <field name="name">Huancavelica</field>
+            <field name="code">HUA</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="18">
+            <field name="name">Apurimac</field>
+            <field name="code">APU</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="19">
+            <field name="name">Cuzco</field>
+            <field name="code">CUZ</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="20">
+            <field name="name">Madre de Dios</field>
+            <field name="code">MAD</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="21">
+            <field name="name">Puno</field>
+            <field name="code">PUN</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="22">
+            <field name="name">Moquegua</field>
+            <field name="code">MOQ</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="23">
+            <field name="name">Tacna</field>
+            <field name="code">TAC</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="24">
+            <field name="name">Pasco</field>
+            <field name="code">PAS</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+        <record model="res.country.state" id="25">
+            <field name="name">Callao</field>
+            <field name="code">CAL</field>
+            <field name="country_id" ref="base.pe"/>
+        </record>
+
+    </data>
+</openerp>

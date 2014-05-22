@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model='ir.ui.view' id='account_list_view_inherit_l10n_pe'>
+			<field name='name'>Account list Inherit l10n pe</field>
+			<field name='model'>account.account</field>
+			<field name='inherit_id' ref='account.view_account_list'/>
+			<field name='type'>tree</field>
+			<field name='arch' type='xml'>
+				<!--xpath expr="/tree" position="replace">
+					<tree colors="blue:type in ('view');black:type in ('other','receivable','payable','consolidation');gray:type in ('closed')" string="Chart of accounts" toolbar="1" editable="bottom">
+				</xpath-->
+				<xpath expr="/tree/field[@name='type']" position="after">
+					<field name="user_type"/>
+				</xpath>
+	
+			</field>
+		</record>
+		
+	</data>
+</openerp>

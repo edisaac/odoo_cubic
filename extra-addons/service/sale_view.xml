@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<openerp>
+	<data>		
+		<record model='ir.ui.view' id='sale_view_inherit'>
+			<field name='name'>service.sale.inherit</field>
+			<field name='model'>sale.order</field>
+			<field name='inherit_id' ref='sale.view_order_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/notebook/page[@string='History']" position="after">
+					<page string="Service Schedule">
+						<!--separator string="Service Schedule" colspan="4"/-->
+						<field name="sale_order_schedule_ids" nolabel="1" colspan="4"/>
+					</page>
+					
+					<page string="Service Orders">
+						<!--separator string="Service Orders" colspan="4"/-->
+						<field name="service_order_ids" nolabel="1" colspan="4"/>
+					</page>
+				</xpath>
+				
+				<xpath expr="/form/notebook/page[@string='Sales Order']/field[@name='order_line']/form/notebook/page[@string='Order Line']/field[@name='product_packaging']" position="after">
+					<field name="periodicity_id"/>
+				</xpath>
+			</field>
+		</record>
+		
+		<!--En sale_loyout se reemplaza el order line, utilizar esto solo si se utiliza este modulo-->
+		<record model='ir.ui.view' id='sale_layout_view_inherit'>
+			<field name='name'>service.sale.layout.inherit</field>
+			<field name='model'>sale.order</field>
+			<field name='inherit_id' ref='sale_layout.view_order_form_inherit_1'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>				
+				<xpath expr="/xpath/field[@name='abstract_line_ids']/form/notebook/page[@string='Order Line']/field[@name='product_packaging']" position="after">
+					<field name="periodicity_id"/>
+				</xpath>
+			</field>
+		</record>
+		
+	</data>
+</openerp>

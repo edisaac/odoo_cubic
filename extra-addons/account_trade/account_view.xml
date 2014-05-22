@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		
+		<record model='ir.ui.view' id='account_journal_trade_form_view'>
+			<field name='name'>International Trade Journal Form</field>
+			<field name='model'>account.journal</field>
+			<field name='inherit_id' ref='account.view_account_journal_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/notebook/page[@string='General Information']/group/field[@name='centralisation']" position="after">
+					<field name="int_trade"/>
+					<field name="customs"/>
+				</xpath>
+			</field>
+		</record>
+		
+		<record model='ir.ui.view' id='account_invoice_line_trade_form_view'>
+			<field name='name'>Invoice Line Trade Form</field>
+			<field name='model'>account.invoice.line</field>
+			<field name='inherit_id' ref='account.view_invoice_line_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/notebook/page[@string='Line']/separator[@string='Taxes']" position="before">
+					<field name="prorated_percent"/>
+					<field name="prorated_price"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record model='ir.ui.view' id='account_customer_invoice_trade_form_view'>
+			<field name='name'>Customer Invoice Trade Form</field>
+			<field name='model'>account.invoice</field>
+			<field name='inherit_id' ref='account.invoice_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				<xpath expr="/form/notebook/page[@string='Other Info']" position="before">
+					<page string="International Trade">
+						<field name="customs_invoice_id"/>
+						<field name="customs_other_id"/>
+						<field name="freight_id"/>
+						<field name="insurance_id"/>
+						<separator string="Expenses, Penaltys and Others" colspan="4"/>
+						<field name="other_invoice_ids" colspan="4" nolabel="1"/>
+						<!--separator string="Prorated Lines" colspan="4"/>
+						<field name="invoice_line" colspan="4" nolabel="1">
+							<tree string="Prorated Lines">
+								<field name="product_id"/>
+								<field name="name"/>
+								<field name="price_unit"/>
+								<field name="quantity"/>
+								<field name="price_subtotal"/>
+								<field name="prorated_percent"/>
+								<field name="prorated_price"/>
+							</tree>
+						</field-->
+					</page>
+				</xpath>
+				<xpath expr="/form/notebook/page[@string='Other Info']/separator[@string='Additional Information']" position="before">
+					<field name="int_trade"  invisible="1"/>
+					<field name="customs" invisible="1"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record model='ir.ui.view' id='account_supplier_invoice_trade_form_view'>
+			<field name='name'>Supplier Invoice Trade Form</field>
+			<field name='model'>account.invoice</field>
+			<field name='inherit_id' ref='account.invoice_supplier_form'/>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+				
+				<xpath expr="/form/notebook/page[@string='Other Info']" position="before">
+					<page string="International Trade" attrs="{'invisible':[('int_trade','=',False)]}">
+						<field name="customs_invoice_id"/>
+						<field name="customs_other_id"/>
+						<field name="freight_id"/>
+						<field name="insurance_id"/>
+						<separator string="Expenses, Penaltys and Others" colspan="4"/>
+						<field name="other_invoice_ids" colspan="4" nolabel="1"/>
+						<!--separator string="Prorated Lines" colspan="4"/>
+						<field name="invoice_line" colspan="4" nolabel="1">
+							<tree string="Prorated Lines">
+								<field name="product_id"/>
+								<field name="name"/>
+								<field name="price_unit"/>
+								<field name="quantity"/>
+								<field name="price_subtotal"/>
+								<field name="prorated_percent"/>
+								<field name="prorated_price"/>
+							</tree>
+						</field-->
+					</page>
+				</xpath>
+				<xpath expr="/form/notebook/page[@string='Other Info']/separator[@string='Additional Information']" position="before">
+					<field name="int_trade"  invisible="1"/>
+					<field name="customs" invisible="1"/>
+				</xpath>
+			</field>
+		</record>
+
+	</data>
+</openerp>

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>		
+	    <record id="view_service_order_tree" model="ir.ui.view">
+		<field name="name">Service Order List</field>
+		<field name="model">service.order</field>
+		<field name="type">tree</field>
+		<field name="priority">100</field>
+		<field name="arch" type="xml">
+		    <tree string="Service Order List">
+			<field name="name"/>
+			<field name="state"/>
+			<field name="sale_order_id"/>
+			<field name="picking_in_id"/>
+		    </tree>
+		</field>
+	    </record>
+	    <record id="view_service_order_form" model="ir.ui.view">
+		<field name="name">Service Order Form</field>
+		<field name="model">service.order</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+		<form string="Service Order Form">
+            <field name="name"/>
+			<field name="state"/>
+			<field name="sale_order_id"/>
+			<field name="analytic_id"/>
+			<field name="picking_in_id"/>
+			<field name="picking_out_id"/>
+			<notebook colspan="4">
+				<page string="Service Lines">
+					<separator string="Servce Lines"/>
+					<field name="line_ids" nolabel="true" colspan="4"/>
+				</page>
+				<page string="Sale Orders">
+					<separator string="Sale Orders"/>
+					<field name="sale_order_ids" nolabel="true" colspan="4"/>
+				</page>
+				<page string="Picking">
+					<separator string="Picking"/>
+					<field name="picking_ids" colspan="4" nolabel="true"/>
+				</page>
+				<page string="Other Information">
+					<separator string="Notes"/>
+					<field name="note" nolabel="true" colspan="4"/>
+				</page>
+			</notebook>	
+			</form>	
+		</field>
+	    </record>
+	    <record model="ir.actions.act_window" id="service_order_list_action">
+		    <field name="name">Service Order</field>
+		    <field name="res_model">service.order</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+
+	    <record id="view_service_order_line_tree" model="ir.ui.view">
+		<field name="name">Service Order Line List</field>
+		<field name="model">service.order.line</field>
+		<field name="type">tree</field>
+		<field name="priority">100</field>
+		<field name="arch" type="xml">
+		    <tree string="Service Order List">
+			<field name="name"/>
+			<field name="serial_id"/>
+			<field name="state"/>
+		    </tree>
+		</field>
+	    </record>    
+	    <record id="view_service_order_line_form" model="ir.ui.view">
+		<field name="name">Service Order Line Form</field>
+		<field name="model">service.order.line</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Service Order Line Form">
+				<field name="name"/>
+				<field name="state"/>
+				<field name="move_id"/>	
+				<field name="serial_id"/>		
+				<notebook colspan="4">
+					<page string="Workcenter">
+						<separator string="Workcenter"/>
+						<field name="workcenter_ids"  nolabel="true" colspan="4"/>
+					</page>
+					<page string="Parts">
+						<separator string="Parts" colspan="4"/>
+						<field name="part_ids" colspan="4" nolabel="true"/>
+					</page>
+					<page string="Description">
+						<separator string="Description" colspan="4"/>
+						<field name="description" colspan="4" nolabel="true"/>
+					</page>
+				</notebook>				
+			</form>
+		</field>
+	    </record>
+	    <record model="ir.actions.act_window" id="service_order_line_list_action">
+		    <field name="name">Service Order Line</field>
+		    <field name="res_model">service.order.line</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+	  
+	    <record id="view_service_line_part_tree" model="ir.ui.view">	
+	    <field name="name">Service Line Part List</field>
+		<field name="model">service.line.part</field>
+		<field name="type">tree</field>
+		<field name="priority">100</field>
+		<field name="arch" type="xml">
+		    <tree string="Service Order List">
+			<field name="service_line_id"/>
+			<field name="serial_id"/>
+		    </tree>
+		</field>
+	    </record>
+	    <record id="view_service_line_part_form" model="ir.ui.view">
+		<field name="name">Service Line Part</field>
+		<field name="model">service.line.part</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Service Order Line Form">
+				<field name="service_line_id"/>
+				<field name="serial_id"/>	
+				<field name="gauge_start_id" colspan="4"/>		
+				<field name="gauge_end_id" colspan="4"/>		
+			</form>
+		</field>
+	    </record>
+	    <record model="ir.actions.act_window" id="service_line_part_list_action">
+		    <field name="name">Service Line Part</field>
+		    <field name="res_model">service.line.part</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+	 	  
+	    <record id="view_service_line_part_gauge_tree" model="ir.ui.view">	
+	    <field name="name">Service Line Part Gauge List</field>
+		<field name="model">service.line.part.gauge</field>
+		<field name="type">tree</field>
+		<field name="priority">100</field>
+		<field name="arch" type="xml">
+		    <tree string="Service Order Line Gauge List">
+				<field name="date"/>
+					<field name="cero"/>	
+					<field name="cero_pattern"/>
+					<field name="cero_error"/>
+					<field name="span"/>
+					<field name="span_pattern"/>
+					<field name="span_pattern_unit"/>
+					<field name="span_error"/>
+					<field name="time_rx_initial"/>
+					<field name="time_stabilization"/>
+					<field name="oscillation"/>	
+		    </tree>
+		</field>
+	    </record>
+	    <record id="view_service_line_part_gauge_form" model="ir.ui.view">
+		<field name="name">Service Line Part Gauge</field>
+		<field name="model">service.line.part.gauge</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Service Order Line Gauge Form">
+			<group col="6">
+				<group col="13" colspan="6">
+					<field name="date" colspan="7"/>
+					<newline/>
+					<separator string="CERO" colspan="6"/>
+					<separator string="SPAN" colspan="7"/>
+					<field name="cero"/>	
+					<field name="cero_pattern"/>
+					<field name="cero_error"/>
+					<field name="span"/>
+					<field name="span_pattern"/>
+					<field name="span_pattern_unit"/>
+					<field name="span_error" nolabel="true"/>
+				</group>
+				<group col="6" colspan="6">
+					<separator string="Time" colspan="6"/>
+					<field name="time_rx_initial"/>
+					<field name="time_stabilization"/>
+					<field name="oscillation"/>	
+				</group>
+			</group>	
+			</form>
+		</field>
+	    </record>
+	    <record model="ir.actions.act_window" id="service_line_part_gauge_list_action">
+		    <field name="name">Service Line Part Gauge</field>
+		    <field name="res_model">service.line.part.gauge</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+	   
+	   	<record id="view_sale_order_schedule_tree" model="ir.ui.view">	
+	    <field name="name">Sale Order Schedule list</field>
+		<field name="model">sale.order.schedule</field>
+		<field name="type">tree</field>
+		<field name="priority">100</field>
+		<field name="arch" type="xml">
+		    <tree string="Sale Order Schedule list">
+				<field name="serial_number_id"/>
+				<field name="start_date"/>	
+		    </tree>
+		</field>
+	    </record>
+	    <record id="view_sale_order_schedule_form" model="ir.ui.view">
+		<field name="name">Sale Order Schedule</field>
+		<field name="model">sale.order.schedule</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Sale Order Schedule Form">
+				<field name="serial_number_id"/>
+				<field name="start_date"/>		
+			</form>
+		</field>
+	    </record>
+	    <record model="ir.actions.act_window" id="sale_order_schedule_list_action">
+		    <field name="name">Sale Order Schedule</field>
+		    <field name="res_model">sale.order.schedule</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+
+	   	<record id="view_service_anual_times_tree" model="ir.ui.view">	
+	    <field name="name">Service anual Times</field>
+		<field name="model">service.anual.time</field>
+		<field name="type">tree</field>
+		<field name="priority">100</field>
+		<field name="arch" type="xml">
+		    <tree string="Service anual Times list">
+				<field name="name"/>
+				<field name="periodicity"/>	
+		    </tree>
+		</field>
+	    </record>
+	    <record id="view_service_anual_times_form" model="ir.ui.view">
+		<field name="name">Service anual Times </field>
+		<field name="model">service.anual.time</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="Service anual Times Form">
+				<field name="name"/>
+				<field name="periodicity"/>			
+			</form>
+		</field>
+	    </record>
+	    <record model="ir.actions.act_window" id="service_anual_list_action">
+		    <field name="name">Service Order anual</field>
+		    <field name="res_model">service.anual.time</field>
+		    <field name="view_type">form</field>
+		    <field name="view_mode">tree,form</field>
+	    </record>
+
+
+        <menuitem name='Technical Service' id='menu_service' sequence='21' action="service_order_list_action"/>
+        <menuitem name='Service Order' id='service_order_menu' parent='menu_service' sequence='200'	action="service_order_list_action"/>
+        <menuitem name='Gauge' id='service_order_gauge' parent='menu_service' sequence='300'	action="service_line_part_gauge_list_action"/>
+        <menuitem name='Configuration' id='menu_service_configuration' parent='menu_service' sequence='201' />      
+        <menuitem name='Parts' id='menu_service_parts' parent='menu_service_configuration' sequence='20' action="service_line_part_list_action"/> 
+        <menuitem name='Service time' id='menu_service_anual' parent='menu_service_configuration' sequence='20' action="service_anual_list_action"/>  
+	    
+	    
+	</data>
+</openerp>

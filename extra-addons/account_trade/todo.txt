@@ -1,0 +1,11 @@
+YT 15/12/2011
+
+- Todos los métodos onchange
+- Agregar subtotales de Tax Prepay - Other Tax - Flete - Seguros - Almacenaje - Otros Gastos
+  (analizar si esta subclasificación se realiza a travez del plan contable)
+- Proceso de calculo de la DUA, prorrateo y actualización de costos prorrateados
+- Ver al forma de bloquear la pantalla cuando se realice todo el proceso (estados)
+- Analizar la posibilidad de eliminr many2one de flete, liquidacion y seguros (poner todo abajo)
+
+- Agregar un lote de seguimiento en la O/C y luego en DUA y guias, analizar la posibilidad de anidar los lotes de seguimiento
+- En la O/C se le puede agregar el incoterm a fin de identificar que una compra es internacional
