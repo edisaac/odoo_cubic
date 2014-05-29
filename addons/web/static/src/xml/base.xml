@@ -79,7 +79,7 @@
             </form>
             <div class="oe_login_footer">
                 <a href="#" class="oe_login_manage_db">Manage Databases</a> |
-                <a href="http://www.openerp.com" target="_blank">Powered by <span>OpenERP</span></a>
+                <a href="http://www.cubicerp.com" target="_blank">Supported by <span>CubicERP</span></a>
             </div>
         </div>
     </div>
