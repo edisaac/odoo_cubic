@@ -341,17 +341,17 @@ class account_move_line(osv.osv):
         super(account_move_line, self).create_analytic_lines(cr, uid, ids, context=context)
         analytic_line_obj = self.pool.get('account.analytic.line')
         for line in self.browse(cr, uid, ids, context=context):
-           if line.analytics_id:
-               if not line.journal_id.analytic_journal_id:
-                   raise osv.except_osv(_('No Analytic Journal!'),_("You have to define an analytic journal on the '%s' journal.") % (line.journal_id.name,))
+            if line.analytics_id:
+                if not line.journal_id.analytic_journal_id:
+                    raise osv.except_osv(_('No Analytic Journal!'),_("You have to define an analytic journal on the '%s' journal.") % (line.journal_id.name,))
 
-               toremove = analytic_line_obj.search(cr, uid, [('move_id','=',line.id),('analytics_id','=',line.analytics_id.id)], context=context)
-               if toremove:
+                toremove = analytic_line_obj.search(cr, uid, [('move_id','=',line.id),('analytics_id','=',line.analytics_id.id)], context=context)
+                if toremove:
                     analytic_line_obj.unlink(cr, uid, toremove, context=context)
-               for line2 in line.analytics_id.account_ids:
-                   val = (line.credit or  0.0) - (line.debit or 0.0)
-                   amt=val * (line2.rate/100)
-                   al_vals={
+                for line2 in line.analytics_id.account_ids:
+                    val = (line.credit or  0.0) - (line.debit or 0.0)
+                    amt=val * (line2.rate/100)
+                    al_vals={
                        'name': line.name,
                        'date': line.date,
                        'account_id': line2.analytic_account_id.id,
@@ -365,9 +365,9 @@ class account_move_line(osv.osv):
                        'ref': line.ref,
                        'percentage': line2.rate,
                        'analytics_id': line2.plan_id.id,
-                   }
-                   analytic_line_id = analytic_line_obj.create(cr, uid, al_vals, context=context)
-                   self.post_analytic_line_create(cr, uid, analytic_line_id, line, line2, amt, context=context)
+                       }
+                    analytic_line_id = analytic_line_obj.create(cr, uid, al_vals, context=context)
+                    self.post_analytic_line_create(cr, uid, analytic_line_id, line, line2, amt, context=context)
         return True
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
