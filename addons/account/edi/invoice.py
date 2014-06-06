@@ -266,7 +266,7 @@ class account_invoice(osv.osv, EDIMixin):
                 params = {
                     "cmd": "_xclick",
                     "business": inv.company_id.paypal_account,
-                    "item_name": "%s Invoice %s" % (inv.company_id.name, inv.number or ''),
+                    "item_name": "%s Invoice %s" % (inv.company_id.name.encode('utf-8'), inv.number or ''),
                     "invoice": inv.number,
                     "amount": inv.residual,
                     "currency_code": inv.currency_id.name,
