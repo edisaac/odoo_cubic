@@ -3948,7 +3948,11 @@ instance.web.form.One2ManyListView = instance.web.ListView.extend({
             else
                 return $.when();
         }).done(function () {
-            if (!self.o2m.options.reload_on_button) {
+            var ds = self.o2m.dataset;
+            var cached_records = _.any([ds.to_create, ds.to_delete, ds.to_write], function(value) {
+                return value.length;
+            });
+            if (!self.o2m.options.reload_on_button && !cached_records) {
                 self.handle_button(name, id, callback);
             }else {
                 self.handle_button(name, id, function(){
@@ -4356,7 +4360,8 @@ instance.web.form.Many2ManyListView = instance.web.ListView.extend(/** @lends in
         pop.select_element(
             this.model,
             {
-                title: _t("Add: ") + this.m2m_field.string
+                title: _t("Add: ") + this.m2m_field.string,
+                no_create: this.m2m_field.options.no_create,
             },
             new instance.web.CompoundDomain(this.m2m_field.build_domain(), ["!", ["id", "in", this.m2m_field.dataset.ids]]),
             this.m2m_field.build_context()
