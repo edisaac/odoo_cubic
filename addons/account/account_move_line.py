@@ -591,7 +591,7 @@ class account_move_line(osv.osv):
             if l.company_id != l.account_id.company_id:
                 raise osv.except_osv(_('Error!'), _('The account %s - %s, must belong to the company %s.') % (l.account_id.code, l.account_id.name, l.company_id.name))
             if l.company_id != l.period_id.company_id:
-                raise osv.except_osv(_('Error!'), _('the Period %s, must belong to the company %s.') % (l.period_id.name,l.company_id.name))
+                raise osv.except_osv(_('Error!'), _('the Period %s (id:%s), must belong to the company %s.') % (l.period_id.name,l.period_id.id,l.company_id.name))
         return True
 
     def _check_date(self, cr, uid, ids, context=None):

@@ -240,11 +240,11 @@ class account_voucher(osv.osv):
         if not voucher_currency_id:
             voucher_currency_id = company_currency
         if payment_rate_currency_id is None:
-            rate = currency_pool.compute(cr, uid, voucher_currency_id, invoice_currency_id, 1.0, context=context)
+            rate = currency_pool.compute(cr, uid, voucher_currency_id, invoice_currency_id, 1.0, context=context, round=False)
         elif payment_rate_currency_id == invoice_currency_id:
             rate = payment_rate
         else:
-            rate = currency_pool.compute(cr, uid, voucher_currency_id, invoice_currency_id, 1.0, context=context)
+            rate = currency_pool.compute(cr, uid, voucher_currency_id, invoice_currency_id, 1.0, context=context, round=False)
         return rate
 
     def _compute_writeoff_amount(self, cr, uid, line_dr_ids, line_cr_ids, amount, type, currency_id, payment_rate=1.0, payment_rate_currency_id=None,context=None):
@@ -1465,14 +1465,14 @@ class account_voucher(osv.osv):
                 tot_line += amount
                 move_line['debit'] = amount
                 if line_currency <> company_currency:
-                    move_line['amount_currency'] = currency_obj.compute(cr, uid, current_currency, line_currency, line.amount, context=ctx)
+                    move_line['amount_currency'] = currency_obj.compute(cr, uid, current_currency, line_currency, line.amount, context=ctx, round=False)
                     if context.has_key('line_total_currency'):
                         context['line_total_currency'] += move_line['amount_currency']
             else:
                 tot_line -= amount
                 move_line['credit'] = amount
                 if line_currency <> company_currency:
-                    move_line['amount_currency'] = -1.0 * currency_obj.compute(cr, uid, current_currency, line_currency, line.amount, context=ctx)
+                    move_line['amount_currency'] = -1.0 * currency_obj.compute(cr, uid, current_currency, line_currency, line.amount, context=ctx, round=False)
                     if context.has_key('line_total_currency'):
                         context['line_total_currency'] += move_line['amount_currency']
 
@@ -1500,7 +1500,7 @@ class account_voucher(osv.osv):
                     else:
                         # if the rate is specified on the voucher, it will be used thanks to the special keys in the context
                         # otherwise we use the rates of the system
-                        amount_currency = currency_obj.compute(cr, uid, company_currency, line.move_line_id.currency_id.id, move_line['debit']-move_line['credit'], context=ctx)
+                        amount_currency = currency_obj.compute(cr, uid, company_currency, line.move_line_id.currency_id.id, move_line['debit']-move_line['credit'], context=ctx, round=False)
 #                 if line.amount == line.amount_unreconciled:
 #                     sign = voucher.type in ('payment', 'purchase') and -1 or 1
 #                     foreign_currency_diff = sign * line.move_line_id.amount_residual_currency + amount_currency
@@ -1515,7 +1515,6 @@ class account_voucher(osv.osv):
                 new_id = move_line_obj.create(cr, uid, exch_lines[0],context)
                 move_line_obj.create(cr, uid, exch_lines[1], context)
                 rec_ids.append(new_id)
-
 #             if line.move_line_id and line.move_line_id.currency_id and not currency_obj.is_zero(cr, uid, line.move_line_id.currency_id, foreign_currency_diff):
 #                 # Change difference entry in voucher currency
 #                 move_line_foreign_currency = {
