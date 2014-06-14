@@ -139,8 +139,9 @@
                     <div id="footer_container">
                     </div>
                     <div class="container mt16 mb8">
-                        <div class="pull-right" t-ignore="true" t-if="not editable">
-                            Supported by <a class="label label-danger" href="https://cubicerp.com/apps/website">CubicERP</a>
+                    	<div class="pull-right" t-ignore="true" t-if="not editable">
+                            Create a <a href="http://www.lapaginaweb.com">website</a> with
+                            <a class="label label-danger" href="http://lapaginaweb.com">laPaginaWeb.com</a>
                         </div>
                         <div class="pull-left text-muted">
                             Copyright &amp;copy; <span t-field="res_company.name">Company name</span>
