@@ -643,11 +643,9 @@ class purchase_order(osv.osv):
         }
 
     def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, context=None):
-        cur_obj=self.pool.get('res.currency')
         tax_obj = self.pool.get('account.tax')
         taxes = tax_obj.compute_all(cr, uid, order_line.taxes_id, order_line.price_unit, 1, order_line.product_id, order_line.order_id.partner_id)
-        cur = order_line.order_id.pricelist_id.currency_id
-        price_unit = cur_obj.round(cr, uid, cur, taxes['total'])
+        price_unit = taxes['total']
         return {
             'name': order_line.name or '',
             'product_id': order_line.product_id.id,
