@@ -1643,7 +1643,7 @@ class stock_move(osv.osv):
         return True
 
     _columns = {
-        'name': fields.char('Description', required=True, select=True),
+        'name': fields.char('Description', required=True, select=True, states={'done': [('readonly', True)]}),
         'priority': fields.selection([('0', 'Not urgent'), ('1', 'Urgent')], 'Priority'),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'date': fields.datetime('Date', required=True, select=True, help="Move date: scheduled date until move is done, then date of actual move processing", states={'done': [('readonly', True)]}),
@@ -1691,15 +1691,15 @@ class stock_move(osv.osv):
                        "* Waiting Availability: This state is reached when the procurement resolution is not straight forward. It may need the scheduler to run, a component to me manufactured...\n"\
                        "* Available: When products are reserved, it is set to \'Available\'.\n"\
                        "* Done: When the shipment is processed, the state is \'Done\'."),
-        'price_unit': fields.float('Unit Price', digits_compute= dp.get_precision('Product Price'), help="Technical field used to record the product cost set by the user during a picking confirmation (when average price costing method is used)"),
-        'price_currency_id': fields.many2one('res.currency', 'Currency for average price', help="Technical field used to record the currency chosen by the user during a picking confirmation (when average price costing method is used)"),
+        'price_unit': fields.float('Unit Price', states={'done': [('readonly', True)]}, help="Technical field used to record the product cost set by the user during a picking confirmation (when average price costing method is used)"),
+        'price_currency_id': fields.many2one('res.currency', 'Currency for average price', states={'done': [('readonly', True)]}, help="Technical field used to record the currency chosen by the user during a picking confirmation (when average price costing method is used)"),
         'company_id': fields.many2one('res.company', 'Company', required=True, select=True),
         'backorder_id': fields.related('picking_id','backorder_id',type='many2one', relation="stock.picking", string="Back Order of", select=True),
-        'origin': fields.related('picking_id','origin',type='char', size=64, relation="stock.picking", string="Source", store=True),
+        'origin': fields.related('picking_id','origin',type='char', size=64, relation="stock.picking", string="Source", store=True, states={'done': [('readonly', True)]}),
 
         # used for colors in tree views:
         'scrapped': fields.related('location_dest_id','scrap_location',type='boolean',relation='stock.location',string='Scrapped', readonly=True),
-        'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal')], string='Shipping Type'),
+        'type': fields.related('picking_id', 'type', type='selection', selection=[('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal')], string='Shipping Type', states={'done': [('readonly', True)]}),
     }
 
     def _check_location(self, cr, uid, ids, context=None):
@@ -2467,6 +2467,8 @@ class stock_move(osv.osv):
         """
         # prepare default values considering that the destination accounts have the reference_currency_id as their main currency
         partner_id = (move.picking_id.partner_id and self.pool.get('res.partner')._find_accounting_partner(move.picking_id.partner_id).id) or False
+        cur_obj = self.pool.get('res.currency')
+        reference_amount = cur_obj.round(cr, uid, cur_obj.browse(cr, uid, reference_currency_id), reference_amount)
         debit_line_vals = {
                     'name': move.name,
                     'product_id': move.product_id and move.product_id.id or False,
@@ -2496,7 +2498,6 @@ class stock_move(osv.osv):
         src_acct, dest_acct = account_obj.browse(cr, uid, [src_account_id, dest_account_id], context=context)
         src_main_currency_id = src_acct.company_id.currency_id.id
         dest_main_currency_id = dest_acct.company_id.currency_id.id
-        cur_obj = self.pool.get('res.currency')
         if reference_currency_id != src_main_currency_id:
             # fix credit line:
             credit_line_vals['credit'] = cur_obj.compute(cr, uid, reference_currency_id, src_main_currency_id, reference_amount, context=context)
