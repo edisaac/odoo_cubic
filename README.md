@@ -1,5 +1,4 @@
-Acerca de este Fork de Odoo v8.0
-================================
+[![Build Status](http://runbot.odoo.com/runbot/badge/default/1/8.0.svg)](http://runbot.odoo.com/runbot)
 
 Este clon de Odoo fue creado para satisfacer los requerimientos de localización de nuestros clientes ubicados en sudamerica de habla hispana. Por lo tanto consideramos que si te encuentras en Panamá, Colombia, Ecuador, Perú, Chile, Argentina, Bolivia, Paraguay o Uruguay, entonces este clon puede ser de mucha utilidad para tu proyecto de implementación.
 
