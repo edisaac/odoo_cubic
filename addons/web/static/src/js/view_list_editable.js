@@ -251,7 +251,10 @@ openerp.web.list_editable = function (instance) {
                     }, options).then(function () {
                         $recordRow.addClass('oe_edition');
                         self.resize_fields();
-                        var focus_field = options && options.focus_field ? options.focus_field : (self.visible_columns.length ? self.visible_columns[0].name : undefined);
+                        var focus_field = options && options.focus_field ? options.focus_field : undefined;
+                        if (!focus_field){
+                            focus_field = _.find(self.editor.form.fields_order, function(field){ return fields[field] && fields[field].$el.is(':visible:has(input)'); });
+                        }
                         if (focus_field) fields[focus_field].$el.find('input').select();
                         return record.attributes;
                     });
@@ -279,9 +282,7 @@ openerp.web.list_editable = function (instance) {
             if (!this.editor.is_editing()) { return; }
             for(var i=0, len=this.fields_for_resize.length; i<len; ++i) {
                 var item = this.fields_for_resize[i];
-                if (!item.field.get('effective_invisible')) {
-                    this.resize_field(item.field, item.cell);
-                }
+                this.resize_field(item.field, item.cell);
             }
         },
         /**
@@ -300,6 +301,11 @@ openerp.web.list_editable = function (instance) {
                 at: 'left top',
                 of: $cell
             });
+            if (field.get('effective_readonly')) {
+                field.$el.addClass('oe_readonly');
+            }
+            if(field.widget == "handle")
+                field.$el.addClass('oe_list_field_handle');
         },
         /**
          * @return {jQuery.Deferred}
@@ -445,13 +451,7 @@ openerp.web.list_editable = function (instance) {
         setup_events: function () {
             var self = this;
             _.each(this.editor.form.fields, function(field, field_name) {
-                var set_invisible = function() {
-                    field.set({'force_invisible': field.get('effective_readonly')});
-                };
-                field.on("change:effective_readonly", self, set_invisible);
-                set_invisible();
-                field.on('change:effective_invisible', self, function () {
-                    if (field.get('effective_invisible')) { return; }
+                field.on("change:effective_readonly", self, function(){
                     var item = _(self.fields_for_resize).find(function (item) {
                         return item.field === field;
                     });

@@ -1384,6 +1384,16 @@ class BaseModel(object):
                 # Failed to write, log to messages, rollback savepoint (to
                 # avoid broken transaction) and keep going
                 cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
+            except Exception, e:
+                message = (_('Unknown error during import:') +
+                           u' %s: %s' % (type(e), unicode(e)))
+                moreinfo = _('Resolve other errors first')
+                messages.append(dict(info, type='error',
+                                     message=message,
+                                     moreinfo=moreinfo))
+                # Failed for some reason, perhaps due to invalid data supplied,
+                # rollback savepoint and keep going
+                cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
         if any(message['type'] == 'error' for message in messages):
             cr.execute('ROLLBACK TO SAVEPOINT model_load')
             ids = False
@@ -2157,7 +2167,7 @@ class BaseModel(object):
                             node.getparent().remove(node)
                     elif pos == 'attributes':
                         for child in spec.getiterator('attribute'):
-                            attribute = (child.get('name'), child.text and child.text.encode('utf8') or None)
+                            attribute = (child.get('name'), child.text or None)
                             if attribute[1]:
                                 node.set(attribute[0], attribute[1])
                             else:
@@ -3380,7 +3390,11 @@ class BaseModel(object):
 
     def _m2m_raise_or_create_relation(self, cr, f):
         m2m_tbl, col1, col2 = f._sql_names(self)
-        self._save_relation_table(cr, m2m_tbl)
+        # do not create relations for custom fields as they do not belong to a module
+        # they will be automatically removed when dropping the corresponding ir.model.field
+        # table name for custom relation all starts with x_, see __init__
+        if not m2m_tbl.startswith('x_'):
+            self._save_relation_table(cr, m2m_tbl)
         cr.execute("SELECT relname FROM pg_class WHERE relkind IN ('r','v') AND relname=%s", (m2m_tbl,))
         if not cr.dictfetchall():
             if not self.pool.get(f._obj):
@@ -4383,6 +4397,8 @@ class BaseModel(object):
             self._transient_vacuum(cr, user)
 
         self.check_access_rights(cr, user, 'create')
+        
+        vals = self._add_missing_default_values(cr, user, vals, context)
 
         if self._log_access:
             for f in LOG_ACCESS_COLUMNS:
@@ -4390,7 +4406,6 @@ class BaseModel(object):
                     _logger.warning(
                         'Field `%s` is not allowed when creating the model `%s`.',
                         f, self._name)
-        vals = self._add_missing_default_values(cr, user, vals, context)
 
         tocreate = {}
         for v in self._inherits:
