@@ -670,7 +670,7 @@ class pos_order(osv.osv):
     }
 
     def create(self, cr, uid, values, context=None):
-        if values['name'] == '/': 
+        if values.get('name','/') == '/': 
             values['name'] = self.pool.get('ir.sequence').get(cr, uid, 'pos.order')
         return super(pos_order, self).create(cr, uid, values, context=context)
 
