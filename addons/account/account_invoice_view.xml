@@ -183,7 +183,7 @@
                                 name="account_id" groups="account.group_account_user"/>
                             <field name="journal_id" groups="account.group_account_user"
                                 on_change="onchange_journal_id(journal_id, context)" domain="[('company_id','=',company_id)]"/>
-                            <field name="currency_id" groups="base.group_multi_currency"/>
+                            <field name="currency_id" domain="['|',('company_id','=',company_id),('company_id','=',False)]" groups="base.group_multi_currency"/>
                             <field name="check_total" groups="account.group_supplier_inv_check_total"/>
                         </group>
                     </group>

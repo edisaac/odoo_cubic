@@ -1435,7 +1435,10 @@ class account_voucher(osv.osv):
             amount = self._convert_amount(cr, uid, line.untax_amount or line.amount, voucher.id, context=ctx)
             # if the amount encoded in voucher is equal to the amount unreconciled, we need to compute the
             # currency rate difference
-            line_currency = line.move_line_id and line.move_line_id.currency_id and line.move_line_id.currency_id.id or company_currency
+            if line.move_line_id:
+                line_currency = line.move_line_id and line.move_line_id.currency_id and line.move_line_id.currency_id.id or company_currency
+            else:
+                line_currency = voucher_currency.id
             if amount == line.amount_unreconciled or (current_currency == line_currency and line.amount == line.amount_unreconciled_currency) or line.reconcile:
                 if not line.move_line_id:
                     raise osv.except_osv(_('Wrong voucher line'),_("The invoice you are willing to pay is not valid anymore."))
