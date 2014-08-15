@@ -291,7 +291,7 @@ class account_voucher(osv.osv):
                      'amount_unreconciled': amount_unreconciled,
                      'amount_unreconciled_currency': line.amount_unreconciled_currency,
                      }
-            line_currency_id = l['currency_id'] or company_currency
+            line_currency_id = l.get('currency_id', company_currency)
             rate = self._get_rate(cr, uid, currency_id,line_currency_id, payment_rate, payment_rate_currency_id ,context=context)
             if currency_id == company_currency:
                 #example: PEN pay, PEN/USD/... invoice
