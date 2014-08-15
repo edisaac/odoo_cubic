@@ -234,7 +234,7 @@ class account_voucher(osv.osv):
 
     def _get_rate(self, cr, uid, voucher_currency_id, invoice_currency_id, payment_rate=1.0, payment_rate_currency_id=None, context=None):
         currency_pool = self.pool.get('res.currency')
-        company_currency = self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id
+        company_currency = context.get('company_currency_id',self.pool.get('res.users').browse(cr, uid, uid, context=context).company_id.currency_id.id)
         if not invoice_currency_id:
             invoice_currency_id = company_currency
         if not voucher_currency_id:
@@ -1389,6 +1389,7 @@ class account_voucher(osv.osv):
         voucher = self.browse(cr, uid, voucher_id, context=context)
         company_currency = voucher.company_id.currency_id.id
         currency_id = voucher.currency_id.id or company_currency
+        context['company_currency_id'] = company_currency
         rate = self._get_rate(cr, uid, currency_id, company_currency, voucher.payment_rate, voucher.payment_rate_currency_id.id, context=context)
         return currency_obj.round(cr, uid, voucher.company_id.currency_id, (amount * rate))
         #return currency_obj.compute(cr, uid, voucher.currency_id.id, voucher.company_id.currency_id.id, amount, context=context)
