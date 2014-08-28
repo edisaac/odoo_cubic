@@ -19,9 +19,10 @@
 #
 ##############################################################################
 
-from osv import osv, fields
-from tools.translate import _
-import addons.decimal_precision as dp
+from openerp.osv import osv, fields
+from openerp.tools.translate import _
+from decimal import Decimal
+import openerp.addons.decimal_precision as dp
 import time
 
 class account_transfer(osv.osv):
@@ -82,6 +83,7 @@ class account_transfer(osv.osv):
             'type': fields.selection(_get_type,'Type', required=True, readonly=True, states={'draft':[('readonly',False)]}),
             'name': fields.char('Number', size=32, required=True, readonly=True, states={'draft':[('readonly',False)]}),
             'date': fields.date('Date', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+            'period_id': fields.many2one('account.period','Period', readonly=True, states={'draft':[('readonly',False)]}),
             'origin': fields.char('Origin', size=128, readonly=True, states={'draft':[('readonly',False)]},help="Origin Document"),
             'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic Account', readonly=True, states={'draft':[('readonly',False)]}),
             'voucher_ids': fields.one2many('account.voucher','transfer_id', string='Payments', readonly=True, states={'draft':[('readonly',False)], 'confirm':[('readonly',False)]}),
@@ -121,7 +123,7 @@ class account_transfer(osv.osv):
         res['transfer_id'] = trans.id
         res['type'] = 'transfer'
         res['company_id'] = trans.company_id.id
-        res['reference'] = trans.name + str(trans.origin and (' - ' + trans.origin) or '')
+        res['reference'] = trans.name.encode('utf-8') + str(trans.origin and (' - ' + trans.origin.encode('utf-8')) or '')
         res['line_ids'] = [(0,0,{})]
         res['line_ids'][0][2]['account_analytic_id'] = trans.account_analytic_id and trans.account_analytic_id.id or 0
         res['line_ids'][0][2]['name'] = trans.origin
@@ -140,30 +142,25 @@ class account_transfer(osv.osv):
 
     def onchange_amount(self, cr, uid, ids, field, src_amount, dst_amount, exchange_rate, context=None):
         res = {'value':{}}
-        if context is None:
-            context = {}
-        if context.get('oneTime', False):
-            context['oneTime'] = False
-            return res
+        new_src = 0
+        new_dst = 0
+        new_ext_inv = exchange_rate and 1.0 / exchange_rate or 0.0
         if field == 'src_amount':
-            res['value']['src_amount'] = src_amount
-            res['value']['dst_amount'] = src_amount * exchange_rate
-            res['value']['exchange_rate'] = exchange_rate
-            res['value']['exchange_inv'] = exchange_rate and 1.0 / exchange_rate or 0.0
-            context['oneTime'] = True
+            new_src = src_amount
+            new_dst = src_amount * exchange_rate
         elif field == 'dst_amount':
-            res['value']['src_amount'] = exchange_rate and dst_amount / exchange_rate or 0.0
-            res['value']['dst_amount'] = dst_amount
-            res['value']['exchange_rate'] = exchange_rate
-            res['value']['exchange_inv'] = exchange_rate and 1.0 / exchange_rate or 0.0
-            context['oneTime'] = True
+            new_src = exchange_rate and dst_amount / exchange_rate or 0.0
+            new_dst = dst_amount
         elif field == 'exchange_rate':
-            res['value']['src_amount'] = src_amount
-            res['value']['dst_amount'] = src_amount * exchange_rate
-            res['value']['exchange_rate'] = exchange_rate
-            res['value']['exchange_inv'] = exchange_rate and 1.0 / exchange_rate or 0.0
+            new_src = src_amount
+            new_dst = src_amount * exchange_rate
+        if round(new_src, abs(Decimal(str(src_amount)).as_tuple().exponent)) != src_amount:
+            res['value']['src_amount'] = new_src
+        if round(new_dst, abs(Decimal(str(dst_amount)).as_tuple().exponent)) != dst_amount:
+            res['value']['dst_amount'] = new_dst
+        res['value']['exchange_inv'] = new_ext_inv
         return res
-
+        
     def onchange_journal(self, cr, uid, ids, src_journal_id, dst_journal_id, date, exchange_rate, src_amount):
         res = {'value':{}}
         if not(src_journal_id and dst_journal_id):
@@ -183,19 +180,28 @@ class account_transfer(osv.osv):
         return res
 
     def action_confirm(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
         voucher_obj = self.pool.get('account.voucher')
         for trans in self.browse(cr, uid, ids, context=context):
+            context['company_id'] = trans.company_id.id
             sval = self.voucher_get(cr, uid, trans, context=context)
             dval = self.voucher_get(cr, uid, trans, context=context)
+            sval['company_id'] = trans.company_id.id
+            dval['company_id'] = trans.company_id.id
             sval['journal_id'] = trans.src_journal_id.id
             dval['journal_id'] = trans.dst_journal_id.id
+            if trans.period_id:
+                sval['period_id'] = trans.period_id.id
+                dval['period_id'] = trans.period_id.id
+            sval['date'] = trans.date
+            dval['date'] = trans.date
             sval['account_id'] = trans.src_journal_id.default_credit_account_id.id
             dval['account_id'] = trans.dst_journal_id.default_debit_account_id.id
             sval['payment_rate'] = trans.src_journal_id.currency.id and trans.company_id.currency_id.id <> trans.src_journal_id.currency.id and trans.exchange_rate or 1.0
             dval['payment_rate'] = trans.dst_journal_id.currency.id and trans.company_id.currency_id.id <> trans.dst_journal_id.currency.id  and trans.exchange_inv or 1.0
             dval['payment_rate_currency_id'] = trans.dst_journal_id.currency.id or trans.company_id.currency_id.id
             sval['payment_rate_currency_id'] = trans.src_journal_id.currency.id or trans.company_id.currency_id.id
-            #import pdb; pdb.set_trace()
             sval['line_ids'][0][2]['amount'] = sval['amount'] = trans.src_amount
             dval['line_ids'][0][2]['amount'] = dval['amount'] = trans.dst_amount
             sval['line_ids'][0][2]['type'] = 'dr'
@@ -212,6 +218,8 @@ class account_transfer(osv.osv):
         return self.write(cr, uid, ids, {'state':'confirm'},context=context)
 
     def action_done(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
         voucher_obj = self.pool.get('account.voucher')
         move_obj = self.pool.get('account.move')
         for trans in self.browse(cr, uid, ids, context=context):
@@ -223,10 +231,13 @@ class account_transfer(osv.osv):
                 #paid_amount.append(sign * voucher.paid_amount_in_company_currency)
             sum_amount = sum(paid_amount)
             if len(paid_amount) > 1 and sum_amount != 0.0:
-                periods = self.pool.get('account.period').find(cr, uid)
+                context['company_id'] = trans.company_id.id
+                periods = self.pool.get('account.period').find(cr, uid, context=context)
+                period_id = trans.period_id.id or (periods and periods[0] or False)
                 move = {}
                 move['journal_id'] = trans.dst_journal_id.id
-                move['period_id'] = periods and periods[0] or False
+                move['company_id'] = trans.company_id.id
+                move['period_id'] = period_id
                 move['ref'] = trans.name + str(trans.origin and (' - ' + trans.origin) or '')
                 move['date'] = trans.date
                 move['line_id'] = [(0,0,{}),(0,0,{})]
