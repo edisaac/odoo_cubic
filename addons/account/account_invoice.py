@@ -205,7 +205,7 @@ class account_invoice(models.Model):
 
     number = fields.Char(related='move_id.name', store=True, readonly=True, copy=False)
     internal_number = fields.Char(string='Invoice Number', readonly=True,
-        default=False, copy=False,
+        default=False, copy=False, states={'draft': [('readonly', False)]},
         help="Unique number of the invoice, computed automatically when the invoice is created.")
     reference = fields.Char(string='Invoice Reference',
         help="The partner reference of this invoice.")
