@@ -37,7 +37,7 @@ openerp_announcement = function(instance) {
                     self.trigger('ab_loaded', $bar);
                 });
 
-                $('head').append($css);
+                //$('head').append($css);
             });
         }
     });
