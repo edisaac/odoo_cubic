@@ -4840,7 +4840,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.menu,name:base.next_id_73
 msgid "Purchase"
-msgstr ""
+msgstr "Compras"
 
 #. module: base
 #: selection:base.language.install,lang:0
