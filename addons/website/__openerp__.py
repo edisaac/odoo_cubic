@@ -28,4 +28,5 @@ OpenERP Website CMS
     ],
     'qweb': ['static/src/xml/website.backend.xml'],
     'application': True,
+    'auto_install': True,
 }
