@@ -81,6 +81,7 @@
 	                                	<field name="type"/>
 	                                </group>
 	                                <group name="two">
+	                                	<field name="period_id" domain="[('company_id','=',company_id)]"/>
 	                                </group>
 	                            </group>
 	                        </page>
