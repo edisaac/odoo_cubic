@@ -1,8 +1,8 @@
-Index: doc-backend/openacademy/course.py
+Index: addons/openacademy/models.py
 ===================================================================
---- doc-backend.orig/openacademy/course.py	2014-08-22 16:57:00.727092169 +0200
-+++ doc-backend/openacademy/course.py	2014-08-22 17:01:08.975101282 +0200
-@@ -17,9 +17,10 @@
+--- addons.orig/openacademy/models.py	2014-08-26 17:26:04.727783302 +0200
++++ addons/openacademy/models.py	2014-08-26 17:26:04.719783302 +0200
+@@ -18,9 +18,10 @@
      _name = 'openacademy.session'
  
      name = fields.Char(required=True)
@@ -14,15 +14,15 @@ Index: doc-backend/openacademy/course.py
  
      instructor_id = fields.Many2one('res.partner', string="Instructor",
          domain=['|', ('instructor', '=', True),
-Index: doc-backend/openacademy/views/openacademy.xml
+Index: addons/openacademy/views/openacademy.xml
 ===================================================================
---- doc-backend.orig/openacademy/views/openacademy.xml	2014-08-22 16:57:00.731092169 +0200
-+++ doc-backend/openacademy/views/openacademy.xml	2014-08-22 17:01:15.307101514 +0200
-@@ -92,6 +92,7 @@
-                         <field name="course_id"/>
-                         <field name="name"/>
-                         <field name="instructor_id"/>
-+                        <field name="active"/>
-                     </group>
-                     <group colspan="2" col="2">
-                         <separator string="Schedule" colspan="2"/>
+--- addons.orig/openacademy/views/openacademy.xml	2014-08-26 17:26:04.727783302 +0200
++++ addons/openacademy/views/openacademy.xml	2014-08-26 17:26:04.719783302 +0200
+@@ -95,6 +95,7 @@
+                                 <field name="course_id"/>
+                                 <field name="name"/>
+                                 <field name="instructor_id"/>
++                                <field name="active"/>
+                             </group>
+                             <group string="Schedule">
+                                 <field name="start_date"/>

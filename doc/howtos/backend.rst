@@ -4,8 +4,8 @@
 Backend
 =======
 
-Build an Odoo module
-====================
+Start/Stop the Odoo server
+==========================
 
 Odoo uses a client/server architecture in which clients are web browsers
 accessing the odoo server via RPC.
@@ -13,6 +13,20 @@ accessing the odoo server via RPC.
 Business logic and extension is generally performed on the server side,
 although supporting client features (e.g. new data representation such as
 interactive maps) can be added to the client.
+
+In order to start the server, simply invoke the command :ref:`odoo.py
+<reference/cmdline>` in the shell, adding the full path to the file if
+necessary:
+
+.. code:: bash
+
+    odoo.py
+
+The server is stopped by hitting ``Ctrl-C`` twice from the terminal, or by
+killing the corresponding OS process.
+
+Build an Odoo module
+====================
 
 Both server and client extensions are packaged as *modules* which are
 optionally loaded in a *database*.
@@ -92,15 +106,28 @@ might contain::
 
     import mymodule
 
+Fortunately, there is a mechanism to help you set up an module. The command
+``odoo.py`` has a subcommand :ref:`scaffold <reference/cmdline/scaffold>` to
+create an empty module:
+
+.. code:: bash
+
+    odoo.py scaffold <module name> <where to put it>
+
+The command creates a subdirectory for your module, and automatically creates a
+bunch of standard files for a module. Most of them simply contain commented code
+or XML. The usage of most of those files will be explained along this tutorial.
+
 .. exercise:: Module creation
 
-    Create an empty module Open Academy, install it in Odoo.
+    Use the command line above to  create an empty module Open Academy, and
+    install it in Odoo.
 
     .. only:: solutions
 
-        #. Create a new folder ``openacademy``
-        #. Create an empty ``openacademy/__init__.py`` file
-        #. Create an ``openacademy/__openerp__.py`` file
+        #. Invoke the command ``odoo.py scaffold openacademy addons``.
+        #. Adapt the manifest file to your module.
+        #. Don't bother about the other files.
 
         .. patch::
 
@@ -200,8 +227,7 @@ overridden by setting :attr:`~openerp.models.Model._rec_name`.
 
     .. only:: solutions
 
-        #. Create a new file ``openacademy/course.py``
-        #. Edit ``openacademy/__init__.py`` to import it
+        Edit the file ``openacademy/models.py`` to include a *Course* class.
 
         .. patch::
 
@@ -245,8 +271,7 @@ be declared in the ``'data'`` list (always loaded) or in the ``'demo'`` list
 
     .. only:: solutions
 
-        #. Create a new file ``openacademy/demo.xml``
-        #. Add the file to the ``'demo'`` list of your ``__openerp__.py``
+        Edit the file ``openacademy/demo.xml`` to include some data.
 
         .. patch::
 
@@ -471,11 +496,12 @@ client data; it is also related to its sale order line records.
 
     Create a model for *sessions*. A session has a name, a start date, a
     duration and a number of seats. Add an action and a menu item to display
-    them.
+    them. Make the new model visible via a menu item.
 
     .. only:: solutions
 
-        Create class *Session*:
+        #. Create the class *Session* in ``openacademy/models.py``.
+        #. Add access to the session object in ``openacademy/view/openacademy.xml``.
 
         .. patch::
 
@@ -505,7 +531,7 @@ Relational field types are:
     accessing it results in a (possibly empty) set of records::
 
         for other in foo.other_ids:
-            print foo.name
+            print other.name
 
     .. danger::
 
@@ -519,7 +545,7 @@ Relational field types are:
     records, accessing it also results in a possibly empty set of records::
 
         for other in foo.other_ids:
-            print foo.name
+            print other.name
 
 .. exercise:: Many2one relations
 
@@ -532,12 +558,12 @@ Relational field types are:
       built-in model ``res.partner``.
     - A session is related to a *course*; the value of that field is a record
       of the model ``openacademy.course`` and is required.
+    - Adapt the views.
 
     .. only:: solutions
 
         #. Add the relevant ``Many2one`` fields to the models, and
-        #. add access to the session object in
-           ``openacademy/view/openacademy.xml``.
+        #. add them in the views.
 
         .. patch::
 
@@ -548,7 +574,8 @@ Relational field types are:
 
     .. only:: solutions
 
-        Modify the ``Course`` class as follows:
+        #. Modify the ``Course`` class, and
+        #. add the field in the course form view.
 
         .. patch::
 
@@ -557,32 +584,12 @@ Relational field types are:
     Using the relational field many2many, modify the *Session* model to relate
     every session to a set of *attendees*. Attendees will be represented by
     partner records, so we will relate to the built-in model ``res.partner``.
+    Adapt the views accordingly.
 
     .. only:: solutions
 
-        Modify the ``Session`` class as follows:
-
-        .. patch::
-
-.. exercise:: Views modification
-
-    For the *Course* model,
-
-    * the name and instructor for the course should be displayed in the tree
-      view
-    * the form view should display the course name and responsible at
-      the top, followed by the course description in a tab and the course
-      sessions in a second tab
-
-    For the *Session* model,
-
-    * the name of the session and the session course should be displayed in
-      the tree view
-    * the form view should display all the session's fields
-
-    Try to lay out the form views so that they're clear and readable.
-
-    .. only:: solutions
+        #. Modify the ``Session`` class, and
+        #. add the field in the form view.
 
         .. patch::
 
@@ -608,7 +615,7 @@ The second inheritance mechanism (delegation) allows to link every record of a
 model to a record in a parent model, and provides transparent access to the
 fields of the parent record.
 
-.. image:: backend/inheritance_methods.png
+.. image:: ../images/inheritance_methods.png
     :align: center
 
 .. seealso::
@@ -664,7 +671,8 @@ instead of a single view its ``arch`` field is composed of any number of
 .. exercise:: Alter existing content
 
     * Using model inheritance, modify the existing *Partner* model to add an
-      ``instructor`` boolean field
+      ``instructor`` boolean field, and a many2many field that corresponds to
+      the session-partner relation
     * Using view inheritance, display this fields in the partner form view
 
     .. only:: solutions
@@ -675,9 +683,9 @@ instead of a single view its ``arch`` field is composed of any number of
            inspect the view, find its external ID and the place to put the
            new field.
 
-       #. Create a ``openacademy/partner.py`` and import it in
+       #. Create a file ``openacademy/partner.py`` and import it in
           ``__init__.py``
-       #. Create an ``openacademy/views/partner.xml`` and add it to
+       #. Create a file ``openacademy/views/partner.xml`` and add it to
           ``__openerp__.py``
 
        .. patch::
@@ -831,6 +839,19 @@ float, string), or a function taking a recordset and returning a value::
     name = fields.Char(default="Unknown")
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user)
 
+.. note::
+
+    The object ``self.env`` gives access to request parameters and other useful
+    things:
+
+    - ``self.env.cr`` or ``self._cr`` is the database *cursor* object; it is
+      used for querying the database
+    - ``self.env.uid`` or ``self._uid`` is the current user's database id
+    - ``self.env.user`` is the current user's record
+    - ``self.env.context`` or ``self._context`` is the context dictionary
+    - ``self.env.ref(xml_id)`` returns the record corresponding to an XML id
+    - ``self.env[model_name]`` returns an instance of the given model
+
 .. exercise:: Active objects – Default values
 
     * Define the start_date default value as today (see
@@ -901,7 +922,7 @@ Model constraints
 
 Odoo provides two ways to set up automatically verified invariants:
 :func:`Python constraints <openerp.api.constrains>` and
-:attr:`SQL constaints <openerp.models.Model._sql_constraints>`.
+:attr:`SQL constraints <openerp.models.Model._sql_constraints>`.
 
 A Python constraint is defined as a method decorated with
 :func:`~openerp.api.constrains`, and invoked on a recordset. The decorator
@@ -1043,21 +1064,35 @@ field (to define the label for each calendar event)
 Search views
 ------------
 
-Search view fields can take custom operators or :ref:`reference/orm/domains`
-for more flexible matching of results.
+Search view ``<field>`` elements can have a ``@filter_domain`` that overrides
+the domain generated for searching on the given field. In the given domain,
+``self`` represents the value entered by the user. In the example below, it is
+used to search on both fields ``name`` and ``description``.
 
-Search views can also contain *filters* which act as toggles for predefined
-searches (defined using :ref:`reference/orm/domains`):
+Search views can also contain ``<filter>`` elements, which act as toggles for
+predefined searches. Filters must have one of the following attributes:
+
+``domain``
+    add the given domain to the current search
+``context``
+    add some context to the current search; use the key ``group_by`` to group
+    results on the given field name
 
 .. code-block:: xml
 
     <search string="Ideas">
-        <filter name="my_ideas" domain="[('inventor_id','=',uid)]"
-                string="My Ideas" icon="terp-partner"/>
         <field name="name"/>
-        <field name="description"/>
+        <field name="description" string="Name and description"
+               filter_domain="['|', ('name', 'ilike', self), ('description', 'ilike', self)]"/>
         <field name="inventor_id"/>
         <field name="country_id" widget="selection"/>
+
+        <filter name="my_ideas" string="My Ideas"
+                domain="[('inventor_id', '=', uid)]"/>
+        <group string="Group By">
+            <filter name="group_by_inventor" string="Inventor"
+                    context="{'group_by': 'inventor'}"/>
+        </group>
     </search>
 
 To use a non-default search view in an action, it should be linked using the
@@ -1071,8 +1106,9 @@ default and behave as booleans (they can only be enabled by default).
 
 .. exercise:: Search views
 
-    Add a button to filter the courses for which the current user is the
-    responsible in the course search view. Make it selected by default.
+    #. Add a button to filter the courses for which the current user is the
+       responsible in the course search view. Make it selected by default.
+    #. Add a button to group courses by responsible user.
 
     .. only:: solutions
 
@@ -1226,6 +1262,13 @@ graphical tools. Workflows, activities (nodes or actions) and transitions
 (conditions) are declared as XML records, as usual. The tokens that navigate
 in workflows are called workitems.
 
+.. warning::
+
+    A workflow associated with a model is only created when the
+    model's records are created. Thus there is no workflow instance
+    associated with session instances created before the workflow's
+    definition
+
 .. exercise:: Workflow
 
     Replace the ad-hoc *Session* workflow by a real workflow. Transform the
@@ -1235,13 +1278,6 @@ in workflows are called workitems.
     .. only:: solutions
 
         .. patch::
-
-        .. warning::
-
-            A workflow associated with a model is only created when the
-            model's records are created. Thus there is no workflow instance
-            associated with session instances created before the workflow's
-            definition
 
         .. tip::
 
@@ -1281,7 +1317,7 @@ policy.
 Group-based access control mechanisms
 -------------------------------------
 
-Groups are created as normal records on the model “res.groups”, and granted
+Groups are created as normal records on the model ``res.groups``, and granted
 menu access via menu definitions. However even without a menu, objects may
 still be accessible indirectly, so actual object-level permissions (read,
 write, create, unlink) must be defined for groups. They are usually inserted
@@ -1291,7 +1327,7 @@ specific fields on a view or object using the field's groups attribute.
 Access rights
 -------------
 
-Access rights are defined as records of the model “ir.model.access”. Each
+Access rights are defined as records of the model ``ir.model.access``. Each
 access right is associated to a model, a group (or no group for global
 access), and a set of permissions: read, write, create, unlink. Such access
 rights are usually created by a CSV file named after its model:
@@ -1330,9 +1366,9 @@ rights are usually created by a CSV file named after its model:
 
         #. Create a new file ``openacademy/security/security.xml`` to
            hold the OpenAcademy Manager group
-        #. Create a new file ``openacademy/security/ir.model.access.csv`` with
+        #. Edit the file ``openacademy/security/ir.model.access.csv`` with
            the access rights to the models
-        #. finally update ``openacademy/__openerp__.py`` to add the new data
+        #. Finally update ``openacademy/__openerp__.py`` to add the new data
            files to it
 
         .. patch::
@@ -1341,14 +1377,14 @@ Record rules
 ------------
 
 A record rule restricts the access rights to a subset of records of the given
-model. A rule is a record of the model “ir.rule”, and is associated to a
+model. A rule is a record of the model ``ir.rule``, and is associated to a
 model, a number of groups (many2many field), permissions to which the
 restriction applies, and a domain. The domain specifies to which records the
 access rights are limited.
 
 Here is an example of a rule that prevents the deletion of leads that are not
-in state “cancel”. Notice that the value of the field “groups” must follow
-the same convention as the method “write” of the ORM.
+in state ``cancel``. Notice that the value of the field ``groups`` must follow
+the same convention as the method ``write`` of the ORM.
 
 .. code-block:: xml
 
@@ -1376,6 +1412,94 @@ the same convention as the method “write” of the ORM.
 
         .. patch::
 
+Wizards
+=======
+
+Wizards describe interactive sessions with the user (or dialog boxes) through
+dynamic forms. A wizard is simply a model that extends the class
+:class:`~openerp.models.TransientModel` instead of
+:class:`~openerp.models.Model`. The class
+:class:`~openerp.models.TransientModel` extends :class:`~openerp.models.Model`
+and reuse all its existing mechanisms, with the following particularities:
+
+- Wizard records are not meant to be persistent; they are automatically deleted
+  from the database after a certain time. This is why they are called
+  *transient*.
+- Wizard models do not require explicit access rights: users have all
+  permissions on wizard records.
+- Wizard records may refer to regular records or wizard records through many2one
+  fields, but regular records *cannot* refer to wizard records through a
+  many2one field.
+
+We want to create a wizard that allow users to create attendees for a particular
+session, or for a list of sessions at once.
+
+.. exercise:: Define the wizard
+
+    Create a wizard model with a many2one relationship with the *Session*
+    model and a many2many relationship with the *Partner* model.
+
+    .. only:: solutions
+
+        Add a new file ``openacademy/wizard.py``:
+
+        .. patch::
+
+Launching wizards
+-----------------
+
+Wizards are launched by ``ir.actions.act_window`` records, with the field
+``target`` set to the value ``new``. The latter opens the wizard view into a
+popup window. The action may be triggered by a menu item.
+
+There is another way to launch the wizard: using an ``ir.actions.act_window``
+record like above, but with an extra field ``src_model`` that specifies in the
+context of which model the action is available. The wizard will appear in the
+contextual actions of the model, above the main view. Because of some internal
+hooks in the ORM, such an action is declared in XML with the tag ``act_window``.
+
+.. code:: xml
+
+    <act_window id="launch_the_wizard"
+                name="Launch the Wizard"
+                src_model="context_model_name"
+                res_model="wizard_model_name"
+                view_mode="form"
+                target="new"
+                key2="client_action_multi"/>
+
+Wizards use regular views and their buttons may use the attribute
+``special="cancel"`` to close the wizard window without saving.
+
+.. exercise:: Launch the wizard
+
+    #. Define a form view for the wizard.
+    #. Add the action to launch it in the context of the *Session* model.
+    #. Define a default value for the session field in the wizard; use the
+       context parameter ``self._context`` to retrieve the current session.
+
+    .. only:: solutions
+
+        .. patch::
+
+.. exercise:: Register attendees
+
+    Add buttons to the wizard, and implement the corresponding method for adding
+    the attendees to the given session.
+
+    .. only:: solutions
+
+        .. patch::
+
+.. exercise:: Register attendees to multiple sessions
+
+    Modify the wizard model so that attendees can be registered to multiple
+    sessions.
+
+    .. only:: solutions
+
+        .. patch::
+
 Internationalization
 ====================
 
@@ -1385,10 +1509,10 @@ the language and country combination when they differ (e.g. pt.po or
 pt_BR.po). Translations will be loaded automatically by Odoo for all
 enabled languages. Developers always use English when creating a module, then
 export the module terms using Odoo's gettext POT export feature
-(Settings>Translations>Export a Translation File without specifying a
-language), to create the module template POT file, and then derive the
-translated PO files. Many IDE's have plugins or modes for editing and merging
-PO/POT files.
+(:menuselection:`Settings --> Translations --> Import/Export --> Export
+Translation` without specifying a language), to create the module template POT
+file, and then derive the translated PO files. Many IDE's have plugins or modes
+for editing and merging PO/POT files.
 
 .. tip:: The GNU gettext format (Portable Object) used by Odoo is
          integrated into LaunchPad, making it an online collaborative
@@ -1407,8 +1531,8 @@ PO/POT files.
 
    By default Odoo's POT export only extracts labels inside XML files or
    inside field definitions in Python code, but any Python string can be
-   translated this way by surrounding it with the tools.translate._ method
-   (e.g. _(‘Label') )
+   translated this way by surrounding it with the function :func:`openerp._`
+   (e.g. ``_("Label")``)
 
 .. exercise:: Translate a module
 
@@ -1421,8 +1545,8 @@ PO/POT files.
         #. Install whichever language you want (
            :menuselection:`Administration --> Translations --> Load an
            Official Translation`)
-        #. Synchronize translatable terms (:menuselection`Administration -->
-           Translations --> Application termsn --> Synchronize Translations`)
+        #. Synchronize translatable terms (:menuselection:`Administration -->
+           Translations --> Application Terms --> Synchronize Translations`)
         #. Create a template translation file by exporting (
            :menuselection:`Administration --> Translations -> Import/Export
            --> Export Translation`) without specifying a language, save in
@@ -1435,19 +1559,12 @@ PO/POT files.
            dedicated PO-file editor e.g. POEdit_ and translate the missing
            terms
 
-           .. note::
-
-               By default, Odoo's export only extracts labels inside XML
-               records or Python field definitions, but arbitrary Python
-               strings can be marked as translatable by calling
-               :func:`openerp._` with them e.g. ``_("Label")``)
-
-        #. Add ``from openerp import _`` to ``course.py`` and
-           mark missing strings as translatable
-
-           .. todo:: there isn't any!
+        #. In ``models.py``, add an import statement for the function
+           ``openerp._`` and mark missing strings as translatable
 
         #. Repeat steps 3-6
+
+        .. patch::
 
         .. todo:: do we never reload translations?
 
@@ -1458,7 +1575,7 @@ Reporting
 Printed reports
 ---------------
 
-Odoo v8 comes with a new report engine based on :ref:`reference/qweb`,
+Odoo 8.0 comes with a new report engine based on :ref:`reference/qweb`,
 `Twitter Bootstrap`_ and Wkhtmltopdf_. 
 
 A report is a combination two elements:
@@ -1533,7 +1650,7 @@ Dashboards
 
    .. only:: solutions
 
-        #. Create a ``openacademy/views/session_board.xml``. It should contain
+        #. Create a file ``openacademy/views/session_board.xml``. It should contain
            the board view, the actions referenced in that view, an action to
            open the dashboard and a re-definition of the main menu item to add
            the dashboard action
@@ -1551,30 +1668,27 @@ WebServices
 
 The web-service module offer a common interface for all web-services :
 
-• SOAP
-• XML-RPC
-• NET-RPC
+- XML-RPC
+- JSON-RPC
 
 Business objects can also be accessed via the distributed object
 mechanism. They can all be modified via the client interface with contextual
 views.
 
-Odoo is accessible through XML-RPC interfaces, for which libraries exist in
-many languages.
+Odoo is accessible through XML-RPC/JSON-RPC interfaces, for which libraries
+exist in many languages.
 
 XML-RPC Library
 ---------------
 
 The following example is a Python program that interacts with an Odoo
-server with the library xmlrpclib.
-
-::
+server with the library ``xmlrpclib``::
 
    import xmlrpclib
 
    root = 'http://%s:%d/xmlrpc/' % (HOST, PORT)
 
-   uid = xmlrpclib.ServerProxy(root + 'common').login(db, username, password)
+   uid = xmlrpclib.ServerProxy(root + 'common').login(DB, USER, PASS)
    print "Logged in as %s (uid: %d)" % (USER, uid)
 
    # Create a new idea
@@ -1584,7 +1698,7 @@ server with the library xmlrpclib.
        'description' : 'This is another idea of mine',
        'inventor_id': uid,
    }
-   idea_id = sock.execute(db, uid, password, 'idea.idea', 'create', args)
+   idea_id = sock.execute(DB, uid, PASS, 'idea.idea', 'create', args)
 
 .. exercise:: Add a new service to the client
 
@@ -1634,18 +1748,87 @@ server with the library xmlrpclib.
                 'course_id' : course_id,
             })
 
-.. note:: there are also a number of high-level APIs in various languages to
-          access Odoo systems without *explicitly* going through XML-RPC e.g.
+JSON-RPC Library
+----------------
+
+The following example is a Python program that interacts with an Odoo server
+with the standard Python libraries ``urllib2`` and ``json``::
+
+    import json
+    import random
+    import urllib2
+
+    def json_rpc(url, method, params):
+        data = {
+            "jsonrpc": "2.0",
+            "method": method,
+            "params": params,
+            "id": random.randint(0, 1000000000),
+        }
+        req = urllib2.Request(url=url, data=json.dumps(data), headers={
+            "Content-Type":"application/json",
+        })
+        reply = json.load(urllib2.urlopen(req))
+        if reply.get("error"):
+            raise Exception(reply["error"])
+        return reply["result"]
+
+    def call(url, service, method, *args):
+        return json_rpc(url, "call", {"service": service, "method": method, "args": args})
+
+    # log in the given database
+    url = "http://%s:%s/jsonrpc" % (HOST, PORT)
+    uid = call(url, "common", "login", DB, USER, PASS)
+
+    # create a new idea
+    args = {
+        'name' : 'Another idea',
+        'description' : 'This is another idea of mine',
+        'inventor_id': uid,
+    }
+    idea_id = call(url, "object", "execute", DB, uid, PASS, 'idea.idea', 'create', args)
+
+Here is the same program, using the library
+`jsonrpclib <https://pypi.python.org/pypi/jsonrpclib>`::
+
+    import jsonrpclib
+
+    # server proxy object
+    url = "http://%s:%s/jsonrpc" % (HOST, PORT)
+    server = jsonrpclib.Server(url)
+
+    # log in the given database
+    uid = server.call(service="common", method="login", args=[DB, USER, PASS])
+
+    # helper function for invoking model methods
+    def invoke(model, method, *args):
+        args = [DB, uid, PASS, model, method] + list(args)
+        return server.call(service="object", method="execute", args=args)
+
+    # create a new idea
+    args = {
+        'name' : 'Another idea',
+        'description' : 'This is another idea of mine',
+        'inventor_id': uid,
+    }
+    idea_id = invoke('idea.idea', 'create', args)
+
+Examples can be easily adapted from XML-RPC to JSON-RPC.
+
+.. note::
+
+    There are a number of high-level APIs in various languages to access Odoo
+    systems without *explicitly* going through XML-RPC or JSON-RPC, such as:
 
     * https://github.com/akretion/ooor
     * https://github.com/syleam/openobject-library
     * https://github.com/nicolas-van/openerp-client-lib
     * https://pypi.python.org/pypi/oersted/
 
-.. [#autofields] it is possible to :attr:`disable the creation of some
-                 <openerp.models.Model._log_access>`
+.. [#autofields] it is possible to :attr:`disable the automatic creation of some
+                 fields <openerp.models.Model._log_access>`
 .. [#rawsql] writing raw SQL queries is possible, but requires care as it
-              bypasses all Odoo authentication and security mechanisms.
+             bypasses all Odoo authentication and security mechanisms.
 
 .. _database index:
     http://use-the-index-luke.com/sql/preface
