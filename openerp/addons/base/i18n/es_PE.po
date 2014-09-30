@@ -7821,10 +7821,9 @@ msgid "Electronic Data Interchange (EDI)"
 msgstr ""
 
 #. module: base
-#: code:addons/base/ir/ir_ui_view.py:496
-#, python-format
-msgid "Element '%s' cannot be located in parent view"
-msgstr ""
+#: model:ir.ui.menu,name:base.next_id_73
+msgid "Purchase"
+msgstr "Compras"
 
 #. module: base
 #: code:addons/base/res/res_company.py:165
