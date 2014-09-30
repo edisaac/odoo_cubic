@@ -646,6 +646,9 @@ class purchase_order(osv.osv):
         tax_obj = self.pool.get('account.tax')
         taxes = tax_obj.compute_all(cr, uid, order_line.taxes_id, order_line.price_unit, 1, order_line.product_id, order_line.order_id.partner_id)
         price_unit = taxes['total']
+        if order.currency_id.id != order.company_id.currency_id.id:
+            #we don't round the price_unit, as we may want to store the standard price with more digits than allowed by the currency
+            price_unit = self.pool.get('res.currency').compute(cr, uid, order.currency_id.id, order.company_id.currency_id.id, price_unit, round=False, context=context)
         return {
             'name': order_line.name or '',
             'product_id': order_line.product_id.id,

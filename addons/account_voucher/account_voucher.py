@@ -226,7 +226,7 @@ class account_voucher(osv.osv):
         if context.get('type', 'sale') in ('purchase', 'payment'):
             nodes = doc.xpath("//field[@name='partner_id']")
             for node in nodes:
-                node.set('context', "{'search_default_supplier': 1}")
+                node.set('context', "{'default_customer': 0, 'search_default_supplier': 1, 'default_supplier': 1}")
                 if context.get('invoice_type','') in ('in_invoice', 'in_refund'):
                     node.set('string', _("Supplier"))
         res['arch'] = etree.tostring(doc)
@@ -365,8 +365,7 @@ class account_voucher(osv.osv):
 
     def _paid_amount_in_company_currency(self, cr, uid, ids, name, args, context=None):
         if context is None:
-            context={}
-        if not ids: return {}
+            context = {}
         res = {}
         ctx = context.copy()
         for v in self.browse(cr, uid, ids, context=context):
@@ -397,9 +396,9 @@ class account_voucher(osv.osv):
         currency_pool = self.pool.get('res.currency')
         currency_str = payment_rate_str = ''
         if currency_id:
-            currency_str = rml_parser.formatLang(1/payment_rate, currency_obj=currency_pool.browse(cr, uid, currency_id, context=context))
+            currency_str = rml_parser.formatLang(1, currency_obj=currency_pool.browse(cr, uid, currency_id, context=context))
         if payment_rate_currency_id:
-            payment_rate_str  = rml_parser.formatLang(1, currency_obj=currency_pool.browse(cr, uid, payment_rate_currency_id, context=context))
+            payment_rate_str  = rml_parser.formatLang(payment_rate, currency_obj=currency_pool.browse(cr, uid, payment_rate_currency_id, context=context))
         currency_help_label = _('At the operation date, the exchange rate was\n%s = %s') % (currency_str, payment_rate_str)
         return currency_help_label
 
@@ -846,20 +845,25 @@ class account_voucher(osv.osv):
 
         total_credit = 0.0
         total_debit = 0.0
-        account_type = 'receivable'
+        account_type = None
+        if context.get('account_id'):
+            account_type = self.pool['account.account'].browse(cr, uid, context['account_id'], context=context).type
         if ttype == 'payment':
-            account_type = 'payable'
+            if not account_type:
+                account_type = 'payable'
             total_debit = price or 0.0
         else:
             total_credit = price or 0.0
-            account_type = 'receivable'
+            if not account_type:
+                account_type = 'receivable'
 
         if not context.get('move_line_ids', False):
             ids = move_line_pool.search(cr, uid, [('state','=','valid'), ('account_id.type', '=', account_type), ('reconcile_id', '=', False), ('partner_id', '=', partner_id)], context=context)
         else:
             ids = context['move_line_ids']
         invoice_id = context.get('invoice_id', False)
-        move_line_found = False
+        company_currency = journal.company_id.currency_id.id
+        move_lines_found = []
 
         #order the lines by most old first
         ids.reverse()
@@ -881,6 +885,7 @@ class account_voucher(osv.osv):
                 if line.invoice.id == invoice_id:
                     #if the invoice linked to the voucher line is equal to the invoice_id in context
                     #then we assign the amount on that line, whatever the other voucher lines
+                    move_lines_found.append(line.id)
                     move_line_found = line.id
                     if currency_id == company_currency:
                         #example: PEN pay, PEN/USD/... invoice
@@ -903,6 +908,7 @@ class account_voucher(osv.osv):
                 if line.amount_residual == price and line.debit > 0.0:
                     #if the amount residual is equal the amount voucher, we assign it to that voucher
                     #line, whatever the other voucher lines
+                    move_lines_found.append(line.id)
                     move_line_found = line.id
                     invoice_amount = price
                     break
@@ -961,10 +967,10 @@ class account_voucher(osv.osv):
                 'type': line.credit and 'dr' or 'cr',
                 'move_line_id':line.id,
                 'account_id':line.account_id.id,
+                'amount_original': amount_original,
                 'amount': (move_line_found == line.id) and invoice_amount or 0.0,
                 'date_original':line.date,
                 'date_due':line.date_maturity,
-                'amount_original': amount_original,
                 'amount_unreconciled': amount_unreconciled,
                 'currency_id': currency_id, #line_currency_id,
                 'amount_original_currency': amount_original_currency,
@@ -1125,7 +1131,7 @@ class account_voucher(osv.osv):
             currency_id = journal.currency.id
         else:
             currency_id = journal.company_id.currency_id.id
-        vals['value'].update({'currency_id': currency_id})
+        vals['value'].update({'currency_id': currency_id, 'payment_rate_currency_id': currency_id})
         #in case we want to register the payment directly from an invoice, it's confusing to allow to switch the journal 
         #without seeing that the amount is expressed in the journal currency, and not in the invoice currency. So to avoid
         #this common mistake, we simply reset the amount to 0 if the currency is not the invoice currency.
@@ -1164,20 +1170,20 @@ class account_voucher(osv.osv):
     def cancel_voucher(self, cr, uid, ids, context=None):
         reconcile_pool = self.pool.get('account.move.reconcile')
         move_pool = self.pool.get('account.move')
+        move_line_pool = self.pool.get('account.move.line')
         partner_obj = self.pool.get('res.partner')
         for voucher in self.browse(cr, uid, ids, context=context):
             # refresh to make sure you don't unlink an already removed move
             voucher.refresh()
-            recs = []
             for line in voucher.move_ids:
                 # refresh to make sure you don't unreconcile an already unreconciled entry
                 line.refresh()
                 if line.reconcile_id:
-                    recs += [line.reconcile_id.id]
-                if line.reconcile_partial_id:
-                    recs += [line.reconcile_partial_id.id]
-
-            reconcile_pool.unlink(cr, uid, recs)
+                    move_lines = [move_line.id for move_line in l
+                    move_lines.remove(line.id)                   
+                    reconcile_pool.unlink(cr, uid, [line.reconcil
+                    if len(move_lines) >= 2:                     
+                        move_line_pool.reconcile_partial(cr, uid,
             partner_obj.write(cr, uid, [voucher.partner_id.id], {'last_reconciliation_date': False}, context=context)
             if voucher.move_id:
                 move_pool.button_cancel(cr, uid, [voucher.move_id.id])
@@ -1285,7 +1291,6 @@ class account_voucher(osv.osv):
         :rtype: dict
         '''
         seq_obj = self.pool.get('ir.sequence')
-        name = ''
         voucher = self.pool.get('account.voucher').browse(cr,uid,voucher_id,context)
         if voucher.number:
             name = voucher.number
@@ -1296,9 +1301,9 @@ class account_voucher(osv.osv):
             c = dict(context)
             c.update({'fiscalyear_id': voucher.period_id.fiscalyear_id.id})
             name = seq_obj.next_by_id(cr, uid, voucher.journal_id.sequence_id.id, context=c)
-        if not name:
+        else:
             raise osv.except_osv(_('Error!'),
-                        _('Please define or configure properly a sequence on the journal %s.'%(voucher.journal_id.name,)))
+                        _('Please define a sequence on the journal.'))
         if not voucher.reference:
             ref = name.replace('/','')
         else:
@@ -1569,8 +1574,11 @@ class account_voucher(osv.osv):
             if voucher.payment_option == 'with_writeoff':
                 account_id = voucher.writeoff_acc_id.id
                 write_off_name = voucher.comment
-            elif voucher.type in ('sale', 'receipt'):
-                account_id = voucher.partner_id.property_account_receivable.id
+            elif voucher.partner_id:
+                if voucher.type in ('sale', 'receipt'):
+                    account_id = voucher.partner_id.property_account_receivable.id
+                else:
+                    account_id = voucher.partner_id.property_account_payable.id
             else:
                 account_id = voucher.partner_id.property_account_payable.id
             sign = (voucher.type == 'payment' and -1 or 1) * (diff < 0 and 1 or -1)
