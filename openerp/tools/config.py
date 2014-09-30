@@ -62,9 +62,15 @@ DEFAULT_LOG_HANDLER = [':INFO']
 
 def _get_default_datadir():
     home = os.path.expanduser('~')
-    func = appdirs.user_data_dir if os.path.exists(home) else appdirs.site_data_dir
+    if os.path.isdir(home):
+        func = appdirs.user_data_dir
+    else:
+        if sys.platform in ['win32', 'darwin']:
+            func = appdirs.site_data_dir
+        else:
+            func = lambda **kwarg: "/var/lib/%s" % kwarg['appname'].lower()
     # No "version" kwarg as session and filestore paths are shared against series
-    return func(appname='Odoo', appauthor=release.author)
+    return func(appname=release.product_name, appauthor=release.author)
 
 class configmanager(object):
     def __init__(self, fname=None):
@@ -255,8 +261,6 @@ class configmanager(object):
 
         # Advanced options
         group = optparse.OptionGroup(parser, "Advanced options")
-        if os.name == 'posix':
-            group.add_option('--auto-reload', dest='auto_reload', action='store_true', my_default=False, help='enable auto reload')
         group.add_option('--dev', dest='dev_mode', action='store_true', my_default=False, help='enable developper mode')
         group.add_option('--debug', dest='debug_mode', action='store_true', my_default=False, help='enable debug mode')
         group.add_option("--stop-after-init", action="store_true", dest="stop_after_init", my_default=False,
@@ -417,7 +421,7 @@ class configmanager(object):
         ]
 
         posix_keys = [
-            'auto_reload', 'workers',
+            'workers',
             'limit_memory_hard', 'limit_memory_soft',
             'limit_time_cpu', 'limit_time_real', 'limit_request',
         ]

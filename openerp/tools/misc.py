@@ -278,6 +278,36 @@ def reverse_enumerate(l):
     """
     return izip(xrange(len(l)-1, -1, -1), reversed(l))
 
+def topological_sort(elems):
+    """ Return a list of elements sorted so that their dependencies are listed
+    before them in the result.
+
+    :param elems: specifies the elements to sort with their dependencies; it is
+        a dictionary like `{element: dependencies}` where `dependencies` is a
+        collection of elements that must appear before `element`. The elements
+        of `dependencies` are not required to appear in `elems`; they will
+        simply not appear in the result.
+
+    :returns: a list with the keys of `elems` sorted according to their
+        specification.
+    """
+    # the algorithm is inspired by [Tarjan 1976],
+    # http://en.wikipedia.org/wiki/Topological_sorting#Algorithms
+    result = []
+    visited = set()
+
+    def visit(n):
+        if n not in visited:
+            visited.add(n)
+            if n in elems:
+                # first visit all dependencies of n, then append n to result
+                map(visit, elems[n])
+                result.append(n)
+
+    map(visit, elems)
+
+    return result
+
 
 class UpdateableStr(local):
     """ Class that stores an updateable string (used in wizards)
@@ -1131,7 +1161,7 @@ class CountingStream(object):
 
 def stripped_sys_argv(*strip_args):
     """Return sys.argv with some arguments stripped, suitable for reexecution or subprocesses"""
-    strip_args = sorted(set(strip_args) | set(['-s', '--save', '-d', '--database', '-u', '--update', '-i', '--init']))
+    strip_args = sorted(set(strip_args) | set(['-s', '--save', '-u', '--update', '-i', '--init']))
     assert all(config.parser.has_option(s) for s in strip_args)
     takes_value = dict((s, config.parser.get_option(s).takes_value()) for s in strip_args)
 
