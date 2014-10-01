@@ -864,6 +864,7 @@ class account_voucher(osv.osv):
         invoice_id = context.get('invoice_id', False)
         company_currency = journal.company_id.currency_id.id
         move_lines_found = []
+        move_line_found = False
 
         #order the lines by most old first
         ids.reverse()
@@ -1179,11 +1180,11 @@ class account_voucher(osv.osv):
                 # refresh to make sure you don't unreconcile an already unreconciled entry
                 line.refresh()
                 if line.reconcile_id:
-                    move_lines = [move_line.id for move_line in l
+                    move_lines = [move_line.id for move_line in line.reconcile_id.line_id]
                     move_lines.remove(line.id)                   
-                    reconcile_pool.unlink(cr, uid, [line.reconcil
+                    reconcile_pool.unlink(cr, uid, [line.reconcile_id.id])
                     if len(move_lines) >= 2:                     
-                        move_line_pool.reconcile_partial(cr, uid,
+                        move_line_pool.reconcile_partial(cr, uid, move_lines, 'auto',context=context)
             partner_obj.write(cr, uid, [voucher.partner_id.id], {'last_reconciliation_date': False}, context=context)
             if voucher.move_id:
                 move_pool.button_cancel(cr, uid, [voucher.move_id.id])
