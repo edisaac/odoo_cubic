@@ -282,9 +282,9 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         this.$el.add(this.$buttons).removeClass('oe_form_dirty');
 
         var shown = this.has_been_loaded;
-        if (options.reload !== false) {
+        if (options.reload !== false || !this.datarecord.id) {
             shown = shown.then(function() {
-                if (self.dataset.index === null) {
+                if (self.dataset.index === null || !self.datarecord.id) {
                     // null index means we should start a new record
                     return self.on_button_new();
                 }
