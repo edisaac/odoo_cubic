@@ -352,6 +352,7 @@ class pos_session(osv.osv):
         for obj in self.browse(cr, uid, ids, context=context):
             for statement in obj.statement_ids:
                 statement.unlink(context=context)
+        super(pos_session,self).unlink(cr, uid, ids, context=context)
         return True
 
 
