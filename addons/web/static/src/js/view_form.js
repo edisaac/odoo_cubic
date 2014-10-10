@@ -42,15 +42,15 @@ instance.web.form.FieldManagerMixin = {
     Gives new values for the fields contained in the view. The new values could not be setted
     right after the call to this method. Setting new values can trigger on_changes.
 
-    @param (dict) values A dictonnary with key = field name and value = new value.
-    @return (Deferred) Is resolved after all the values are setted.
+    @param {Object} values A dictonary with key = field name and value = new value.
+    @return {$.Deferred} Is resolved after all the values are setted.
     */
     set_values: function(values) {},
     /**
     Computes an OpenERP domain.
 
-    @param (list) expression An OpenERP domain.
-    @return (boolean) The computed value of the domain.
+    @param {Array} expression An OpenERP domain.
+    @return {boolean} The computed value of the domain.
     */
     compute_domain: function(expression) {},
     /**
@@ -58,7 +58,7 @@ instance.web.form.FieldManagerMixin = {
     the field are only supposed to use this context to evualuate their own, they should not
     extend it.
 
-    @return (CompoundContext) An OpenERP context.
+    @return {CompoundContext} An OpenERP context.
     */
     build_eval_context: function() {},
 };
@@ -282,9 +282,9 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         this.$el.add(this.$buttons).removeClass('oe_form_dirty');
 
         var shown = this.has_been_loaded;
-        if (options.reload !== false || !this.datarecord.id) {
+        if (options.reload !== false) {
             shown = shown.then(function() {
-                if (self.dataset.index === null || !self.datarecord.id) {
+                if (self.dataset.index === null) {
                     // null index means we should start a new record
                     return self.on_button_new();
                 }
