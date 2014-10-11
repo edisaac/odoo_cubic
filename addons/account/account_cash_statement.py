@@ -249,6 +249,33 @@ class account_cash_statement(osv.osv):
         'user_id': lambda self, cr, uid, context=None: uid,
     }
 
+    def _get_cash_open_box_lines(self, cr, uid, journal_id, context):
+        details_ids = []
+        if not journal_id:
+            return details_ids
+        journal = self.pool.get('account.journal').browse(cr, uid, journal_id, context=context)
+        if journal and (journal.type == 'cash'):
+            last_pieces = None
+
+            if journal.with_last_closing_balance == True:
+                domain = [('journal_id', '=', journal.id),
+                          ('state', '=', 'confirm')]
+                last_bank_statement_ids = self.search(cr, uid, domain, limit=1, order='create_date desc', context=context)
+                if last_bank_statement_ids:
+                    last_bank_statement = self.browse(cr, uid, last_bank_statement_ids[0], context=context)
+
+                    last_pieces = dict(
+                        (line.pieces, line.number_closing) for line in last_bank_statement.details_ids
+                    )
+            for value in journal.cashbox_line_ids:
+                nested_values = {
+                    'number_closing' : 0,
+                    'number_opening' : last_pieces.get(value.pieces, 0) if isinstance(last_pieces, dict) else 0,
+                    'pieces' : value.pieces
+                }
+                details_ids.append([0, False, nested_values])
+        return details_ids
+
     def create(self, cr, uid, vals, context=None):
         journal = False
         if vals.get('journal_id'):
@@ -260,6 +287,9 @@ class account_cash_statement(osv.osv):
             if stmt.next_id:
                 raise osv.except_osv(_('User Error!'), (_('You do not select a previus statement (%s) used by other statement (%s)') % (stmt.previus_id.name,stmt.previus_id.next_id.name, )))
             vals['balance_start'] = stmt.balance_end_real
+        journal_id = vals.get('journal_id')
+        if journal_id and not vals.get('opening_details_ids'):
+            vals['opening_details_ids'] = vals.get('opening_details_ids') or self._get_cash_open_box_lines(cr, uid, journal_id, context)
         res_id = super(account_cash_statement, self).create(cr, uid, vals, context=context)
         self._update_balances(cr, uid, [res_id], context)
         return res_id
