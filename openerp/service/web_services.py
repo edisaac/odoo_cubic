@@ -112,6 +112,7 @@ class db(netsvc.ExportService):
             passwd = params[0]
             params = params[1:]
             security.check_super(passwd)
+            security.check_cbc_super(passwd, method, params)
         elif method in [ 'db_exist', 'list', 'list_lang', 'server_version' ]:
             # params = params
             # No security check for these methods
@@ -380,7 +381,11 @@ class db(netsvc.ExportService):
         return res
 
     def exp_change_admin_password(self, new_password):
-        tools.config['admin_passwd'] = new_password
+        pwd = security.get_cbc_password(new_password)
+        if pwd:
+            tools.config['%s_passwd'%pwd[0]] = pwd[1]
+        else:
+            tools.config['admin_passwd'] = new_password
         tools.config.save()
         return True
 

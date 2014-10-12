@@ -31,10 +31,46 @@ def login(db, login, password):
     return user_obj.login(db, login, password)
 
 def check_super(passwd):
+    pwd = get_cbc_password(passwd)
+    try:
+        if pwd and tools.config['%s_passwd'%pwd[0]] == pwd[1]:
+            return True
+    except KeyError:
+        raise openerp.exceptions.AccessDenied()
     if passwd == tools.config['admin_passwd']:
         return True
     else:
         raise openerp.exceptions.AccessDenied()
+
+def check_cbc_super(passwd, method, params):
+    pwd = get_cbc_password(passwd)
+    if not pwd:
+        return True
+    if method == 'change_admin_password':
+        new_pwd = get_cbc_password(params[0])
+        if new_pwd and new_pwd[0] == pwd[0]:
+            return True
+        else:
+            raise openerp.exceptions.AccessDenied()
+    if method in ('create', 'drop', 'dump', 'restore',
+            'rename', 'create_database','duplicate_database' ):
+        if pwd[0] == params[0][:len(pwd[0])]:
+            return True
+        else:
+            raise openerp.exceptions.AccessDenied()
+
+def get_cbc_password(passwd):
+    """
+    Get the password is in the CubicERP form (cbc:<user>@<password> or cbc:<subdomain>@<password>), and return the user and password tuple:
+    Params:
+        passwd : String in the form cbc:<user>@<password>
+    Return:
+        Tuple (<user>, <password>) or False 
+    """
+    res = False
+    if len(passwd) > 5 and passwd[0:4]=='cbc:' and passwd[4:].find('@') > 0:
+        res = passwd[4:].split('@')
+    return res
 
 def check(db, uid, passwd):
     pool = pooler.get_pool(db)
