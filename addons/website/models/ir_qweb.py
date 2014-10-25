@@ -53,22 +53,28 @@ class QWeb(orm.AbstractModel):
         'style',
     ]
 
-    def add_template(self, qcontext, name, node):
-        # preprocessing for multilang static urls
-        if request.website:
-            for tag, attr in self.URL_ATTRS.iteritems():
-                for e in node.iterdescendants(tag=tag):
-                    url = e.get(attr)
-                    if url:
-                        e.set(attr, qcontext.get('url_for')(url))
-        super(QWeb, self).add_template(qcontext, name, node)
+    CDN_TRIGGERS = {
+        'link':    'href',
+        'script':  'src',
+        'img':     'src',
+    }
 
-    def render_att_att(self, element, attribute_name, attribute_value, qwebcontext):
-        att, val = super(QWeb, self).render_att_att(element, attribute_name, attribute_value, qwebcontext)
+    def render_attribute(self, element, name, value, qwebcontext):
+        context = qwebcontext.context or {}
+        if not context.get('rendering_bundle'):
+            if name == self.URL_ATTRS.get(element.tag):
+                value = qwebcontext.get('url_for')(value)
+            if request and request.website and request.website.cdn_activated and name == self.CDN_TRIGGERS.get(element.tag):
+                value = request.website.get_cdn_url(value)
 
-        if request.website and att == self.URL_ATTRS.get(element.tag) and isinstance(val, basestring):
-            val = qwebcontext.get('url_for')(val)
-        return att, val
+        return super(QWeb, self).render_attribute(element, name, value, qwebcontext)
+
+    def render_tag_call_assets(self, element, template_attributes, generated_attributes, qwebcontext):
+        if request and request.website and request.website.cdn_activated:
+            if qwebcontext.context is None:
+                qwebcontext.context = {}
+            qwebcontext.context['url_for'] = request.website.get_cdn_url
+        return super(QWeb, self).render_tag_call_assets(element, template_attributes, generated_attributes, qwebcontext)
 
     def get_converter_for(self, field_type):
         return self.pool.get(
@@ -307,32 +313,32 @@ class Image(orm.AbstractModel):
 
     def record_to_html(self, cr, uid, field_name, record, column, options=None, context=None):
         if options is None: options = {}
-        classes = ['img', 'img-responsive'] + options.get('class', '').split()
+        aclasses = ['img', 'img-responsive'] + options.get('class', '').split()
+        classes = ' '.join(itertools.imap(escape, aclasses))
 
-        url_frags = {
-            'classes': ' '.join(itertools.imap(escape, classes)),
-            'model': record._model._name,
-            'id': record.id,
-            'field': field_name,
-            'max_size': '',
-        }
+        max_size = None
         max_width, max_height = options.get('max_width', 0), options.get('max_height', 0)
         if max_width or max_height:
-            url_frags['max_size'] = '/%sx%s' % (max_width, max_height)
+            max_size = '%sx%s' % (max_width, max_height)
 
-        img = '<img class="%(classes)s" src="/website/image/%(model)s/%(id)s/%(field)s%(max_size)s"/>'
-        return ir_qweb.HTMLSafe(img % url_frags)
+        src = self.pool['website'].image_url(cr, uid, record, field_name, max_size)
+        img = '<img class="%s" src="%s"/>' % (classes, src)
+        return ir_qweb.HTMLSafe(img)
 
     local_url_re = re.compile(r'^/(?P<module>[^]]+)/static/(?P<rest>.+)$')
     def from_html(self, cr, uid, model, column, element, context=None):
         url = element.find('img').get('src')
 
         url_object = urlparse.urlsplit(url)
-        query = dict(urlparse.parse_qsl(url_object.query))
-        if url_object.path == '/website/image':
-            item = self.pool[query['model']].browse(
-                cr, uid, int(query['id']), context=context)
-            return item[query['field']]
+        if url_object.path.startswith('/website/image'):
+            # url might be /website/image/<model>/<id>[_<checksum>]/<field>[/<width>x<height>]
+            fragments = url_object.path.split('/')
+            query = dict(urlparse.parse_qsl(url_object.query))
+            model = query.get('model', fragments[3])
+            oid = query.get('id', fragments[4].split('_')[0])
+            field = query.get('field', fragments[5])
+            item = self.pool[model].browse(cr, uid, int(oid), context=context)
+            return item[field]
 
         if self.local_url_re.match(url_object.path):
             return self.load_local_url(url)
@@ -435,6 +441,9 @@ class RelativeDatetime(orm.AbstractModel):
 class Contact(orm.AbstractModel):
     _name = 'website.qweb.field.contact'
     _inherit = ['ir.qweb.field.contact', 'website.qweb.field.many2one']
+
+    def from_html(self, cr, uid, model, column, element, context=None):
+        return None
 
 class QwebView(orm.AbstractModel):
     _name = 'website.qweb.field.qweb'

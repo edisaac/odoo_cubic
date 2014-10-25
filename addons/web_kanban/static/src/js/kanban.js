@@ -43,6 +43,9 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
         this.currently_dragging = {};
         this.limit = options.limit || 40;
         this.add_group_mutex = new $.Mutex();
+        if (!this.options.$buttons || !this.options.$buttons.length) {
+            this.options.$buttons = false;
+        }
     },
     view_loading: function(r) {
         return this.load_kanban(r);
@@ -69,13 +72,12 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
         if (unsorted && default_order) {
             this.dataset.set_sort(default_order.split(','));
         }
-
         this.$el.addClass(this.fields_view.arch.attrs['class']);
         this.$buttons = $(QWeb.render("KanbanView.buttons", {'widget': this}));
         if (this.options.$buttons) {
             this.$buttons.appendTo(this.options.$buttons);
         } else {
-            this.$el.find('.oe_kanban_buttons').replaceWith(this.$buttons);
+            this.$('.oe_kanban_buttons').replaceWith(this.$buttons);
         }
         this.$buttons
             .on('click', 'button.oe_kanban_button_new', this.do_add_record)
@@ -159,7 +161,7 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
             case 'button':
             case 'a':
                 var type = node.attrs.type || '';
-                if (_.indexOf('action,object,edit,open,delete'.split(','), type) !== -1) {
+                if (_.indexOf('action,object,edit,open,delete,url'.split(','), type) !== -1) {
                     _.each(node.attrs, function(v, k) {
                         if (_.indexOf('icon,type,name,args,string,context,states,kanban_states'.split(','), k) != -1) {
                             node.attrs['data-' + k] = v;
@@ -179,7 +181,7 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
                             }
                         }];
                     }
-                    if (node.tag == 'a') {
+                    if (node.tag == 'a' && node.attrs['data-type'] != "url") {
                         node.attrs.href = '#';
                     } else {
                         node.attrs.type = 'button';
@@ -252,12 +254,12 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
                 self.fields_keys = _.unique(self.fields_keys.concat(grouping_fields));
             }
             var grouping = new instance.web.Model(self.dataset.model, context, domain).query(self.fields_keys).group_by(grouping_fields);
-            return self.alive($.when(grouping)).done(function(groups) {
+            return self.alive($.when(grouping)).then(function(groups) {
                 self.remove_no_result();
                 if (groups) {
-                    self.do_process_groups(groups);
+                    return self.do_process_groups(groups);
                 } else {
-                    self.do_process_dataset();
+                    return self.do_process_dataset();
                 }
             });
         });
@@ -266,12 +268,12 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
         var self = this;
         this.$el.find('table:first').show();
         this.$el.removeClass('oe_kanban_ungrouped').addClass('oe_kanban_grouped');
-        this.add_group_mutex.exec(function() {
+        return this.add_group_mutex.exec(function() {
             self.do_clear_groups();
             self.dataset.ids = [];
             if (!groups.length) {
                 self.no_result();
-                return false;
+                return $.when();
             }
             self.nb_records = 0;
             var remaining = groups.length - 1,
@@ -287,8 +289,10 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
                         self.nb_records += records.length;
                         self.dataset.ids.push.apply(self.dataset.ids, dataset.ids);
                         groups_array[index] = new instance.web_kanban.KanbanGroup(self, records, group, dataset);
-                        if (!remaining--) {
+                        if (self.dataset.index >= records.length){
                             self.dataset.index = self.dataset.size() ? 0 : null;
+                        }
+                        if (!remaining--) {
                             return self.do_add_groups(groups_array);
                         }
                 });
@@ -304,8 +308,8 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
         var self = this;
         this.$el.find('table:first').show();
         this.$el.removeClass('oe_kanban_grouped').addClass('oe_kanban_ungrouped');
+        var def = $.Deferred();
         this.add_group_mutex.exec(function() {
-            var def = $.Deferred();
             self.do_clear_groups();
             self.dataset.read_slice(self.fields_keys.concat(['__last_update']), { 'limit': self.limit }).done(function(records) {
                 var kgroup = new instance.web_kanban.KanbanGroup(self, records, null, self.dataset);
@@ -324,8 +328,8 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
             }).done(null, function() {
                 def.reject();
             });
-            return def;
         });
+        return def;
     },
     do_reload: function() {
         this.do_search(this.search_domain, this.search_context, this.search_group_by);
@@ -488,7 +492,7 @@ instance.web_kanban.KanbanView = instance.web.View.extend({
     },
 
     do_show: function() {
-        if (this.$buttons) {
+        if (this.options.$buttons) {
             this.$buttons.show();
         }
         this.do_push_state({});
@@ -947,7 +951,6 @@ instance.web_kanban.KanbanRecord = instance.web.Widget.extend({
         this.$el.find('[title]').each(function(){
             $(this).tooltip({
                 delay: { show: 500, hide: 0},
-                container: $(this),
                 title: function() {
                     var template = $(this).attr('tooltip');
                     if (!self.view.qweb.has_template(template)) {
@@ -1026,7 +1029,10 @@ instance.web_kanban.KanbanRecord = instance.web.Widget.extend({
      *  open on form/edit view : oe_kanban_global_click_edit
      */
     on_card_clicked: function(ev) {
-        if(this.$el.find('.oe_kanban_global_click_edit').size()>0)
+        if (this.$el.find('.oe_kanban_global_click').size() > 0 && this.$el.find('.oe_kanban_global_click').data('routing')) {
+            instance.web.redirect(this.$el.find('.oe_kanban_global_click').data('routing') + "/" + this.id);
+        }
+        else if (this.$el.find('.oe_kanban_global_click_edit').size()>0)
             this.do_action_edit();
         else
             this.do_action_open();
@@ -1075,6 +1081,9 @@ instance.web_kanban.KanbanRecord = instance.web.Widget.extend({
         var button_attrs = $action.data();
         this.view.do_execute_action(button_attrs, this.view.dataset, this.id, this.do_reload);
     },
+    do_action_url: function($action) {
+        return instance.web.redirect($action.attr("href"));
+     },
     do_reload: function() {
         var self = this;
         this.view.dataset.read_ids([this.id], this.view.fields_keys.concat(['__last_update'])).done(function(records) {
