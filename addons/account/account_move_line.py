@@ -355,7 +355,7 @@ class account_move_line(osv.osv):
         result = []
         for line in self.browse(cr, uid, ids, context=context):
             if line.ref:
-                result.append((line.id, (line.move_id.name or '')+' ('+line.ref+')'))
+                result.append((line.id, (line.move_id.name or '')+' ('+line.ref+(line.name<>' / ' and ('/'+line.name) or '')+')'))
             else:
                 result.append((line.id, line.move_id.name))
         return result
