@@ -354,10 +354,17 @@ class account_move_line(osv.osv):
             return []
         result = []
         for line in self.browse(cr, uid, ids, context=context):
-            if line.ref:
-                result.append((line.id, (line.move_id.name or '')+' ('+line.ref+(line.name<>' / ' and ('/'+line.name) or '')+')'))
-            else:
-                result.append((line.id, line.move_id.name))
+            name = line.move_id.name or ''
+            sub_name = ''
+            if line.ref and name <> line.ref:
+                sub_name += line.ref
+                if line.name and line.name <> '/':
+                    sub_name += ' / '+line.name
+            elif line.name and line.name <> '/':
+                sub_name = line.name
+            if sub_name:
+                name += ' (%s)'%sub_name
+            result.append((line.id, name))
         return result
 
     def _balance_search(self, cursor, user, obj, name, args, domain=None, context=None):
