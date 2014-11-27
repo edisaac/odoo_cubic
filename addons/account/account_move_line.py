@@ -775,6 +775,12 @@ class account_move_line(osv.osv):
         ids = partner_obj.search(cr, uid, [('id', 'in', ids)], context=context)
         return partner_obj.name_get(cr, uid, ids, context=context)
 
+    def _get_move_reconcile_partial_create(self, cr, uid, type, merges, unmerge, context=None):
+        return {
+            'type': type,
+            'line_partial_ids': map(lambda x: (4,x,False), merges+unmerge)
+        }
+
     def reconcile_partial(self, cr, uid, ids, type='auto', context=None, writeoff_acc_id=False, writeoff_period_id=False, writeoff_journal_id=False):
         move_rec_obj = self.pool.get('account.move.reconcile')
         merges = []
@@ -813,18 +819,22 @@ class account_move_line(osv.osv):
                 else:
                     total += (line.debit or 0.0) - (line.credit or 0.0)
         if self.pool.get('res.currency').is_zero(cr, uid, currency_id, total):
-            res = self.reconcile(cr, uid, merges+unmerge, context=context, writeoff_acc_id=writeoff_acc_id, writeoff_period_id=writeoff_period_id, writeoff_journal_id=writeoff_journal_id)
+            res = self.reconcile(cr, uid, merges+unmerge, context=context, writeoff_acc_id=writeoff_acc_id, writeoff_period_id=writeoff_period_id, writeoff_journal_id=writeoff_journal_id, type=type)
             return res
         # marking the lines as reconciled does not change their validity, so there is no need
         # to revalidate their moves completely.
         reconcile_context = dict(context, novalidate=True)
-        r_id = move_rec_obj.create(cr, uid, {
-            'type': type,
-            'line_partial_ids': map(lambda x: (4,x,False), merges+unmerge)
-        }, context=reconcile_context)
+        r_id = move_rec_obj.create(cr, uid, self._get_move_reconcile_partial_create(cr, uid, type, merges, unmerge, context=context), context=reconcile_context)
         move_rec_obj.reconcile_partial_check(cr, uid, [r_id] + merges_rec, context=reconcile_context)
         return True
 
+    def _get_move_reconcile_create(self, cr, uid, type, ids, context=None):
+        return {
+            'type': type,
+            'line_id': map(lambda x: (4, x, False), ids),
+            'line_partial_ids': map(lambda x: (3, x, False), ids)
+        }
+        
     def reconcile(self, cr, uid, ids, type='auto', writeoff_acc_id=False, writeoff_period_id=False, writeoff_journal_id=False, context=None):
         account_obj = self.pool.get('account.account')
         move_obj = self.pool.get('account.move')
@@ -956,11 +966,7 @@ class account_move_line(osv.osv):
         # marking the lines as reconciled does not change their validity, so there is no need
         # to revalidate their moves completely.
         reconcile_context = dict(context, novalidate=True)
-        r_id = move_rec_obj.create(cr, uid, {
-            'type': type,
-            'line_id': map(lambda x: (4, x, False), ids),
-            'line_partial_ids': map(lambda x: (3, x, False), ids)
-        }, context=reconcile_context)
+        r_id = move_rec_obj.create(cr, uid, self._get_move_reconcile_create(cr, uid, type, ids, context=context), context=reconcile_context)
         wf_service = netsvc.LocalService("workflow")
         # the id of the move.reconcile is written in the move.line (self) by the create method above
         # because of the way the line_id are defined: (4, x, False)
