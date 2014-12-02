@@ -265,7 +265,7 @@ class account_voucher(osv.osv):
                      'amount_unreconciled': amount_unreconciled,
                      'amount_unreconciled_currency': line.amount_unreconciled_currency,
                      }
-            line_currency_id = l['currency_id'] or company_currency
+            line_currency_id = l.get('currency_id', company_currency)
             rate = self._get_rate(cr, uid, currency_id,line_currency_id, payment_rate, payment_rate_currency_id ,context=context)
             if currency_id == company_currency:
                 #example: PEN pay, PEN/USD/... invoice
@@ -313,8 +313,8 @@ class account_voucher(osv.osv):
         if not line_dr_ids and not line_cr_ids:
             return {'value':{'writeoff_amount': 0.0}}
         line_osv = self.pool.get("account.voucher.line")
-        line_dr_ids = resolve_o2m_operations(cr, uid, line_osv, line_dr_ids, ['amount'], context)
-        line_cr_ids = resolve_o2m_operations(cr, uid, line_osv, line_cr_ids, ['amount'], context)
+        line_dr_ids = resolve_o2m_operations(cr, uid, line_osv, line_dr_ids, ['amount','amount_unreconciled','amount_unreconciled_currency'], context)
+        line_cr_ids = resolve_o2m_operations(cr, uid, line_osv, line_cr_ids, ['amount','amount_unreconciled','amount_unreconciled_currency'], context)
         #YT 21/03/2013
         if date is None:
             date = time.strftime('%Y-%m-%d')
@@ -1961,7 +1961,7 @@ class account_bank_statement_line(osv.osv):
     def _check_amount(self, cr, uid, ids, context=None):
         for obj in self.browse(cr, uid, ids, context=context):
             if obj.voucher_id:
-                diff = abs(obj.amount) - obj.voucher_id.amount
+                diff = abs(obj.amount) - abs(obj.voucher_id.amount)
                 if not self.pool.get('res.currency').is_zero(cr, uid, obj.statement_id.currency, diff):
                     return False
         return True

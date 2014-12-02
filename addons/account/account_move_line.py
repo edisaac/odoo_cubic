@@ -878,12 +878,7 @@ class account_move_line(osv.osv):
                    (tuple(ids), ))
         r = cr.fetchall()
         #TODO: move this check to a constraint in the account_move_reconcile object
-        if context.get('restrict_only_one_account', True) and len(r) != 1:
-            if context.has_key('restrict_only_one_account'):
-                raise osv.except_osv(_('Error'), _('Entries are not of the same account or already reconciled ! \n You could use the invoice swap check on the partner form to avoid this message.'))
-            else:
-                raise osv.except_osv(_('Error'), _('Entries are not of the same account or already reconciled ! '))
-        elif len(r) == 0:
+        if len(r) != 1:
             raise osv.except_osv(_('Error'), _('Entries are not of the same account or already reconciled ! '))
         if not unrec_lines:
             raise osv.except_osv(_('Error!'), _('Entry is already reconciled.'))
