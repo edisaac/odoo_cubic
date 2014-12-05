@@ -50,7 +50,7 @@ openerp.service.server.load_server_wide_modules()
 # Standard OpenERP XML-RPC port is 8069
 bind = '0.0.0.0:8878'
 pidfile = '.gunicorn.pid'
-workers = 5
+workers = 3
 timeout = 240
 max_requests = 2000
 
