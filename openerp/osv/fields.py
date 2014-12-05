@@ -42,6 +42,7 @@ import logging
 import pytz
 import re
 import xmlrpclib
+from operator import itemgetter
 from psycopg2 import Binary
 
 import openerp
@@ -103,7 +104,7 @@ class _column(object):
         self.help = args.get('help', '')
         self.priority = priority
         self.change_default = change_default
-        self.ondelete = ondelete.lower() if ondelete else None # defaults to 'set null' in ORM
+        self.ondelete = ondelete.lower() if ondelete else 'set null'
         self.translate = translate
         self._domain = domain
         self._context = context
@@ -115,13 +116,29 @@ class _column(object):
         self.group_operator = args.get('group_operator', False)
         self.groups = False  # CSV list of ext IDs of groups that can access this field
         self.deprecated = False # Optional deprecation warning
+        self._args = args
         for a in args:
             setattr(self, a, args[a])
 
         # prefetch only if self._classic_write, not self.groups, and not
         # self.deprecated
-        if not self._classic_write or self.groups or self.deprecated:
+        if not self._classic_write or self.deprecated:
             self._prefetch = False
+
+    def new(self, **args):
+        """ return a column like `self` with the given parameters """
+        # memory optimization: reuse self whenever possible; you can reduce the
+        # average memory usage per registry by 10 megabytes!
+        return self if self.same_parameters(args) else type(self)(**args)
+
+    def same_parameters(self, args):
+        dummy = object()
+        return all(
+            # either both are falsy, or they are equal
+            (not val1 and not val) or (val1 == val)
+            for key, val in args.iteritems()
+            for val1 in [getattr(self, key, getattr(self, '_' + key, dummy))]
+        )
 
     def to_field(self):
         """ convert column `self` to a new-style field """
@@ -130,8 +147,8 @@ class _column(object):
 
     def to_field_args(self):
         """ return a dictionary with all the arguments to pass to the field """
-        items = [
-            ('_origin', self),                  # field interfaces self
+        base_items = [
+            ('column', self),                   # field interfaces self
             ('copy', self.copy),
             ('index', self.select),
             ('manual', self.manual),
@@ -141,15 +158,17 @@ class _column(object):
             ('required', self.required),
             ('states', self.states),
             ('groups', self.groups),
+            ('change_default', self.change_default),
+            ('deprecated', self.deprecated),
+        ]
+        truthy_items = filter(itemgetter(1), [
             ('size', self.size),
             ('ondelete', self.ondelete),
             ('translate', self.translate),
             ('domain', self._domain),
             ('context', self._context),
-            ('change_default', self.change_default),
-            ('deprecated', self.deprecated),
-        ]
-        return dict(item for item in items if item[1])
+        ])
+        return dict(base_items + truthy_items + self._args.items())
 
     def restart(self):
         pass
@@ -313,6 +332,10 @@ class float(_column):
         self.digits = digits
         # synopsis: digits_compute(cr) ->  (precision, scale)
         self.digits_compute = digits_compute
+
+    def new(self, **args):
+        # float columns are database-dependent, so always recreate them
+        return type(self)(**args)
 
     def to_field_args(self):
         args = super(float, self).to_field_args()
@@ -671,19 +694,20 @@ class one2many(_column):
             context = dict(context or {})
             context.update(self._context)
 
-        res = dict((id, []) for id in ids)
-
+        # retrieve the records in the comodel
         comodel = obj.pool[self._obj].browse(cr, user, [], context)
         inverse = self._fields_id
         domain = self._domain(obj) if callable(self._domain) else self._domain
         domain = domain + [(inverse, 'in', ids)]
+        records = comodel.search(domain, limit=self._limit)
 
-        for record in comodel.search(domain, limit=self._limit):
-            # Note: record[inverse] can be a record or an integer!
-            assert int(record[inverse]) in res
-            res[int(record[inverse])].append(record.id)
+        result = {id: [] for id in ids}
+        # read the inverse of records without prefetching other fields on them
+        for record in records.with_context(prefetch_fields=False):
+            # record[inverse] may be a record or an integer
+            result[int(record[inverse])].append(record.id)
 
-        return res
+        return result
 
     def set(self, cr, obj, id, field, values, user=None, context=None):
         result = []
@@ -1242,6 +1266,11 @@ class function(_column):
                 self._symbol_c = type_class._symbol_c
                 self._symbol_f = type_class._symbol_f
                 self._symbol_set = type_class._symbol_set
+
+    def new(self, **args):
+        # HACK: function fields are tricky to recreate, simply return a copy
+        import copy
+        return copy.copy(self)
 
     def to_field_args(self):
         args = super(function, self).to_field_args()
