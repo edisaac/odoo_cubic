@@ -39,7 +39,6 @@
 
 """
 
-import copy
 import datetime
 import functools
 import itertools
@@ -65,7 +64,7 @@ from .api import Environment
 from .exceptions import except_orm, AccessError, MissingError, ValidationError
 from .osv import fields
 from .osv.query import Query
-from .tools import lazy_property
+from .tools import lazy_property, ormcache
 from .tools.config import config
 from .tools.misc import CountingStream, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from .tools.safe_eval import safe_eval as eval
@@ -179,7 +178,12 @@ def get_pg_type(f, type_override=None):
     if field_type in FIELDS_TO_PGTYPES:
         pg_type =  (FIELDS_TO_PGTYPES[field_type], FIELDS_TO_PGTYPES[field_type])
     elif issubclass(field_type, fields.float):
-        if f.digits:
+        # Explicit support for "falsy" digits (0, False) to indicate a
+        # NUMERIC field with no fixed precision. The values will be saved
+        # in the database with all significant digits.
+        # FLOAT8 type is still the default when there is no precision because
+        # it is faster for most operations (sums, etc.)
+        if f.digits is not None:
             pg_type = ('numeric', 'NUMERIC')
         else:
             pg_type = ('float8', 'DOUBLE PRECISION')
@@ -237,6 +241,12 @@ class MetaModel(api.Meta):
         if not self._custom:
             self.module_to_models.setdefault(self._module, []).append(self)
 
+        # transform columns into new-style fields (enables field inheritance)
+        for name, column in self._columns.iteritems():
+            if name in self.__dict__:
+                _logger.warning("In class %s, field %r overriding an existing value", self, name)
+            setattr(self, name, column.to_field())
+
 
 class NewId(object):
     """ Pseudo-ids for new records. """
@@ -245,6 +255,9 @@ class NewId(object):
 
 IdType = (int, long, basestring, NewId)
 
+
+# maximum number of prefetched records
+PREFETCH_MAX = 200
 
 # special columns automatically created by the ORM
 LOG_ACCESS_COLUMNS = ['create_uid', 'create_date', 'write_uid', 'write_date']
@@ -453,22 +466,32 @@ class BaseModel(object):
     @classmethod
     def _add_field(cls, name, field):
         """ Add the given `field` under the given `name` in the class """
-        field.set_class_name(cls, name)
-
-        # add field in _fields (for reflection)
+        # add field as an attribute and in cls._fields (for reflection)
+        if not isinstance(getattr(cls, name, field), Field):
+            _logger.warning("In model %r, field %r overriding existing value", cls._name, name)
+        setattr(cls, name, field)
         cls._fields[name] = field
 
-        # add field as an attribute, unless another kind of value already exists
-        if isinstance(getattr(cls, name, field), Field):
-            setattr(cls, name, field)
-        else:
-            _logger.warning("In model %r, member %r is not a field", cls._name, name)
+        # basic setup of field
+        field.set_class_name(cls, name)
 
         if field.store:
             cls._columns[name] = field.to_column()
         else:
             # remove potential column that may be overridden by field
             cls._columns.pop(name, None)
+
+    @classmethod
+    def _pop_field(cls, name):
+        """ Remove the field with the given `name` from the model.
+            This method should only be used for manual fields.
+        """
+        field = cls._fields.pop(name)
+        cls._columns.pop(name, None)
+        cls._all_columns.pop(name, None)
+        if hasattr(cls, name):
+            delattr(cls, name)
+        return field
 
     @classmethod
     def _add_magic_fields(cls):
@@ -583,9 +606,6 @@ class BaseModel(object):
             )
             columns.update(cls._columns)
 
-            defaults = dict(parent_class._defaults)
-            defaults.update(cls._defaults)
-
             inherits = dict(parent_class._inherits)
             inherits.update(cls._inherits)
 
@@ -610,7 +630,6 @@ class BaseModel(object):
                 '_name': name,
                 '_register': False,
                 '_columns': columns,
-                '_defaults': defaults,
                 '_inherits': inherits,
                 '_depends': depends,
                 '_constraints': constraints,
@@ -624,7 +643,7 @@ class BaseModel(object):
             '_name': name,
             '_register': False,
             '_columns': dict(cls._columns),
-            '_defaults': dict(cls._defaults),
+            '_defaults': {},            # filled by Field._determine_default()
             '_inherits': dict(cls._inherits),
             '_depends': dict(cls._depends),
             '_constraints': list(cls._constraints),
@@ -632,12 +651,6 @@ class BaseModel(object):
             '_original_module': original_module,
         }
         cls = type(cls._name, (cls,), attrs)
-
-        # float fields are registry-dependent (digit attribute); duplicate them
-        # to avoid issues
-        for key, col in cls._columns.items():
-            if col._type == 'float':
-                cls._columns[key] = copy.copy(col)
 
         # instantiate the model, and initialize it
         model = object.__new__(cls)
@@ -796,12 +809,13 @@ class BaseModel(object):
                 "TransientModels must have log_access turned on, " \
                 "in order to implement their access rights policy"
 
-        # retrieve new-style fields and duplicate them (to avoid clashes with
-        # inheritance between different models)
+        # retrieve new-style fields (from above registry class) and duplicate
+        # them (to avoid clashes with inheritance between different models)
         cls._fields = {}
-        for attr, field in getmembers(cls, Field.__instancecheck__):
-            if not field._origin:
-                cls._add_field(attr, field.copy())
+        above = cls.__bases__[0]
+        for attr, field in getmembers(above, Field.__instancecheck__):
+            if not field.inherited:
+                cls._add_field(attr, field.new())
 
         # introduce magic fields
         cls._add_magic_fields()
@@ -836,8 +850,23 @@ class BaseModel(object):
         # prepare ormcache, which must be shared by all instances of the model
         cls._ormcache = {}
 
+    @api.model
+    @ormcache()
+    def _is_an_ordinary_table(self):
+        self.env.cr.execute("""\
+            SELECT  1
+            FROM    pg_class
+            WHERE   relname = %s
+            AND     relkind = %s""", [self._table, 'r'])
+        return bool(self.env.cr.fetchone())
+
     def __export_xml_id(self):
         """ Return a valid xml_id for the record `self`. """
+        if not self._is_an_ordinary_table():
+            raise Exception(
+                "You can not export the column ID of model %s, because the "
+                "table %s is not an ordinary table."
+                % (self._name, self._table))
         ir_model_data = self.sudo().env['ir.model.data']
         data = ir_model_data.search([('model', '=', self._name), ('res_id', '=', self.id)])
         if data:
@@ -1280,7 +1309,8 @@ class BaseModel(object):
                 except Exception, e:
                     raise ValidationError("Error while validating constraint\n\n%s" % tools.ustr(e))
 
-    def default_get(self, cr, uid, fields_list, context=None):
+    @api.model
+    def default_get(self, fields_list):
         """ default_get(fields) -> default_values
 
         Return default values for the fields in `fields_list`. Default
@@ -1289,68 +1319,56 @@ class BaseModel(object):
 
         :param fields_list: a list of field names
         :return: a dictionary mapping each field name to its corresponding
-            default value; the keys of the dictionary are the fields in
-            `fields_list` that have a default value different from ``False``.
+            default value, if it has one.
 
-        This method should not be overridden. In order to change the
-        mechanism for determining default values, you should override method
-        :meth:`add_default_value` instead.
         """
         # trigger view init hook
-        self.view_init(cr, uid, fields_list, context)
+        self.view_init(fields_list)
 
-        # use a new record to determine default values; evaluate fields on the
-        # new record and put default values in result
-        record = self.new(cr, uid, {}, context=context)
-        result = {}
+        defaults = {}
+        parent_fields = defaultdict(list)
+
         for name in fields_list:
-            if name in self._fields:
-                value = record[name]
-                if name in record._cache:
-                    result[name] = value        # it really is a default value
+            # 1. look up context
+            key = 'default_' + name
+            if key in self._context:
+                defaults[name] = self._context[key]
+                continue
 
-        # convert default values to the expected format
-        result = self._convert_to_write(result)
-        return result
+            # 2. look up ir_values
+            #    Note: performance is good, because get_defaults_dict is cached!
+            ir_values_dict = self.env['ir.values'].get_defaults_dict(self._name)
+            if name in ir_values_dict:
+                defaults[name] = ir_values_dict[name]
+                continue
 
-    def add_default_value(self, field):
-        """ Set the default value of `field` to the new record `self`.
-            The value must be assigned to `self`.
-        """
-        assert not self.id, "Expected new record: %s" % self
-        cr, uid, context = self.env.args
-        name = field.name
+            field = self._fields.get(name)
 
-        # 1. look up context
-        key = 'default_' + name
-        if key in context:
-            self[name] = context[key]
-            return
+            # 3. look up property fields
+            #    TODO: get rid of this one
+            if field and field.company_dependent:
+                defaults[name] = self.env['ir.property'].get(name, self._name)
+                continue
 
-        # 2. look up ir_values
-        #    Note: performance is good, because get_defaults_dict is cached!
-        ir_values_dict = self.env['ir.values'].get_defaults_dict(self._name)
-        if name in ir_values_dict:
-            self[name] = ir_values_dict[name]
-            return
+            # 4. look up field.default
+            if field and field.default:
+                defaults[name] = field.default(self)
+                continue
 
-        # 3. look up property fields
-        #    TODO: get rid of this one
-        column = self._columns.get(name)
-        if isinstance(column, fields.property):
-            self[name] = self.env['ir.property'].get(name, self._name)
-            return
+            # 5. delegate to parent model
+            if field and field.inherited:
+                field = field.related_field
+                parent_fields[field.model_name].append(field.name)
 
-        # 4. look up _defaults
-        if name in self._defaults:
-            value = self._defaults[name]
-            if callable(value):
-                value = value(self._model, cr, uid, context)
-            self[name] = value
-            return
+        # convert default values to the right format
+        defaults = self._convert_to_cache(defaults, validate=False)
+        defaults = self._convert_to_write(defaults)
 
-        # 5. delegate to field
-        field.determine_default(self)
+        # add default values for inherited fields
+        for model, names in parent_fields.iteritems():
+            defaults.update(self.env[model].default_get(names))
+
+        return defaults
 
     def fields_get_keys(self, cr, user, context=None):
         res = self._columns.keys()
@@ -1661,8 +1679,9 @@ class BaseModel(object):
 
     @api.depends(lambda self: (self._rec_name,) if self._rec_name else ())
     def _compute_display_name(self):
-        for i, got_name in enumerate(self.name_get()):
-            self[i].display_name = got_name[1]
+        names = dict(self.name_get())
+        for record in self:
+            record.display_name = names.get(record.id, False)
 
     @api.multi
     def name_get(self):
@@ -1836,7 +1855,8 @@ class BaseModel(object):
             pass
 
 
-    def _read_group_fill_results(self, cr, uid, domain, groupby, remaining_groupbys, aggregated_fields,
+    def _read_group_fill_results(self, cr, uid, domain, groupby, remaining_groupbys,
+                                 aggregated_fields, count_field,
                                  read_group_result, read_group_order=None, context=None):
         """Helper method for filling in empty groups for all possible values of
            the field being grouped by"""
@@ -1870,8 +1890,7 @@ class BaseModel(object):
                 result.append(left_side)
                 known_values[grouped_value] = left_side
             else:
-                count_attr = groupby + '_count'
-                known_values[grouped_value].update({count_attr: left_side[count_attr]})
+                known_values[grouped_value].update({count_field: left_side[count_field]})
         def append_right(right_side):
             grouped_value = right_side[0]
             if not grouped_value in known_values:
@@ -1960,11 +1979,20 @@ class BaseModel(object):
         qualified_field = self._inherits_join_calc(split[0], query)
         if temporal:
             display_formats = {
-                'day': 'dd MMM YYYY', 
-                'week': "'W'w YYYY", 
-                'month': 'MMMM YYYY', 
-                'quarter': 'QQQ YYYY', 
-                'year': 'YYYY'
+                # Careful with week/year formats:
+                #  - yyyy (lower) must always be used, *except* for week+year formats
+                #  - YYYY (upper) must always be used for week+year format
+                #         e.g. 2006-01-01 is W52 2005 in some locales (de_DE),
+                #                         and W1 2006 for others
+                #
+                # Mixing both formats, e.g. 'MMM YYYY' would yield wrong results,
+                # such as 2006-01-01 being formatted as "January 2005" in some locales.
+                # Cfr: http://babel.pocoo.org/docs/dates/#date-fields
+                'day': 'dd MMM yyyy', # yyyy = normal year
+                'week': "'W'w YYYY",  # w YYYY = ISO week-year
+                'month': 'MMMM yyyy',
+                'quarter': 'QQQ yyyy',
+                'year': 'yyyy',
             }
             time_intervals = {
                 'day': dateutil.relativedelta.relativedelta(days=1),
@@ -2116,12 +2144,13 @@ class BaseModel(object):
             count_field = groupby_fields[0] if len(groupby_fields) >= 1 else '_'
         else:
             count_field = '_'
+        count_field += '_count'
 
         prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
 
         query = """
-            SELECT min(%(table)s.id) AS id, count(%(table)s.id) AS %(count_field)s_count %(extra_fields)s
+            SELECT min(%(table)s.id) AS id, count(%(table)s.id) AS %(count_field)s %(extra_fields)s
             FROM %(from)s
             %(where)s
             %(groupby)s
@@ -2161,7 +2190,7 @@ class BaseModel(object):
             # method _read_group_fill_results need to be completely reimplemented
             # in a sane way 
             result = self._read_group_fill_results(cr, uid, domain, groupby_fields[0], groupby[len(annotated_groupbys):],
-                                                       aggregated_fields, result, read_group_order=order,
+                                                       aggregated_fields, count_field, result, read_group_order=order,
                                                        context=context)
         return result
 
@@ -2241,28 +2270,13 @@ class BaseModel(object):
                 if val is not False:
                     cr.execute(update_query, (ss[1](val), key))
 
-    def _check_selection_field_value(self, cr, uid, field, value, context=None):
-        """Raise except_orm if value is not among the valid values for the selection field"""
-        if self._columns[field]._type == 'reference':
-            val_model, val_id_str = value.split(',', 1)
-            val_id = False
-            try:
-                val_id = long(val_id_str)
-            except ValueError:
-                pass
-            if not val_id:
-                raise except_orm(_('ValidateError'),
-                                 _('Invalid value for reference field "%s.%s" (last part must be a non-zero integer): "%s"') % (self._table, field, value))
-            val = val_model
-        else:
-            val = value
-        if isinstance(self._columns[field].selection, (tuple, list)):
-            if val in dict(self._columns[field].selection):
-                return
-        elif val in dict(self._columns[field].selection(self, cr, uid, context=context)):
-            return
-        raise except_orm(_('ValidateError'),
-                         _('The value "%s" for the field "%s.%s" is not in the selection') % (value, self._name, field))
+    @api.model
+    def _check_selection_field_value(self, field, value):
+        """ Check whether value is among the valid values for the given
+            selection/reference field, and raise an exception if not.
+        """
+        field = self._fields[field]
+        field.convert_to_cache(value, self)
 
     def _check_removed_columns(self, cr, log=False):
         # iterate on the database columns to drop the NOT NULL constraints
@@ -2398,22 +2412,13 @@ class BaseModel(object):
 
 
     def _set_default_value_on_column(self, cr, column_name, context=None):
-        # ideally should use add_default_value but fails
-        # due to ir.values not being ready
+        # ideally, we should use default_get(), but it fails due to ir.values
+        # not being ready
 
-        # get old-style default
+        # get default value
         default = self._defaults.get(column_name)
         if callable(default):
             default = default(self, cr, SUPERUSER_ID, context)
-
-        # get new_style default if no old-style
-        if default is None:
-            record = self.new(cr, SUPERUSER_ID, context=context)
-            field = self._fields[column_name]
-            field.determine_default(record)
-            defaults = dict(record._cache)
-            if column_name in defaults:
-                default = field.convert_to_write(defaults[column_name])
 
         column = self._columns[column_name]
         ss = column._symbol_set
@@ -2465,8 +2470,8 @@ class BaseModel(object):
                 self._create_table(cr)
                 has_rows = False
             else:
-                cr.execute('SELECT min(id) FROM "%s"' % (self._table,))
-                has_rows = cr.fetchone()[0] is not None
+                cr.execute('SELECT 1 FROM "%s" LIMIT 1' % self._table)
+                has_rows = cr.rowcount
 
             cr.commit()
             if self._parent_store:
@@ -2660,7 +2665,7 @@ class BaseModel(object):
                                 dest_model = self.pool[f._obj]
                                 ref = dest_model._table
                                 # ir_actions is inherited so foreign key doesn't work on it
-                                if ref != 'ir_actions':
+                                if dest_model._auto and ref != 'ir_actions':
                                     self._m2o_add_foreign_key_checked(k, dest_model, f.ondelete)
                             if f.select:
                                 cr.execute('CREATE INDEX "%s_%s_index" ON "%s" ("%s")' % (self._table, k, self._table, k))
@@ -2919,8 +2924,11 @@ class BaseModel(object):
         for parent_model, parent_field in reversed(cls._inherits.items()):
             for attr, field in cls.pool[parent_model]._fields.iteritems():
                 if attr not in cls._fields:
-                    new_field = field.copy(related=(parent_field, attr), _origin=field)
-                    cls._add_field(attr, new_field)
+                    cls._add_field(attr, field.new(
+                        inherited=True,
+                        related=(parent_field, attr),
+                        related_sudo=False,
+                    ))
 
         cls._inherits_reload_src()
 
@@ -2969,11 +2977,11 @@ class BaseModel(object):
     def _setup_fields(self, partial=False):
         """ Setup the fields (dependency triggers, etc). """
         for field in self._fields.itervalues():
-            if partial and field.manual and \
-                    field.relational and field.comodel_name not in self.pool:
-                # do not set up manual fields that refer to unknown models
-                continue
-            field.setup(self.env)
+            try:
+                field.setup(self.env)
+            except Exception:
+                if not partial:
+                    raise
 
         # group fields by compute to determine field.computed_fields
         fields_by_compute = defaultdict(list)
@@ -3006,6 +3014,8 @@ class BaseModel(object):
         res = {}
         for fname, field in self._fields.iteritems():
             if allfields and fname not in allfields:
+                continue
+            if not field.setup_done:
                 continue
             if field.groups and not recs.user_has_groups(field.groups):
                 continue
@@ -3122,20 +3132,30 @@ class BaseModel(object):
         # fetch the records of this model without field_name in their cache
         records = self._in_cache_without(field)
 
-        # by default, simply fetch field
-        fnames = {field.name}
+        if len(records) > PREFETCH_MAX:
+            records = records[:PREFETCH_MAX] | self
 
-        if self.env.in_draft:
-            # we may be doing an onchange, do not prefetch other fields
-            pass
-        elif field in self.env.todo:
-            # field must be recomputed, do not prefetch records to recompute
-            records -= self.env.todo[field]
-        elif self._columns[field.name]._prefetch:
-            # here we can optimize: prefetch all classic and many2one fields
-            fnames = set(fname
+        # determine which fields can be prefetched
+        if not self.env.in_draft and \
+                self._context.get('prefetch_fields', True) and \
+                self._columns[field.name]._prefetch:
+            # prefetch all classic and many2one fields that the user can access
+            fnames = {fname
                 for fname, fcolumn in self._columns.iteritems()
-                if fcolumn._prefetch)
+                if fcolumn._prefetch
+                if not fcolumn.groups or self.user_has_groups(fcolumn.groups)
+            }
+        else:
+            fnames = {field.name}
+
+        # important: never prefetch fields to recompute!
+        get_recs_todo = self.env.field_todo
+        for fname in list(fnames):
+            if get_recs_todo(self._fields[fname]):
+                if fname == field.name:
+                    records -= get_recs_todo(field)
+                else:
+                    fnames.discard(fname)
 
         # fetch records with read()
         assert self in records and field.name in fnames
@@ -3511,6 +3531,7 @@ class BaseModel(object):
         self.check_access_rule(cr, uid, ids, 'unlink', context=context)
         pool_model_data = self.pool.get('ir.model.data')
         ir_values_obj = self.pool.get('ir.values')
+        ir_attachment_obj = self.pool.get('ir.attachment')
         for sub_ids in cr.split_for_in_conditions(ids):
             cr.execute('delete from ' + self._table + ' ' \
                        'where id IN %s', (sub_ids,))
@@ -3531,6 +3552,13 @@ class BaseModel(object):
                     context=context)
             if ir_value_ids:
                 ir_values_obj.unlink(cr, uid, ir_value_ids, context=context)
+
+            # For the same reason, removing the record relevant to ir_attachment
+            # The search is performed with sql as the search method of ir_attachment is overridden to hide attachments of deleted records
+            cr.execute('select id from ir_attachment where res_model = %s and res_id in %s', (self._name, sub_ids))
+            ir_attachment_ids = [ir_attachment[0] for ir_attachment in cr.fetchall()]
+            if ir_attachment_ids:
+                ir_attachment_obj.unlink(cr, uid, ir_attachment_ids, context=context)
 
         # invalidate the *whole* cache, since the orm does not handle all
         # changes made in the database, like cascading delete!
@@ -3620,10 +3648,12 @@ class BaseModel(object):
         # split up fields into old-style and pure new-style ones
         old_vals, new_vals, unknown = {}, {}, []
         for key, val in vals.iteritems():
-            if key in self._columns:
-                old_vals[key] = val
-            elif key in self._fields:
-                new_vals[key] = val
+            field = self._fields.get(key)
+            if field:
+                if field.store or field.inherited:
+                    old_vals[key] = val
+                if field.inverse and not field.inherited:
+                    new_vals[key] = val
             else:
                 unknown.append(key)
 
@@ -3650,6 +3680,7 @@ class BaseModel(object):
 
         readonly = None
         self.check_field_access_rights(cr, user, 'write', vals.keys())
+        deleted_related = defaultdict(list)
         for field in vals.keys():
             fobj = None
             if field in self._columns:
@@ -3658,6 +3689,10 @@ class BaseModel(object):
                 fobj = self._inherit_fields[field][2]
             if not fobj:
                 continue
+            if fobj._type in ['one2many', 'many2many'] and vals[field]:
+                for wtuple in vals[field]:
+                    if isinstance(wtuple, (tuple, list)) and wtuple[0] == 2:
+                        deleted_related[fobj._obj].append(wtuple[1])
             groups = fobj.write
 
             if groups:
@@ -3732,6 +3767,8 @@ class BaseModel(object):
             upd0.append('write_uid=%s')
             upd0.append("write_date=(now() at time zone 'UTC')")
             upd1.append(user)
+            direct.append('write_uid')
+            direct.append('write_date')
 
         if len(upd0):
             self.check_access_rule(cr, user, ids, 'write', context=context)
@@ -3753,6 +3790,11 @@ class BaseModel(object):
                             self.write(cr, user, ids, {f: vals[f]}, context=context_wo_lang)
                         self.pool.get('ir.translation')._set_ids(cr, user, self._name+','+f, 'model', context['lang'], ids, vals[f], src_trans)
 
+        # invalidate and mark new-style fields to recompute; do this before
+        # setting other fields, because it can require the value of computed
+        # fields, e.g., a one2many checking constraints on records
+        recs.modified(direct)
+
         # call the 'set' method of fields which are not classic_write
         upd_todo.sort(lambda x, y: self._columns[x].priority-self._columns[y].priority)
 
@@ -3765,6 +3807,9 @@ class BaseModel(object):
         for field in upd_todo:
             for id in ids:
                 result += self._columns[field].set(cr, self, id, field, vals[field], user, context=rel_context) or []
+
+        # for recomputing new-style fields
+        recs.modified(upd_todo)
 
         unknown_fields = updend[:]
         for table in self._inherits:
@@ -3849,9 +3894,6 @@ class BaseModel(object):
         result += self._store_get_values(cr, user, ids, vals.keys(), context)
         result.sort()
 
-        # for recomputing new-style fields
-        recs.modified(modified_fields)
-
         done = {}
         for order, model_name, ids_to_update, fields_to_recompute in result:
             key = (model_name, tuple(fields_to_recompute))
@@ -3861,7 +3903,8 @@ class BaseModel(object):
             for id in ids_to_update:
                 if id not in done[key]:
                     done[key][id] = True
-                    todo.append(id)
+                    if id not in deleted_related[model_name]:
+                        todo.append(id)
             self.pool[model_name]._store_set_values(cr, user, todo, fields_to_recompute, context)
 
         # recompute new-style fields
@@ -3906,10 +3949,12 @@ class BaseModel(object):
         # split up fields into old-style and pure new-style ones
         old_vals, new_vals, unknown = {}, {}, []
         for key, val in vals.iteritems():
-            if key in self._all_columns:
-                old_vals[key] = val
-            elif key in self._fields:
-                new_vals[key] = val
+            field = self._fields.get(key)
+            if field:
+                if field.store or field.inherited:
+                    old_vals[key] = val
+                if field.inverse and not field.inherited:
+                    new_vals[key] = val
             else:
                 unknown.append(key)
 
@@ -4060,7 +4105,6 @@ class BaseModel(object):
 
         id_new, = cr.fetchone()
         recs = self.browse(cr, user, id_new, context)
-        upd_todo.sort(lambda x, y: self._columns[x].priority-self._columns[y].priority)
 
         if self._parent_store and not context.get('defer_parent_store_computation'):
             if self.pool._init:
@@ -4087,6 +4131,14 @@ class BaseModel(object):
                 cr.execute('update '+self._table+' set parent_left=%s,parent_right=%s where id=%s', (pleft+1, pleft+2, id_new))
                 recs.invalidate_cache(['parent_left', 'parent_right'])
 
+        # invalidate and mark new-style fields to recompute; do this before
+        # setting other fields, because it can require the value of computed
+        # fields, e.g., a one2many checking constraints on records
+        recs.modified([u[0] for u in updates])
+
+        # call the 'set' method of fields which are not classic_write
+        upd_todo.sort(lambda x, y: self._columns[x].priority-self._columns[y].priority)
+
         # default element in context must be remove when call a one2many or many2many
         rel_context = context.copy()
         for c in context.items():
@@ -4097,14 +4149,11 @@ class BaseModel(object):
         for field in upd_todo:
             result += self._columns[field].set(cr, self, id_new, field, vals[field], user, rel_context) or []
 
+        # for recomputing new-style fields
+        recs.modified(upd_todo)
+
         # check Python constraints
         recs._validate_fields(vals)
-
-        # invalidate and mark new-style fields to recompute
-        modified_fields = list(vals)
-        if self._log_access:
-            modified_fields += ['create_uid', 'create_date', 'write_uid', 'write_date']
-        recs.modified(modified_fields)
 
         if context.get('recompute', True):
             result += self._store_get_values(cr, user, [id_new],
@@ -5223,7 +5272,7 @@ class BaseModel(object):
 
     #
     # New records - represent records that do not exist in the database yet;
-    # they are used to compute default values and perform onchanges.
+    # they are used to perform onchanges.
     #
 
     @api.model
@@ -5285,14 +5334,17 @@ class BaseModel(object):
             yield self._browse(self.env, (id,))
 
     def __contains__(self, item):
-        """ Test whether `item` is a subset of `self` or a field name. """
-        if isinstance(item, BaseModel):
-            if self._name == item._name:
-                return set(item._ids) <= set(self._ids)
-            raise except_orm("ValueError", "Mixing apples and oranges: %s in %s" % (item, self))
-        if isinstance(item, basestring):
+        """ Test whether `item` (record or field name) is an element of `self`.
+            In the first case, the test is fully equivalent to::
+
+                any(item == record for record in self)
+        """
+        if isinstance(item, BaseModel) and self._name == item._name:
+            return len(item) == 1 and item.id in self._ids
+        elif isinstance(item, basestring):
             return item in self._fields
-        return item in self.ids
+        else:
+            raise except_orm("ValueError", "Mixing apples and oranges: %s in %s" % (item, self))
 
     def __add__(self, other):
         """ Return the concatenation of two recordsets. """
@@ -5475,42 +5527,34 @@ class BaseModel(object):
         """ If `field` must be recomputed on some record in `self`, return the
             corresponding records that must be recomputed.
         """
-        for env in [self.env] + list(iter(self.env.all)):
-            if env.todo.get(field) and env.todo[field] & self:
-                return env.todo[field]
+        return self.env.check_todo(field, self)
 
     def _recompute_todo(self, field):
         """ Mark `field` to be recomputed. """
-        todo = self.env.todo
-        todo[field] = (todo.get(field) or self.browse()) | self
+        self.env.add_todo(field, self)
 
     def _recompute_done(self, field):
-        """ Mark `field` as being recomputed. """
-        todo = self.env.todo
-        if field in todo:
-            recs = todo.pop(field) - self
-            if recs:
-                todo[field] = recs
+        """ Mark `field` as recomputed. """
+        self.env.remove_todo(field, self)
 
     @api.model
     def recompute(self):
         """ Recompute stored function fields. The fields and records to
             recompute have been determined by method :meth:`modified`.
         """
-        for env in list(iter(self.env.all)):
-            while env.todo:
-                field, recs = next(env.todo.iteritems())
-                # evaluate the fields to recompute, and save them to database
-                for rec, rec1 in zip(recs, recs.with_context(recompute=False)):
-                    try:
-                        values = rec._convert_to_write({
-                            f.name: rec[f.name] for f in field.computed_fields
-                        })
-                        rec1._write(values)
-                    except MissingError:
-                        pass
-                # mark the computed fields as done
-                map(recs._recompute_done, field.computed_fields)
+        while self.env.has_todo():
+            field, recs = self.env.get_todo()
+            # evaluate the fields to recompute, and save them to database
+            for rec, rec1 in zip(recs, recs.with_context(recompute=False)):
+                try:
+                    values = rec._convert_to_write({
+                        f.name: rec[f.name] for f in field.computed_fields
+                    })
+                    rec1._write(values)
+                except MissingError:
+                    pass
+            # mark the computed fields as done
+            map(recs._recompute_done, field.computed_fields)
 
     #
     # Generic onchange method
@@ -5669,13 +5713,28 @@ class BaseModel(object):
 
                 # determine which fields have been modified
                 for name, oldval in values.iteritems():
+                    field = self._fields[name]
                     newval = record[name]
-                    if newval != oldval or getattr(newval, '_dirty', False):
-                        field = self._fields[name]
-                        result['value'][name] = field.convert_to_write(
-                            newval, record._origin, subfields.get(name),
-                        )
-                        todo.add(name)
+                    if field.type in ('one2many', 'many2many'):
+                        if newval != oldval or newval._dirty:
+                            # put new value in result
+                            result['value'][name] = field.convert_to_write(
+                                newval, record._origin, subfields.get(name),
+                            )
+                            todo.add(name)
+                        else:
+                            # keep result: newval may have been dirty before
+                            pass
+                    else:
+                        if newval != oldval:
+                            # put new value in result
+                            result['value'][name] = field.convert_to_write(
+                                newval, record._origin, subfields.get(name),
+                            )
+                            todo.add(name)
+                        else:
+                            # clean up result to not return another value
+                            result['value'].pop(name, None)
 
         # At the moment, the client does not support updates on a *2many field
         # while this one is modified by the user.
