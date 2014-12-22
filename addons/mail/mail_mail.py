@@ -251,7 +251,7 @@ class mail_mail(osv.Model):
                 attachment_ids = [a.id for a in mail.attachment_ids]
                 attachments = [(a['datas_fname'], base64.b64decode(a['datas']))
                                  for a in ir_attachment.read(cr, SUPERUSER_ID, attachment_ids,
-                                                             ['datas_fname', 'datas'])]
+                                                             ['datas_fname', 'datas']) if a['datas']]
 
                 # specific behavior to customize the send email for notified partners
                 email_list = []
