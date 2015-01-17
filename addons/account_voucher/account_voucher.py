@@ -1582,7 +1582,7 @@ class account_voucher(osv.osv):
                     account_id = voucher.partner_id.property_account_payable.id
             else:
                 account_id = voucher.partner_id.property_account_payable.id
-            sign = (voucher.type == 'payment' and -1 or 1) * (diff < 0 and 1 or -1)
+            sign = (diff < 0 and -1 or 1)
             move_line = {
                 'name': write_off_name or 'Rounding: ' + name,
                 'account_id': account_id,
@@ -1591,7 +1591,7 @@ class account_voucher(osv.osv):
                 'date': voucher.date,
                 'credit': diff > 0 and diff or 0.0,
                 'debit': diff < 0 and -diff or 0.0,
-                'amount_currency': company_currency <> current_currency and (sign * -1 * context.get('line_total_currency',voucher.writeoff_amount)) or False,
+                'amount_currency': company_currency <> current_currency and (sign * abs(context.get('line_total_currency',voucher.writeoff_amount))) or False,
                 'currency_id': company_currency <> current_currency and current_currency or False,
                 'analytic_account_id': voucher.analytic_id and voucher.analytic_id.id or False,
             }
