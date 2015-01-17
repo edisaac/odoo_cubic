@@ -1582,7 +1582,7 @@ class account_voucher(osv.osv):
                     account_id = voucher.partner_id.property_account_payable.id
             else:
                 account_id = voucher.partner_id.property_account_payable.id
-            sign = (diff < 0 and -1 or 1)
+            sign = (diff < 0 and 1 or -1)
             move_line = {
                 'name': write_off_name or 'Rounding: ' + name,
                 'account_id': account_id,
