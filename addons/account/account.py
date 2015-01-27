@@ -760,7 +760,7 @@ class account_journal(osv.osv):
         'company_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
     }
     _sql_constraints = [
-        ('code_company_uniq', 'unique (code, company_id)', 'The code of the journal must be unique per company !'),
+        ('code_company_uniq', 'unique (code, type, company_id)', 'The code of the journal must be unique per company !'),
         ('name_company_uniq', 'unique (name, company_id)', 'The name of the journal must be unique per company !'),
     ]
 
@@ -809,8 +809,8 @@ class account_journal(osv.osv):
         seq = {
             'name': vals['name'],
             'implementation':'no_gap',
-            'prefix': prefix + "/%(year)s/",
-            'padding': 4,
+            'prefix': prefix + "-",
+            'padding': 6,
             'number_increment': 1
         }
         if 'company_id' in vals:

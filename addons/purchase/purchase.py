@@ -706,7 +706,9 @@ class purchase_order(osv.osv):
     def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, group_id, context=None):
         ''' prepare the stock move data from the PO line. This function returns a list of dictionary ready to be used in stock.move's create()'''
         product_uom = self.pool.get('product.uom')
-        price_unit = order_line.price_unit
+        tax_obj = self.pool.get('account.tax')
+        taxes = tax_obj.compute_all(cr, uid, order_line.taxes_id, order_line.price_unit, 1, order_line.product_id, order_line.order_id.partner_id)
+        price_unit = taxes['total']
         if order_line.product_uom.id != order_line.product_id.uom_id.id:
             price_unit *= order_line.product_uom.factor / order_line.product_id.uom_id.factor
         if order.currency_id.id != order.company_id.currency_id.id:
