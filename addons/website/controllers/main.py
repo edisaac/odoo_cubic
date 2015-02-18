@@ -89,8 +89,6 @@ class Website(openerp.addons.web.controllers.main.Home):
             url_root = url_root + '/'
         else:
             url_root =  request.httprequest.url_root
-            
-        
 
         def create_sitemap(url, content):
             ira.create(cr, uid, dict(
