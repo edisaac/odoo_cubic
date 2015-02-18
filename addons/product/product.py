@@ -489,7 +489,7 @@ class product_template(osv.osv):
 
     def _get_product_variant_count(self, cr, uid, ids, name, arg, context=None):
         res = {}
-        for product in self.browse(cr, uid, ids):
+        for product in self.browse(cr, uid, ids, context=context):
             res[product.id] = len(product.product_variant_ids)
         return res
 
@@ -660,7 +660,8 @@ class product_template(osv.osv):
                 for variant in all_variants:
                     for value_id in variant_id.value_ids:
                         temp_variants.append(variant + [int(value_id)])
-                all_variants = temp_variants
+                if temp_variants:
+                    all_variants = temp_variants
 
             # adding an attribute with only one value should not recreate product
             # write this attribute on every product to make sure we don't lose them
@@ -1102,6 +1103,9 @@ class product_product(osv.osv):
     def copy(self, cr, uid, id, default=None, context=None):
         if context is None:
             context={}
+
+        if default is None:
+            default = {}
 
         product = self.browse(cr, uid, id, context)
         if context.get('variant'):
