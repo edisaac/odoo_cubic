@@ -271,7 +271,7 @@ class ir_actions_act_window(osv.osv):
     _columns = {
         'name': fields.char('Action Name', translate=True),
         'type': fields.char('Action Type', required=True),
-        'view_id': fields.many2one('ir.ui.view', 'View Ref.', ondelete='cascade'),
+        'view_id': fields.many2one('ir.ui.view', 'View Ref.', ondelete='set null'),
         'domain': fields.char('Domain Value',
             help="Optional domain filtering of the destination data, as a Python expression"),
         'context': fields.char('Context Value', required=True,
@@ -316,7 +316,6 @@ class ir_actions_act_window(osv.osv):
         'auto_search':True,
         'multi': False,
     }
-
     def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
         """ call the method get_empty_list_help of the model and set the window action help message
         """
@@ -325,24 +324,22 @@ class ir_actions_act_window(osv.osv):
             ids = [ids]
         results = super(ir_actions_act_window, self).read(cr, uid, ids, fields=fields, context=context, load=load)
 
-        context = dict(context or {})
-        eval_dict = {
-            'active_model': context.get('active_model'),
-            'active_id': context.get('active_id'),
-            'active_ids': context.get('active_ids'),
-            'uid': uid,
-            'context': context,
-        }
-        for res in results:
-            model = res.get('res_model')
-            if model in self.pool:
-                try:
-                    with tools.mute_logger("openerp.tools.safe_eval"):
-                        eval_context = eval(res['context'] or "{}", eval_dict) or {}
-                        res['context'] = str(eval_context)
-                except Exception:
-                    continue
-                if not fields or 'help' in fields:
+        if not fields or 'help' in fields:
+            context = dict(context or {})
+            eval_dict = {
+                'active_model': context.get('active_model'),
+                'active_id': context.get('active_id'),
+                'active_ids': context.get('active_ids'),
+                'uid': uid,
+            }
+            for res in results:
+                model = res.get('res_model')
+                if model and self.pool.get(model):
+                    try:
+                        with tools.mute_logger("openerp.tools.safe_eval"):
+                            eval_context = eval(res['context'] or "{}", eval_dict) or {}
+                    except Exception:
+                        continue
                     custom_context = dict(context, **eval_context)
                     res['help'] = self.pool[model].get_empty_list_help(cr, uid, res.get('help', ""), context=custom_context)
         if ids_int:
@@ -616,16 +613,16 @@ class ir_actions_server(osv.osv):
         # analyze path
         while path:
             step = path.pop(0)
-            column_info = self.pool[current_model_name]._all_columns.get(step)
-            if not column_info:
+            field = self.pool[current_model_name]._fields.get(step)
+            if not field:
                 return (False, None, 'Part of the expression (%s) is not recognized as a column in the model %s.' % (step, current_model_name))
-            column_type = column_info.column._type
-            if column_type not in ['many2one', 'int']:
-                return (False, None, 'Part of the expression (%s) is not a valid column type (is %s, should be a many2one or an int)' % (step, column_type))
-            if column_type == 'int' and path:
+            ftype = field.type
+            if ftype not in ['many2one', 'int']:
+                return (False, None, 'Part of the expression (%s) is not a valid column type (is %s, should be a many2one or an int)' % (step, ftype))
+            if ftype == 'int' and path:
                 return (False, None, 'Part of the expression (%s) is an integer field that is only allowed at the end of an expression' % (step))
-            if column_type == 'many2one':
-                current_model_name = column_info.column._obj
+            if ftype == 'many2one':
+                current_model_name = field.comodel_name
         return (True, current_model_name, None)
 
     def _check_write_expression(self, cr, uid, ids, context=None):
