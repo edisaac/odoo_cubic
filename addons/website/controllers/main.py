@@ -74,7 +74,8 @@ class Website(openerp.addons.web.controllers.main.Home):
 
     @http.route(['/robots.txt'], type='http', auth="public")
     def robots(self):
-        return request.render('website.robots', {'url_root': request.httprequest.url_root}, mimetype='text/plain')
+        url = request.registry['ir.config_parameter'].get_param(request.cr, openerp.SUPERUSER_ID, 'web.base.url') or request.httprequest.url_root
+        return request.render('website.robots', {'url_root': url+'/'}, mimetype='text/plain')
 
     @http.route('/sitemap.xml', type='http', auth="public", website=True)
     def sitemap_xml_index(self):
@@ -83,6 +84,11 @@ class Website(openerp.addons.web.controllers.main.Home):
         iuv = request.registry['ir.ui.view']
         mimetype ='application/xml;charset=utf-8'
         content = None
+        url_root = request.registry['ir.config_parameter'].get_param(request.cr, openerp.SUPERUSER_ID, 'web.base.url')
+        if url_root:
+            url_root = url_root + '/'
+        else:
+            url_root =  request.httprequest.url_root
 
         def create_sitemap(url, content):
             ira.create(cr, uid, dict(
@@ -115,7 +121,7 @@ class Website(openerp.addons.web.controllers.main.Home):
                 start = pages * LOC_PER_SITEMAP
                 values = {
                     'locs': islice(locs, start, start + LOC_PER_SITEMAP),
-                    'url_root': request.httprequest.url_root[:-1],
+                    'url_root': url_root[:-1],
                 }
                 urls = iuv.render(cr, uid, 'website.sitemap_locs', values, context=context)
                 if urls.strip():
@@ -134,7 +140,7 @@ class Website(openerp.addons.web.controllers.main.Home):
                 # Sitemaps must be split in several smaller files with a sitemap index
                 content = iuv.render(cr, uid, 'website.sitemap_index_xml', dict(
                     pages=range(1, pages + 1),
-                    url_root=request.httprequest.url_root,
+                    url_root=url_root,
                 ), context=context)
             create_sitemap('/sitemap.xml', content)
 
@@ -367,7 +373,7 @@ class Website(openerp.addons.web.controllers.main.Home):
         obj = _object.browse(request.cr, request.uid, _id)
 
         values = {}
-        if 'website_published' in _object._all_columns:
+        if 'website_published' in _object._fields:
             values['website_published'] = not obj.website_published
         _object.write(request.cr, request.uid, [_id],
                       values, context=request.context)
