@@ -2,7 +2,7 @@
 <lots>
     <lot-line type="fields" name="id">
         <code type="field" name="code"/>
-        <product type="field" name="name"/>
+        <product type="field" name="product_tmpl_id.name"/>
         <variant type="field" name="attribute_value_ids"/>
         <price type="field" name="list_price"/>
         <ean13 type="field" name="ean13"/>
