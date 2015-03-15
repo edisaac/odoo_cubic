@@ -89,8 +89,6 @@ class Website(openerp.addons.web.controllers.main.Home):
             url_root = url_root + '/'
         else:
             url_root =  request.httprequest.url_root
-            
-        
 
         def create_sitemap(url, content):
             ira.create(cr, uid, dict(
@@ -388,7 +386,7 @@ class Website(openerp.addons.web.controllers.main.Home):
         url = "http://google.com/complete/search"
         try:
             req = urllib2.Request("%s?%s" % (url, werkzeug.url_encode({
-                'ie': 'utf8', 'oe': 'utf8', 'output': 'toolbar', 'q': keywords})))
+                'hl': 'es', 'ie': 'utf8', 'oe': 'utf8', 'output': 'toolbar', 'q': keywords.replace(' ','+')})))
             request = urllib2.urlopen(req)
         except (urllib2.HTTPError, urllib2.URLError):
             return []
