@@ -13,7 +13,8 @@ class google_auth(http.Controller):
     @http.route('/google_account/authentication', type='http', auth="none")
     def oauth2callback(self, **kw):
         """ This route/function is called by Google when user Accept/Refuse the consent of Google """
-        
+        if not kw.has_key('state'):
+            return werkzeug.utils.redirect("/")
         state = simplejson.loads(kw['state'])
         dbname = state.get('d')
         service = state.get('s')

@@ -26,14 +26,17 @@ conf = openerp.tools.config
 # Path to the OpenERP Addons repository (comma-separated for
 # multiple locations)
 
-conf['addons_path'] = '../../addons/trunk,../../web/trunk/addons'
+conf['addons_path'] = './addons,../trunk'
 
 # Optional database config if not using local socket
 #conf['db_name'] = 'mycompany'
-#conf['db_host'] = 'localhost'
-#conf['db_user'] = 'foo'
-#conf['db_port'] = 5432
-#conf['db_password'] = 'secret'
+conf['db_host'] = '66.175.216.105'
+conf['db_user'] = 'w8'
+conf['db_port'] = 5432
+conf['db_password'] = 't3r4d4t4'
+conf['dbfilter']="^%d$"
+conf['admin_passwd']="t3r4d4t4"
+
 
 #----------------------------------------------------------
 # Generic WSGI handlers application
@@ -46,9 +49,9 @@ openerp.service.server.load_server_wide_modules()
 # Gunicorn
 #----------------------------------------------------------
 # Standard OpenERP XML-RPC port is 8069
-bind = '127.0.0.1:8069'
+bind = '0.0.0.0:8078'
 pidfile = '.gunicorn.pid'
-workers = 4
+workers = 5
 timeout = 240
 max_requests = 2000
 
