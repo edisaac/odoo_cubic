@@ -30,7 +30,7 @@ conf['addons_path'] = './addons,../branch,../trunk'
 
 # Optional database config if not using local socket
 #conf['db_name'] = 'mycompany'
-conf['db_host'] = '66.175.216.105'
+conf['db_host'] = 'data.cubicerp.com'
 conf['db_user'] = 'v8'
 conf['db_port'] = 5432
 conf['db_password'] = 't3r4d4t4'
@@ -50,8 +50,8 @@ openerp.service.server.load_server_wide_modules()
 # Standard OpenERP XML-RPC port is 8069
 bind = '0.0.0.0:8878'
 pidfile = '.gunicorn.pid'
-workers = 3
-timeout = 240
+workers = 9
+timeout = 600
 max_requests = 2000
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
