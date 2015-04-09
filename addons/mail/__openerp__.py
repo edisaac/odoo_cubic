@@ -70,6 +70,7 @@ Main Features
         'data/mail_group_demo_data.xml',
     ],
     'installable': True,
+    'auto_install': True,
     'application': True,
     'qweb': [
         'static/src/xml/mail.xml',
