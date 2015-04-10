@@ -27,8 +27,7 @@
 #
 ##############################################################################
 
-from osv import fields, osv
-
+from openerp.osv import fields, osv
 
 class product_related_tag(osv.osv):
 
