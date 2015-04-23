@@ -27,7 +27,8 @@ class MassMailController(http.Controller):
         mailing = MassMailing.browse(cr, SUPERUSER_ID, mailing_ids[0], context=context)
         if mailing.mailing_model == 'mail.mass_mailing.contact':
             list_ids = [l.id for l in mailing.contact_list_ids]
-            record_ids = request.registry[mailing.mailing_model].search(cr, SUPERUSER_ID, [('list_id', 'in', list_ids), ('id', '=', res_id), ('email', 'ilike', email)], context=context)
+            mailing_domain = res_id!='0' and [('list_id', 'in', list_ids), ('id', '=', res_id), ('email', 'ilike', email)] or [('list_id', 'in', list_ids), ('email', 'ilike', email)]
+            record_ids = request.registry[mailing.mailing_model].search(cr, SUPERUSER_ID, mailing_domain, context=context)
             request.registry[mailing.mailing_model].write(cr, SUPERUSER_ID, record_ids, {'opt_out': True}, context=context)
         else:
             email_fname = None
