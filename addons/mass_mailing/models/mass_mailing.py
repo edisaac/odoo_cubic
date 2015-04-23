@@ -611,3 +611,6 @@ class MassMailing(osv.Model):
             self.pool['mail.compose.message'].send_mail(cr, uid, [composer_id], context=comp_ctx)
             self.write(cr, uid, [mailing.id], {'sent_date': fields.datetime.now(), 'state': 'done'}, context=context)
         return True
+    
+    def run_queue(self, cr, uid, ids, context=None):
+        return self.pool['mail.email'].process_email_queue(cr, uid, context=context)
