@@ -117,8 +117,8 @@ class im_livechat_channel(osv.Model):
         return [(6, 0, [uid])]
 
     _defaults = {
-        'button_text': "Have a Question? Chat with us.",
-        'input_placeholder': "How may I help you?",
+        'button_text': "¿Preguntas?, chat en linea",
+        'input_placeholder': "¿Cómo puedo ayudarlo?",
         'default_message': '',
         'user_ids': _default_user_ids,
         'image': _get_default_image,
