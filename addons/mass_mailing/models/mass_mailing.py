@@ -613,4 +613,4 @@ class MassMailing(osv.Model):
         return True
     
     def run_queue(self, cr, uid, ids, context=None):
-        return self.pool['mail.email'].process_email_queue(cr, uid, context=context)
+        return self.pool['mail.mail'].process_email_queue(cr, uid, context=context)
