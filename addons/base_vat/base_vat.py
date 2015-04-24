@@ -63,7 +63,7 @@ _ref_vat = {
     'mx': 'MXABC123456T1B',
     'nl': 'NL123456782B90',
     'no': 'NO123456785',
-    'pe': 'PER10254824220 or PED10254824220',
+    'pe': 'PE20506995958',
     'pl': 'PL1234567883',
     'pt': 'PT123456789',
     'ro': 'RO1234567897',
@@ -281,41 +281,6 @@ class res_partner(osv.osv):
             # 10 is not a valid check digit for an organization number
             return False
         return check == int(vat[8])
-
-    # Peruvian VAT validation, contributed by Vauxoo
-    def check_vat_pe(self, vat):
-
-        vat_type,vat = vat and len(vat)>=2 and (vat[0], vat[1:]) or (False, False)
-
-        if vat_type and vat_type.upper() == 'D':
-            #DNI
-            return True
-        elif vat_type and vat_type.upper() == 'R':
-            #verify RUC
-            factor = '5432765432'
-            sum = 0
-            dig_check = False
-            if len(vat) != 11:
-                return False
-            try:
-                int(vat)
-            except ValueError:
-                return False 
-                         
-            for f in range(0,10):
-                sum += int(factor[f]) * int(vat[f])
-                
-            subtraction = 11 - (sum % 11)
-            if subtraction == 10:
-                dig_check = 0
-            elif subtraction == 11:
-                dig_check = 1
-            else:
-                dig_check = subtraction
-            
-            return int(vat[10]) == dig_check
-        else:
-            return False
 
     # VAT validation in Turkey, contributed by # Levent Karakas @ Eska Yazilim A.S.
     def check_vat_tr(self, vat):
