@@ -407,7 +407,7 @@
                                 <field name="partner_id"
                                     on_change="on_change_partner_id(partner_id)"
                                     string="Customer"
-                                    context="{'default_name': partner_name, 'default_email': email_from, 'default_phone': phone}"/>
+                                    context="{'default_name': partner_name, 'default_email': email_from, 'default_phone': phone, 'default_section_id':section_id,'default_is_company':1, 'default_user_id': user_id}"/>
                                 <field name="email_from" string="Email" widget="email"/>
                                 <field name="phone"/>
                             </group>

@@ -57,6 +57,10 @@ class res_partner(osv.osv):
         'meeting_count': fields.function(_opportunity_meeting_phonecall_count, string="# Meetings", type='integer', multi='opp_meet'),
         'phonecall_count': fields.function(_opportunity_meeting_phonecall_count, string="Phonecalls", type="integer", multi='opp_meet'),
     }
+    
+    _defaults = {
+            'section_id': lambda s,c,u,cx={}:s.pool['res.users'].browse(c,u,u,context=cx).default_section_id.id,
+        }
 
     def redirect_partner_form(self, cr, uid, partner_id, context=None):
         search_view = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'base', 'view_res_partner_filter')
