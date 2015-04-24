@@ -59,7 +59,7 @@ class res_partner(osv.osv):
     }
     
     _defaults = {
-            'section_id': lambda s,c,u,cx={}:s.pool['res.users'].browse(c,u,u,context=cx).default_section_id.id,
+            'section_id': lambda s,c,u,context={}:s.pool['res.users'].browse(c,u,u,context=context).default_section_id.id,
         }
 
     def redirect_partner_form(self, cr, uid, partner_id, context=None):
