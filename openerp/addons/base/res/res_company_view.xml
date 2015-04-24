@@ -55,7 +55,7 @@
                                     <div>
                                         <field name="rml_header1" placeholder="e.g. Global Business Solutions"/>
                                     </div>
-                                    <field name="website" widget="url" placeholder="e.g. www.odoo.com"
+                                    <field name="website" widget="url" placeholder="e.g. www.cubicerp.com"
                                         on_change="onchange_footer(custom_footer, phone, fax, email, website, vat, company_registry, bank_ids)"/>
                                 </group>
                                 <group>

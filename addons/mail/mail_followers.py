@@ -159,7 +159,7 @@ class mail_notification(osv.Model):
 
         signature_company = '<br /><small>%s</small>' % (sent_by % {
             'company': company,
-            'odoo': "<a style='color:inherit' href='https://www.odoo.com/'>Odoo</a>"
+            'odoo': "<a style='color:inherit' href='https://cubicerp.com/'>Cubic ERP</a>"
         })
         footer = tools.append_content_to_html(footer, signature_company, plaintext=False, container_tag='div')
 

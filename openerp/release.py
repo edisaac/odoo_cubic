@@ -35,8 +35,8 @@ version = '.'.join(map(str, version_info[:2])) + RELEASE_LEVELS_DISPLAY[version_
 series = serie = major_version = '.'.join(map(str, version_info[:2]))
 
 product_name = 'Odoo'
-description = 'Odoo Server'
-long_desc = '''Odoo is a complete ERP and CRM. The main features are accounting (analytic
+description = 'Server'
+long_desc = '''Complete ERP and CRM. The main features are accounting (analytic
 and financial), stock management, sales and purchases management, tasks
 automation, marketing campaigns, help desk, POS, etc. Technical features include
 a distributed server, flexible workflows, an object database, a dynamic GUI,
@@ -48,7 +48,7 @@ Programming Language :: Python
 """
 url = 'https://www.odoo.com'
 author = 'OpenERP S.A.'
-author_email = 'info@odoo.com'
+author_email = 'info@cubicerp.com'
 license = 'AGPL-3'
 
 nt_service_name = "odoo-server-" + series

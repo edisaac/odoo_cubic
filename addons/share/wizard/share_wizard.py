@@ -830,7 +830,7 @@ class share_wizard(osv.TransientModel):
             if wizard_data.message:
                 body += "%s\n\n" % (wizard_data.message)
             if result_line.newly_created:
-                body += _("The documents are not attached, you can view them online directly on my Odoo server at:\n    %s\n\n") % (result_line.share_url)
+                body += _("The documents are not attached, you can view them online directly on my server at:\n    %s\n\n") % (result_line.share_url)
                 body += _("These are your credentials to access this protected area:\n")
                 body += "%s: %s" % (_("Username"), result_line.user_id.login) + "\n"
                 body += "%s: %s" % (_("Password"), result_line.password) + "\n"
@@ -838,8 +838,8 @@ class share_wizard(osv.TransientModel):
             body += _("The documents have been automatically added to your subscriptions.\n\n")
             body += '%s\n\n' % ((user.signature or ''))
             body += "--\n"
-            body += _("Odoo is a powerful and user-friendly suite of Business Applications (CRM, Sales, HR, etc.)\n"
-                      "It is open source and can be found on https://www.odoo.com.")
+            body += _("CubicERP is a powerful and user-friendly suite of Business Applications (CRM, Sales, HR, etc.)\n"
+                      "It is open source and can be found on https://cubicerp.com.")
             msg_id = message_obj.schedule_with_attach(cr, uid, user.email, [email_to], subject, body, model='', context=context)
             notification_obj.create(cr, uid, {'user_id': result_line.user_id.id, 'message_id': msg_id}, context=context)
     
