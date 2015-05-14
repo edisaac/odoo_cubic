@@ -52,6 +52,7 @@ bind = '0.0.0.0:8878'
 pidfile = '.gunicorn.pid'
 workers = 9
 timeout = 600
-max_requests = 2000
+max_requests = 1000
+preload_app = True
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
