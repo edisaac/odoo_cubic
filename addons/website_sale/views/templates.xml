@@ -256,10 +256,10 @@
 <template id="products_categories" inherit_id="website_sale.products" active="False" customize_show="True" name="Product Categories">
   <xpath expr="//div[@id='products_grid_before']" position="inside">
       <ul class="nav nav-pills nav-stacked mt16">
-          <li t-att-class=" '' if category else 'active' "><a t-att-href="keep('/shop',category=0)">All Products</a></li>
           <t t-foreach="categories" t-as="c">
               <t t-call="website_sale.categories_recursive"/>
           </t>
+          <li t-att-class=" '' if category else 'active' "><a t-att-href="keep('/shop',category=0)">All Products</a></li>
       </ul>
   </xpath>
   <xpath expr="//div[@id='products_grid_before']" position="attributes">

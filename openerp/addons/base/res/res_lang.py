@@ -161,7 +161,7 @@ class lang(osv.osv):
         'direction': 'ltr',
         'date_format':_get_default_date_format,
         'time_format':_get_default_time_format,
-        'grouping': '[]',
+        'grouping': '[3,3,3,3,2]',
         'decimal_point': '.',
         'thousands_sep': ',',
     }

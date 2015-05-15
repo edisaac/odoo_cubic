@@ -81,7 +81,7 @@ class res_currency(osv.osv):
     }
     _defaults = {
         'active': 1,
-        'position' : 'after',
+        'position' : 'before',
         'rounding': 0.01,
         'accuracy': 4,
         'company_id': False,

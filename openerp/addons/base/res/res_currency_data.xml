@@ -531,7 +531,7 @@
         <record id="CLP" model="res.currency">
             <field name="name">CLP</field>
             <field name="symbol">$</field>
-            <field name="rounding">0.01</field>
+            <field name="rounding">1.00</field>
             <field name="accuracy">4</field>
         </record>
         <record forcecreate="0" id="rateCLP" model="res.currency.rate">
@@ -1982,7 +1982,7 @@
         <record id="PYG" model="res.currency">
             <field name="name">PYG</field>
             <field name="symbol">₲</field>
-            <field name="rounding">0.01</field>
+            <field name="rounding">1.00</field>
             <field name="accuracy">4</field>
         </record>
         <record forcecreate="0" id="ratePYG" model="res.currency.rate">
