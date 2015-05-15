@@ -867,10 +867,10 @@ class product_product(osv.osv):
             if 'uom' in context:
                 uom = product.uos_id or product.uom_id
                 res[product.id] = product_uom_obj._compute_price(cr, uid,
-                        uom.id, product.list_price, context['uom'])
+                        uom.id, product.list_price or product.product_tmpl_id.list_price, context['uom'])
             else:
-                res[product.id] = product.list_price
-            res[product.id] =  res[product.id] + product.price_extra
+                res[product.id] = product.list_price or product.product_tmpl_id.list_price
+            res[product.id] =  res[product.id] + (0.0 if  product.list_price else product.price_extra) 
 
         return res
 
@@ -882,7 +882,7 @@ class product_product(osv.osv):
             uom = product.uos_id or product.uom_id
             value = product_uom_obj._compute_price(cr, uid,
                     context['uom'], value, uom.id)
-        value =  value - product.price_extra
+        #value =  value - product.price_extra
         
         return product.write({'list_price': value})
 
@@ -951,6 +951,7 @@ class product_product(osv.osv):
         'price': fields.function(_product_price, type='float', string='Price', digits_compute=dp.get_precision('Product Price')),
         'price_extra': fields.function(_get_price_extra, type='float', string='Variant Extra Price', help="This is the sum of the extra price of all attributes", digits_compute=dp.get_precision('Product Price')),
         'lst_price': fields.function(_product_lst_price, fnct_inv=_set_product_lst_price, type='float', string='Public Price', digits_compute=dp.get_precision('Product Price')),
+        'list_price': fields.float('Sale Price', digits_compute=dp.get_precision('Product Price'), help="Base price to compute the customer price. Sometimes called the catalog price. Set to zero to disable static price list and activate the price based on attributes prices"),
         'code': fields.function(_product_code, type='char', string='Internal Reference'),
         'partner_ref' : fields.function(_product_partner_ref, type='char', string='Customer ref'),
         'default_code' : fields.char('Internal Reference', select=True),
