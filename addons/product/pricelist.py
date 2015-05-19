@@ -446,7 +446,7 @@ class product_pricelist_item(osv.osv):
         if fields.get('type') == 'purchase':
             product_price_type_ids = product_price_type_obj.search(cr, uid, [('field', '=', 'standard_price')], context=context)
         elif fields.get('type') == 'sale':
-            product_price_type_ids = product_price_type_obj.search(cr, uid, [('field','=','list_price')], context=context)
+            product_price_type_ids = product_price_type_obj.search(cr, uid, [('field','=','lst_price')], context=context)
         else:
             return -1
         if not product_price_type_ids:

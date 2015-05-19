@@ -3058,7 +3058,7 @@ class wizard_multi_charts_accounts(osv.osv_memory):
                 res['domain']['sale_tax'] = repr(sale_tax_domain)
                 res['domain']['purchase_tax'] = repr(purchase_tax_domain)
             if data.code_digits:
-               res['value'].update({'code_digits': data.code_digits})
+                res['value'].update({'code_digits': data.code_digits})
         return res
 
     def default_get(self, cr, uid, fields, context=None):
