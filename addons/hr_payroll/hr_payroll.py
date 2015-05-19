@@ -403,7 +403,7 @@ class hr_payslip(osv.osv):
             day = datetime_day.strftime("%Y-%m-%d")
             holiday_ids = self.pool.get('hr.holidays').search(cr, uid, [('state','=','validate'),('employee_id','=',employee_id),('type','=','remove'),('date_from','<=',day),('date_to','>=',day)])
             if holiday_ids:
-                res = self.pool.get('hr.holidays').browse(cr, uid, holiday_ids, context=context)[0].holiday_status_id.name
+                res = self.pool.get('hr.holidays').browse(cr, uid, holiday_ids, context=context)[0].holiday_status_id
             return res
 
         res = []
@@ -430,14 +430,14 @@ class hr_payslip(osv.osv):
                     leave_type = was_on_leave(contract.employee_id.id, day_from + timedelta(days=day), context=context)
                     if leave_type:
                         #if he was on leave, fill the leaves dict
-                        if leave_type in leaves:
-                            leaves[leave_type]['number_of_days'] += 1.0
-                            leaves[leave_type]['number_of_hours'] += working_hours_on_day
+                        if leave_type.name in leaves:
+                            leaves[leave_type.name]['number_of_days'] += 1.0
+                            leaves[leave_type.name]['number_of_hours'] += working_hours_on_day
                         else:
-                            leaves[leave_type] = {
-                                'name': leave_type,
+                            leaves[leave_type.name] = {
+                                'name': leave_type.name,
                                 'sequence': 5,
-                                'code': leave_type,
+                                'code': leave_type.code or leave_type.name,
                                 'number_of_days': 1.0,
                                 'number_of_hours': working_hours_on_day,
                                 'contract_id': contract.id,
