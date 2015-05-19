@@ -207,7 +207,7 @@ class website_sale(http.Controller):
         attributes_ids = attributes_obj.search(cr, uid, [], context=context)
         attributes = attributes_obj.browse(cr, uid, attributes_ids, context=context)
 
-        from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'list_price', context)
+        from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'lst_price', context)
         to_currency = pricelist.currency_id
         compute_currency = lambda price: pool['res.currency']._compute(cr, uid, from_currency, to_currency, price, context=context)
 
@@ -254,7 +254,7 @@ class website_sale(http.Controller):
 
         pricelist = self.get_pricelist()
 
-        from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'list_price', context)
+        from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'lst_price', context)
         to_currency = pricelist.currency_id
         compute_currency = lambda price: pool['res.currency']._compute(cr, uid, from_currency, to_currency, price, context=context)
 
@@ -302,7 +302,7 @@ class website_sale(http.Controller):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
         order = request.website.sale_get_order()
         if order:
-            from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'list_price', context)
+            from_currency = pool.get('product.price.type')._get_field_currency(cr, uid, 'lst_price', context)
             to_currency = order.pricelist_id.currency_id
             compute_currency = lambda price: pool['res.currency']._compute(cr, uid, from_currency, to_currency, price, context=context)
         else:

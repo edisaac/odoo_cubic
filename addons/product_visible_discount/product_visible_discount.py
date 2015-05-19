@@ -47,7 +47,7 @@ class sale_order_line(osv.osv):
             item_obj = self.pool.get('product.pricelist.item')
             price_type_obj = self.pool.get('product.price.type')
             product_obj = self.pool.get('product.product')
-            field_name = 'list_price'
+            field_name = 'lst_price'
             rule_id = res_dict.get(pricelist) and res_dict[pricelist][1] or False
             if rule_id:
                 item_base = item_obj.read(cr, uid, [rule_id], ['base'])[0]['base']
