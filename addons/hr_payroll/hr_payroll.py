@@ -786,6 +786,7 @@ class hr_salary_rule(osv.osv):
 # payslip: object containing the payslips
 # employee: hr.employee object
 # contract: hr.contract object
+# rule: hr.salary.rule object (this rule)
 # rules: object containing the rules code (previously computed)
 # categories: object containing the computed salary rule categories (sum of amount of all rules belonging to that category).
 # worked_days: object containing the computed worked days.
@@ -801,6 +802,7 @@ result = contract.wage * 0.10''',
 # payslip: object containing the payslips
 # employee: hr.employee object
 # contract: hr.contract object
+# rule: hr.salary.rule object (this rule)
 # rules: object containing the rules code (previously computed)
 # categories: object containing the computed salary rule categories (sum of amount of all rules belonging to that category).
 # worked_days: object containing the computed worked days
@@ -844,6 +846,7 @@ result = rules.NET > categories.NET * 0.10''',
         :rtype: (float, float, float)
         """
         rule = self.browse(cr, uid, rule_id, context=context)
+        localdict['rule'] = rule 
         if rule.amount_select == 'fix':
             try:
                 return rule.amount_fix, float(eval(rule.quantity, localdict)), 100.0
@@ -860,8 +863,8 @@ result = rules.NET > categories.NET * 0.10''',
             try:
                 eval(rule.amount_python_compute, localdict, mode='exec', nocopy=True)
                 return float(localdict['result']), 'result_qty' in localdict and localdict['result_qty'] or 1.0, 'result_rate' in localdict and localdict['result_rate'] or 100.0
-            except:
-                raise osv.except_osv(_('Error!'), _('Wrong python code defined for salary rule %s (%s).')% (rule.name, rule.code))
+            except Exception, e:
+                raise osv.except_osv(_('Error!'), _('Wrong python code defined for salary rule %s (%s).')% (rule.name, rule.code) + "\n\n"+ str(e))
 
     def satisfy_condition(self, cr, uid, rule_id, localdict, context=None):
         """
@@ -870,7 +873,8 @@ result = rules.NET > categories.NET * 0.10''',
         @return: returns True if the given rule match the condition for the given contract. Return False otherwise.
         """
         rule = self.browse(cr, uid, rule_id, context=context)
-
+        localdict['rule'] = rule
+         
         if rule.condition_select == 'none':
             return True
         elif rule.condition_select == 'range':
@@ -883,8 +887,8 @@ result = rules.NET > categories.NET * 0.10''',
             try:
                 eval(rule.condition_python, localdict, mode='exec', nocopy=True)
                 return 'result' in localdict and localdict['result'] or False
-            except:
-                raise osv.except_osv(_('Error!'), _('Wrong python condition defined for salary rule %s (%s).')% (rule.name, rule.code))
+            except Exception, e:
+                raise osv.except_osv(_('Error!'), _('Wrong python condition defined for salary rule %s (%s).')% (rule.name, rule.code) + "\n\n" + str(e))
 
 
 class hr_rule_input(osv.osv):
