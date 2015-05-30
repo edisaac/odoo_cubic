@@ -75,6 +75,7 @@ class event_track(osv.osv):
 
     _columns = {
         'name': fields.char('Track Title', required=True, translate=True),
+        'sequence': fields.integer('Sequence'),
         'user_id': fields.many2one('res.users', 'Responsible'),
         'speaker_ids': fields.many2many('res.partner', string='Speakers'),
         'tag_ids': fields.many2many('event.track.tag', string='Tags'),

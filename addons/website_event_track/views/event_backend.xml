@@ -327,7 +327,7 @@
                                     <field name="duration" class="oe_inline" widget="float_time"/> hours
                                 </div>
                                 <field name="tag_ids" widget="many2many_tags"/>
-                                <field name="color"/>
+                                <field name="sequence"/>
                             </group>
                         </group>
                     </sheet>
@@ -346,6 +346,7 @@
                 <tree string="Event Track">
                     <field name="name"/>
                     <field name="event_id"/>
+                    <field name="sequence"/>
                 </tree>
             </field>
         </record>
