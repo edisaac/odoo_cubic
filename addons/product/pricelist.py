@@ -45,7 +45,7 @@ class price_type(osv.osv):
         return res
 
     def _get_field_currency(self, cr, uid, fname, ctx):
-        ids = self.search(cr, uid, [('field','=',fname)], context=ctx)
+        ids = self.search(cr, uid, [('field','=',fname)], context=ctx) or [1]
         return self.browse(cr, uid, ids, context=ctx)[0].currency_id
 
     def _get_currency(self, cr, uid, ctx):
