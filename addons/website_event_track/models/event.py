@@ -75,6 +75,7 @@ class event_track(osv.osv):
 
     _columns = {
         'name': fields.char('Track Title', required=True, translate=True),
+        'sequence': fields.integer('Sequence'),
         'user_id': fields.many2one('res.users', 'Responsible'),
         'speaker_ids': fields.many2many('res.partner', string='Speakers'),
         'tag_ids': fields.many2many('event.track.tag', string='Tags'),
@@ -105,7 +106,8 @@ class event_track(osv.osv):
         'stage_id': _default_stage_id,
         'priority': '2'
     }
-
+    _order = 'sequence'
+    
     def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         stage_obj = self.pool.get('event.track.stage')
         result = stage_obj.name_search(cr, uid, '', context=context)
