@@ -61,6 +61,12 @@ class ReportController(Controller):
         if converter == 'html':
             html = report_obj.get_html(cr, uid, docids, reportname, data=options_data, context=context)
             return request.make_response(html)
+        elif converter == 'xls':
+            xls = report_obj.get_xls(cr, uid, docids, reportname, data=options_data, context=context)
+            xlshttpheaders = [('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+                              ('Cache-Control', 'max-age=0'),
+                              ('Content-Length', len(xls))]
+            return request.make_response(xls, headers=xlshttpheaders)
         elif converter == 'pdf':
             pdf = report_obj.get_pdf(cr, uid, docids, reportname, data=options_data, context=context)
             pdfhttpheaders = [('Content-Type', 'application/pdf'), ('Content-Length', len(pdf))]
@@ -125,6 +131,24 @@ class ReportController(Controller):
                     response = self.report_routes(reportname, converter='pdf', **dict(data))
 
                 response.headers.add('Content-Disposition', 'attachment; filename=%s.pdf;' % reportname)
+                response.set_cookie('fileToken', token)
+                return response
+            elif type == 'qweb-xls':
+                reportname = url.split('/report/xls/')[1].split('?')[0]
+
+                docids = None
+                if '/' in reportname:
+                    reportname, docids = reportname.split('/')
+
+                if docids:
+                    # Generic report:
+                    response = self.report_routes(reportname, docids=docids, converter='xls')
+                else:
+                    # Particular report:
+                    data = url_decode(url.split('?')[1]).items()  # decoding the args represented in JSON
+                    response = self.report_routes(reportname, converter='xls', **dict(data))
+
+                response.headers.add('Content-Disposition', 'attachment; filename=%s.xls;' % reportname)
                 response.set_cookie('fileToken', token)
                 return response
             elif type =='controller':

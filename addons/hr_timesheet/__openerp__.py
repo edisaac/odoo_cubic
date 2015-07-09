@@ -40,7 +40,7 @@ up a management by affair.
     """,
     'author': 'OpenERP SA',
     'website': 'https://www.odoo.com/page/employees',
-    'depends': ['account', 'hr', 'base', 'hr_attendance'],
+    'depends': ['account', 'hr', 'base', 'hr_attendance', 'product'],
     'data': [
         'security/ir.model.access.csv',
         'security/hr_timesheet_security.xml',

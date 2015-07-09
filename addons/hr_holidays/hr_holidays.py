@@ -73,6 +73,7 @@ class hr_holidays_status(osv.osv):
 
     _columns = {
         'name': fields.char('Leave Type', size=64, required=True, translate=True),
+        'code': fields.char('Leave Code', size=16),
         'categ_id': fields.many2one('calendar.event.type', 'Meeting Type',
             help='Once a leave is validated, Odoo will create a corresponding meeting of this type in the calendar.'),
         'color_name': fields.selection([('red', 'Red'),('blue','Blue'), ('lightgreen', 'Light Green'), ('lightblue','Light Blue'), ('lightyellow', 'Light Yellow'), ('magenta', 'Magenta'),('lightcyan', 'Light Cyan'),('black', 'Black'),('lightpink', 'Light Pink'),('brown', 'Brown'),('violet', 'Violet'),('lightcoral', 'Light Coral'),('lightsalmon', 'Light Salmon'),('lavender', 'Lavender'),('wheat', 'Wheat'),('ivory', 'Ivory')],'Color in Report', required=True, help='This color will be used in the leaves summary located in Reporting\Leaves by Department.'),

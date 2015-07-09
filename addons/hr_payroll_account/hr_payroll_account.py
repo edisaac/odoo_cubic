@@ -115,7 +115,7 @@ class hr_payslip(osv.osv):
                     debit_line = (0, 0, {
                     'name': line.name,
                     'date': timenow,
-                    'partner_id': (line.salary_rule_id.register_id.partner_id or line.salary_rule_id.account_debit.type in ('receivable', 'payable')) and partner_id or False,
+                    'partner_id': partner_id if line.salary_rule_id.register_id.partner_apply in ('debdit','both') else ((line.salary_rule_id.account_debit.type in ('receivable', 'payable')) and partner_id or False),
                     'account_id': debit_account_id,
                     'journal_id': slip.journal_id.id,
                     'period_id': period_id,
@@ -133,7 +133,7 @@ class hr_payslip(osv.osv):
                     credit_line = (0, 0, {
                     'name': line.name,
                     'date': timenow,
-                    'partner_id': (line.salary_rule_id.register_id.partner_id or line.salary_rule_id.account_credit.type in ('receivable', 'payable')) and partner_id or False,
+                    'partner_id': partner_id if line.salary_rule_id.register_id.partner_apply in ('credit','both') else ((line.salary_rule_id.account_credit.type in ('receivable', 'payable')) and partner_id or False),
                     'account_id': credit_account_id,
                     'journal_id': slip.journal_id.id,
                     'period_id': period_id,
@@ -223,5 +223,18 @@ class hr_payslip_run(osv.osv):
         'journal_id': _get_default_journal,
     }
 
+class contrib_register(osv.osv):
+    _name = 'hr.contribution.register'
+    _inherit = 'hr.contribution.register'
+
+    _columns = {
+        'partner_apply': fields.selection([('credit','Credit'),
+                                           ('debit','Debit'),
+                                           ('both','Credit and Debit'),
+                                           ('auto', 'Automatic')], string="Partner Apply", help="Apply accounting partner to debits, credits or both"),
+    }
+    _defaults = {
+        'partner_apply': 'auto',
+    }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

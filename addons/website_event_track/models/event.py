@@ -106,7 +106,8 @@ class event_track(osv.osv):
         'stage_id': _default_stage_id,
         'priority': '2'
     }
-
+    _order = 'sequence'
+    
     def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
         stage_obj = self.pool.get('event.track.stage')
         result = stage_obj.name_search(cr, uid, '', context=context)

@@ -582,7 +582,7 @@ class product_template(osv.osv):
     def _price_get_list_price(self, product):
         return 0.0
 
-    def _price_get(self, cr, uid, products, ptype='list_price', context=None):
+    def _price_get(self, cr, uid, products, ptype='lst_price', context=None):
         if context is None:
             context = {}
 
@@ -603,7 +603,7 @@ class product_template(osv.osv):
                 company_id = product.env.user.company_id.id
                 product = product.with_context(force_company=company_id)
                 res[product.id] = res[product.id] = product.sudo()[ptype]
-            if ptype == 'list_price':
+            if ptype == 'lst_price':
                 res[product.id] += product._name == "product.product" and product.price_extra or 0.0
             if 'uom' in context:
                 uom = product.uom_id or product.uos_id
@@ -1113,7 +1113,7 @@ class product_product(osv.osv):
     #
     # Could be overrided for variants matrices prices
     #
-    def price_get(self, cr, uid, ids, ptype='list_price', context=None):
+    def price_get(self, cr, uid, ids, ptype='lst_price', context=None):
         products = self.browse(cr, uid, ids, context=context)
         return self.pool.get("product.template")._price_get(cr, uid, products, ptype=ptype, context=context)
 

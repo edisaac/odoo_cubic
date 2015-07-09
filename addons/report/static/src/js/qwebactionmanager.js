@@ -23,7 +23,7 @@ openerp.report = function(instance) {
             _t =  instance.web._t;
 
             // QWeb reports
-            if ('report_type' in action && (action.report_type == 'qweb-html' || action.report_type == 'qweb-pdf' || action.report_type == 'controller')) {
+            if ('report_type' in action && (action.report_type == 'qweb-html' || action.report_type == 'qweb-xls' || action.report_type == 'qweb-pdf' || action.report_type == 'controller')) {
                 var report_url = '';
                 switch (action.report_type) {
                     case 'qweb-html':
@@ -31,6 +31,9 @@ openerp.report = function(instance) {
                         break;
                     case 'qweb-pdf':
                         report_url = '/report/pdf/' + action.report_name;
+                        break;
+                    case 'qweb-xls':
+                        report_url = '/report/xls/' + action.report_name;
                         break;
                     case 'controller':
                         report_url = action.report_file;
@@ -86,6 +89,8 @@ workers to print a pdf version of the reports.'), true);
                         }
                         return trigger_download(self.session, response, c, action, options);
                     });
+                } else if (action.report_type === 'qweb-xls') {
+                    return trigger_download(self.session, response, c, action, options);
                 } else if (action.report_type === 'controller') {
                     return trigger_download(self.session, response, c, action, options);
                 }                     
