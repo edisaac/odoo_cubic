@@ -1933,6 +1933,9 @@ class account_bank_statement(osv.osv):
             wf_service.trg_validate(uid, 'account.voucher', st_line.voucher_id.id, 'proforma_voucher', cr)
 
             v = voucher_obj.browse(cr, uid, st_line.voucher_id.id, context=context)
+            if not v.move_id:
+                raise osv.except_osv(_('Error!'),
+                        _('There is no account move asociated to voucher: %s (state %s), in the line %s') % (v.name, v.state, st_line.name))
             bank_st_line_obj.write(cr, uid, [st_line_id], {
                 'move_ids': [(4, v.move_id.id, False)]
             })
