@@ -34,6 +34,21 @@ class stock_transfer_details(models.TransientModel):
     picking_source_location_id = fields.Many2one('stock.location', string="Head source location", related='picking_id.location_id', store=False, readonly=True)
     picking_destination_location_id = fields.Many2one('stock.location', string="Head destination location", related='picking_id.location_dest_id', store=False, readonly=True)
 
+    def get_pack_operation_item(self, cr, uid, op, context=None):
+        return {
+                'packop_id': op.id,
+                'product_id': op.product_id.id,
+                'product_uom_id': op.product_uom_id.id,
+                'quantity': op.product_qty,
+                'package_id': op.package_id.id,
+                'lot_id': op.lot_id.id,
+                'sourceloc_id': op.location_id.id,
+                'destinationloc_id': op.location_dest_id.id,
+                'result_package_id': op.result_package_id.id,
+                'date': op.date, 
+                'owner_id': op.owner_id.id,
+            }
+
     def default_get(self, cr, uid, fields, context=None):
         if context is None: context = {}
         res = super(stock_transfer_details, self).default_get(cr, uid, fields, context=context)
@@ -50,19 +65,7 @@ class stock_transfer_details(models.TransientModel):
         packs = []
         picking.do_prepare_partial()
         for op in picking.pack_operation_ids:
-            item = {
-                'packop_id': op.id,
-                'product_id': op.product_id.id,
-                'product_uom_id': op.product_uom_id.id,
-                'quantity': op.product_qty,
-                'package_id': op.package_id.id,
-                'lot_id': op.lot_id.id,
-                'sourceloc_id': op.location_id.id,
-                'destinationloc_id': op.location_dest_id.id,
-                'result_package_id': op.result_package_id.id,
-                'date': op.date, 
-                'owner_id': op.owner_id.id,
-            }
+            item = self.get_pack_operation_item(cr, uid, op, context=context)
             if op.product_id:
                 items.append(item)
             elif op.package_id:
