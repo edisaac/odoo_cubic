@@ -754,7 +754,7 @@ class stock_picking(osv.osv):
         picking_obj = self.browse(cr, uid, id, context=context)
         if ('name' not in default) or (picking_obj.name == '/'):
             seq_obj_name = 'stock.picking.' + picking_obj.type
-            default['name'] = self.pool.get('ir.sequence').get(cr, uid, seq_obj_name)
+            default['name'] = self.pool.get('ir.sequence').get(cr, uid, seq_obj_name) or self.pool.get('ir.sequence').get(cr, uid, 'stock.picking') 
             default.setdefault('origin', False)
             default.setdefault('backorder_id', False)
         if 'invoice_state' not in default and picking_obj.invoice_state == 'invoiced':
