@@ -13,7 +13,7 @@
 #   $ gunicorn openerp:service.wsgi_server.application -c openerp-wsgi.py
 
 import openerp
-
+import multiprocessing 
 #----------------------------------------------------------
 # Common
 #----------------------------------------------------------
@@ -26,16 +26,15 @@ conf = openerp.tools.config
 # Path to the OpenERP Addons repository (comma-separated for
 # multiple locations)
 
-conf['addons_path'] = './addons,../trunk'
+conf['addons_path'] = './addons,../branch,../trunk'
 
 # Optional database config if not using local socket
-#conf['db_name'] = 'mycompany'
-conf['db_host'] = '66.175.216.105'
-conf['db_user'] = 'w8'
-conf['db_port'] = 5432
-conf['db_password'] = 't3r4d4t4'
-conf['dbfilter']="^%d$"
-conf['admin_passwd']="t3r4d4t4"
+# conf['db_host'] = 'localhost'
+# conf['db_user'] = 'alex'
+# conf['db_port'] = 5432
+# conf['db_password'] = 'ca4/02'
+# conf['dbfilter']="^%d$"
+# conf['admin_passwd']="t3r4d4t4"
 
 
 #----------------------------------------------------------
@@ -49,9 +48,9 @@ openerp.service.server.load_server_wide_modules()
 # Gunicorn
 #----------------------------------------------------------
 # Standard OpenERP XML-RPC port is 8069
-bind = '0.0.0.0:8078'
+bind = '127.0.0.1:8078'
 pidfile = '.gunicorn.pid'
-workers = 5
+workers = multiprocessing.cpu_count() * 2 + 1
 timeout = 240
 max_requests = 2000
 
