@@ -297,7 +297,7 @@ class website_sale(http.Controller):
         request.website.sale_get_order(code=promo, context=context)
         return request.redirect("/shop/cart")
 
-    @http.route(['/shop/cart'], type='http', auth="user", website=True)
+    @http.route(['/shop/cart'], type='http', auth="public", website=True)
     def cart(self, **post):
         cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
         order = request.website.sale_get_order()
@@ -570,7 +570,7 @@ class website_sale(http.Controller):
 
         order_obj.write(cr, SUPERUSER_ID, [order.id], order_info, context=context)
 
-    @http.route(['/shop/checkout'], type='http', auth="user", website=True)
+    @http.route(['/shop/checkout'], type='http', auth="public", website=True)
     def checkout(self, **post):
         cr, uid, context = request.cr, request.uid, request.context
 
@@ -614,7 +614,7 @@ class website_sale(http.Controller):
     # Payment
     #------------------------------------------------------
 
-    @http.route(['/shop/payment'], type='http', auth="user", website=True)
+    @http.route(['/shop/payment'], type='http', auth="public", website=True)
     def payment(self, **post):
         """ Payment step. This page proposes several payment means based on available
         payment.acquirer. State at this point :
@@ -829,7 +829,7 @@ class website_sale(http.Controller):
 
         return request.redirect('/shop/confirmation')
 
-    @http.route(['/shop/confirmation'], type='http', auth="user", website=True)
+    @http.route(['/shop/confirmation'], type='http', auth="public", website=True)
     def payment_confirmation(self, **post):
         """ End of checkout process controller. Confirmation is basically seing
         the status of a sale.order. State at this point :

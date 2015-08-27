@@ -167,6 +167,7 @@ class ir_actions_report_xml(osv.osv):
         'report_type': fields.selection([('qweb-pdf', 'PDF'),
                     ('qweb-html', 'HTML'),
                     ('qweb-xls', 'Excel'),
+                    ('cubicReport.xlsx', 'CubicReport.xlsx'),
                     ('controller', 'Controller'),
                     ('pdf', 'RML pdf (deprecated)'),
                     ('sxw', 'RML sxw (deprecated)'),
