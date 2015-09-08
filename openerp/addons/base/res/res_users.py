@@ -267,6 +267,7 @@ class res_users(osv.osv):
         'password': '',
         'active': True,
         'customer': False,
+        'is_company': False,
         'company_id': _get_company,
         'company_ids': _get_companies,
         'groups_id': _get_group,
