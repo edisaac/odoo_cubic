@@ -399,11 +399,11 @@ class hr_payslip(osv.osv):
         @return: returns a list of dict containing the input that should be applied for the given contract between date_from and date_to
         """
         def was_on_leave(employee_id, datetime_day, context=None):
-            res = False
+            res = []
             day = datetime_day.strftime("%Y-%m-%d")
             holiday_ids = self.pool.get('hr.holidays').search(cr, uid, [('state','=','validate'),('employee_id','=',employee_id),('type','=','remove'),('date_from','<=',day),('date_to','>=',day)])
             if holiday_ids:
-                res = self.pool.get('hr.holidays').browse(cr, uid, holiday_ids, context=context)[0].holiday_status_id
+                res = self.pool.get('hr.holidays').browse(cr, uid, holiday_ids, context=context) #[0].holiday_status_id
             return res
 
         res = []
@@ -420,32 +420,37 @@ class hr_payslip(osv.osv):
                  'contract_id': contract.id,
             }
             leaves = {}
+            _holiday_ids = []
             day_from = datetime.strptime(date_from,"%Y-%m-%d")
             day_to = datetime.strptime(date_to,"%Y-%m-%d")
             nb_of_days = (day_to - day_from).days + 1
             for day in range(0, nb_of_days):
                 working_hours_on_day = self.pool.get('resource.calendar').working_hours_on_day(cr, uid, contract.working_hours, day_from + timedelta(days=day), context)
                 if working_hours_on_day:
-                    #the employee had to work
-                    leave_type = was_on_leave(contract.employee_id.id, day_from + timedelta(days=day), context=context)
-                    if leave_type:
-                        #if he was on leave, fill the leaves dict
-                        if leave_type.name in leaves:
-                            leaves[leave_type.name]['number_of_days'] += 1.0
-                            leaves[leave_type.name]['number_of_hours'] += working_hours_on_day
-                        else:
-                            leaves[leave_type.name] = {
-                                'name': leave_type.name,
-                                'sequence': 5,
-                                'code': leave_type.code or leave_type.name,
-                                'number_of_days': 1.0,
-                                'number_of_hours': working_hours_on_day,
-                                'contract_id': contract.id,
-                            }
+                    attendances['number_of_days'] += 1.0
+                    attendances['number_of_hours'] += working_hours_on_day
+                
+                holidays = was_on_leave(contract.employee_id.id, day_from + timedelta(days=day), context=context)
+                for holiday in holidays:
+                    if holiday.id in _holiday_ids:
+                        continue
+                    leave_type = holiday.holiday_status_id
+                    holiday_seconds = float((datetime.strptime(holiday.date_to, '%Y-%m-%d %H:%M:%S') - datetime.strptime(holiday.date_from, '%Y-%m-%d %H:%M:%S')).seconds)
+                    #if he was on leave, fill the leaves dict
+                    if leave_type.name in leaves:
+                        leaves[leave_type.name]['number_of_days'] += holiday.number_of_days_temp
+                        leaves[leave_type.name]['number_of_hours'] += holiday_seconds / 60 / 60
                     else:
-                        #add the input vals to tmp (increment if existing)
-                        attendances['number_of_days'] += 1.0
-                        attendances['number_of_hours'] += working_hours_on_day
+                        leaves[leave_type.name] = {
+                            'name': leave_type.name,
+                            'sequence': 5,
+                            'code': leave_type.code or leave_type.name,
+                            'number_of_days': holiday.number_of_days_temp,
+                            'number_of_hours': holiday_seconds / 60 / 60,
+                            'contract_id': contract.id,
+                        }
+                    _holiday_ids.append(holiday.id)
+                
             leaves = [value for key,value in leaves.items()]
             res += [attendances] + leaves
         return res
