@@ -106,7 +106,20 @@ class hr_payslip(osv.osv):
                 amt = slip.credit_note and -line.total or line.total
                 if float_is_zero(amt, precision_digits=precision):
                     continue
-                partner_id = line.salary_rule_id.register_id.partner_id and line.salary_rule_id.register_id.partner_id.id or default_partner_id
+                debit_partner_id = False
+                if line.register_employee_id.debit_partner_apply == 'employee':
+                    debit_partner_id = default_partner_id
+                elif line.register_employee_id.debit_partner_apply == 'partner':
+                    debit_partner_id = line.register_employee_id.partner_id.id
+                elif line.register_employee_id.debit_partner_apply == 'auto':
+                    debit_partner_id = line.register_employee_id.partner_id and line.register_employee_id.partner_id.id or default_partner_id
+                credit_partner_id = False
+                if line.register_employee_id.credit_partner_apply == 'employee':
+                    credit_partner_id = default_partner_id
+                elif line.register_employee_id.credit_partner_apply == 'partner':
+                    credit_partner_id = line.register_employee_id.partner_id.id
+                elif line.register_employee_id.credit_partner_apply == 'auto':
+                    credit_partner_id = line.register_employee_id.partner_id and line.register_employee_id.partner_id.id or default_partner_id 
                 debit_account_id = line.salary_rule_id.account_debit.id
                 credit_account_id = line.salary_rule_id.account_credit.id
 
@@ -115,7 +128,7 @@ class hr_payslip(osv.osv):
                     debit_line = (0, 0, {
                     'name': line.name,
                     'date': timenow,
-                    'partner_id': partner_id if line.salary_rule_id.register_id.partner_apply in ('debdit','both') else ((line.salary_rule_id.account_debit.type in ('receivable', 'payable')) and partner_id or False),
+                    'partner_id': credit_partner_id if line.register_employee_id.debit_partner_apply in ('partner','employee') else ((line.salary_rule_id.account_debit.type in ('receivable', 'payable')) and credit_partner_id or False),
                     'account_id': debit_account_id,
                     'journal_id': slip.journal_id.id,
                     'period_id': period_id,
@@ -133,7 +146,7 @@ class hr_payslip(osv.osv):
                     credit_line = (0, 0, {
                     'name': line.name,
                     'date': timenow,
-                    'partner_id': partner_id if line.salary_rule_id.register_id.partner_apply in ('credit','both') else ((line.salary_rule_id.account_credit.type in ('receivable', 'payable')) and partner_id or False),
+                    'partner_id': debit_partner_id if line.register_employee_id.credit_partner_apply in ('partner','employee') else ((line.salary_rule_id.account_credit.type in ('receivable', 'payable')) and debit_partner_id or False),
                     'account_id': credit_account_id,
                     'journal_id': slip.journal_id.id,
                     'period_id': period_id,
@@ -228,13 +241,36 @@ class contrib_register(osv.osv):
     _inherit = 'hr.contribution.register'
 
     _columns = {
-        'partner_apply': fields.selection([('credit','Credit'),
-                                           ('debit','Debit'),
-                                           ('both','Credit and Debit'),
-                                           ('auto', 'Automatic')], string="Partner Apply", help="Apply accounting partner to debits, credits or both"),
+        'debit_partner_apply': fields.selection([('employee','Employee'),
+                                           ('partner','Contribution Partner'),
+                                           ('auto', 'Automatic')], string="Debit Partner Apply", help="Apply accounting partner to debits"),
+        'credit_partner_apply': fields.selection([('employee','Employee'),
+                                           ('partner','Contribution Partner'),
+                                           ('auto', 'Automatic')], string="Credit Partner Apply", help="Apply accounting partner to credits"),
     }
     _defaults = {
-        'partner_apply': 'auto',
+        'debit_partner_apply': 'auto',
+        'credit_partner_apply': 'auto',
     }
+
+class hr_payslip_line(osv.osv):
+    _name = 'hr.payslip.line'
+    _inherit = 'hr.payslip.line'
+    
+    def _register_employee_id(self, cr, uid, ids, field_names, arg=None, context=None):
+        res = {}
+        for line in self.browse(cr, uid, ids, context=context):
+            if line.salary_rule_id.register_employee:
+                res[line.id] = self.pool.get('hr.employee.contribution.rule').get_register_id(cr, uid, line.salary_rule_id.id, 
+                                                                                                     line.employee_id.id, context=context)
+            else:
+                res[line.id] = line.salary_rule_id.register_id.id
+        return res
+    
+    _columns = {
+            'register_employee_id': fields.function(_register_employee_id, string="Employee Contribution Register", 
+                                                      relation= "hr.contribution.register", type="many2one",
+                                                      help="Eventual third party involved in the salary payment of the employees."),
+        }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
