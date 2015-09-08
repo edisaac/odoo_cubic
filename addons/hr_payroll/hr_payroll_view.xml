@@ -413,9 +413,9 @@
                         <field name="name"/>
                         <field name="code"/>
                         <field name="parent_id"/>
-                        <separator string="Notes"/>
-                        <field name="note"/>
                     </group>
+                    <separator string="Notes"/>
+                    <field name="note"/>
                 </form>
             </field>
         </record>
