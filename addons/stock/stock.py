@@ -2396,6 +2396,7 @@ class stock_move(osv.osv):
         to real_time valuation tracking, and the source or destination location is
         a transit location or is outside of the company.
         """
+        res = []
         if move.product_id.valuation == 'real_time': # FIXME: product valuation should perhaps be a property?
             if context is None:
                 context = {}
@@ -2431,12 +2432,14 @@ class stock_move(osv.osv):
 
             move_obj = self.pool.get('account.move')
             for j_id, move_lines in account_moves:
-                move_obj.create(cr, uid,
+                new_id = move_obj.create(cr, uid,
                         {
                          'journal_id': j_id,
                          'line_id': move_lines,
                          'company_id': move.company_id.id,
                          'ref': move.picking_id and move.picking_id.name}, context=company_ctx)
+                res.append(new_id)
+        return res
 
     def action_done(self, cr, uid, ids, context=None):
         """ Makes the move done and if all moves are done, it will finish the picking.
