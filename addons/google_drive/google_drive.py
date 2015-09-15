@@ -30,6 +30,9 @@ import json
 import re
 import openerp
 
+import StringIO
+import gzip
+
 _logger = logging.getLogger(__name__)
 
 
@@ -90,7 +93,13 @@ class config(osv.Model):
                 raise openerp.exceptions.RedirectWarning(msg, action_id, _('Go to the configuration panel'))
             else:
                 raise osv.except_osv(_('Error!'), _("Google Drive is not yet configured. Please contact your administrator."))
-        content = json.loads(content)
+        try:
+            content = json.loads(content)
+        except ValueError:
+            buf = StringIO.StringIO(content)
+            f= gzip.GzipFile(fileobj=buf,mode='r')
+            content = f.read()
+            content = json.loads(content)
         return content.get('access_token')
 
     def copy_doc(self, cr, uid, res_id, template_id, name_gdocs, res_model, context=None):
