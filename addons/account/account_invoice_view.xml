@@ -332,7 +332,7 @@
                             <field name="date_invoice"/>
                             <field name="internal_number" invisible="1"/>
                             <field name="journal_id" groups="account.group_account_user"
-                                on_change="onchange_journal_id(journal_id, context)" domain="[('company_id','=',company_id),('type','=','sale')]"/>
+                                on_change="onchange_journal_id(journal_id, context)" domain="[('company_id','=',company_id),'|',('type','=','sale'),('type','=','sale_refund')]"/>
                             <field domain="[('company_id', '=', company_id),('type','=', 'receivable')]"
                                 name="account_id" groups="account.group_account_user"/>
 
