@@ -1806,6 +1806,8 @@ class stock_move(models.Model):
 
     def _default_location_source(self, cr, uid, context=None):
         context = context or {}
+        if context.get('default_location_dest_id', False):
+            return context.get('default_location_dest_id')
         if context.get('default_picking_type_id', False):
             pick_type = self.pool.get('stock.picking.type').browse(cr, uid, context['default_picking_type_id'], context=context)
             return pick_type.default_location_src_id and pick_type.default_location_src_id.id or False

@@ -114,6 +114,7 @@
                                     <field name="salvage_value" widget="monetary" options="{'currency_field': 'currency_id'}" on_change="onchange_purchase_salvage_value(purchase_value, salvage_value)"/>
                                     <field name="value_residual" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                     <field name="partner_id"/>
+                        			<field name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
                                 </group>
                                 <group>
                                     <field name="method"/>
@@ -165,7 +166,7 @@
                         </page>
                         <page string="History">
                             <field name="account_move_line_ids" readonly="1"/>
-                            <field name="history_ids" readonly="1"/>
+                            <field name="history_ids" readonly="0"/>
                         </page>
                         <page string="Notes">
                             <field name="note" placeholder="Add an internal note here..."/>

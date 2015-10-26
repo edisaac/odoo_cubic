@@ -160,7 +160,7 @@ class account_asset_asset(osv.osv):
                     last_depreciation_date = datetime.strptime(depreciation_lin_obj.browse(cr,uid,posted_depreciation_line_ids[0],context=context).depreciation_date, '%Y-%m-%d')
                     depreciation_date = (last_depreciation_date+relativedelta(months=+asset.method_period))
                 else:
-                    depreciation_date = datetime(purchase_date.year, 1, 1)
+                    depreciation_date = datetime(purchase_date.year, purchase_date.month, 1)
             day = depreciation_date.day
             month = depreciation_date.month
             year = depreciation_date.year
@@ -277,6 +277,7 @@ class account_asset_asset(osv.osv):
         'history_ids': fields.one2many('account.asset.history', 'asset_id', 'History', readonly=False),
         'depreciation_line_ids': fields.one2many('account.asset.depreciation.line', 'asset_id', 'Depreciation Lines', readonly=True, states={'draft':[('readonly',False)],'open':[('readonly',False)]}),
         'salvage_value': fields.float('Salvage Value', digits_compute=dp.get_precision('Account'), help="It is the amount you plan to have that you cannot depreciate.", readonly=True, states={'draft':[('readonly',False)]}),
+        'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic account', readonly=True, states={'draft':[('readonly',False)]}),
     }
     _defaults = {
         'code': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'account.asset.code'),
@@ -319,6 +320,7 @@ class account_asset_asset(osv.osv):
                             'method_progress_factor': category_obj.method_progress_factor,
                             'method_end': category_obj.method_end,
                             'prorata': category_obj.prorata,
+                            'account_analytic_id': category_obj.account_analytic_id.id
             }
         return res
 
@@ -395,7 +397,6 @@ class account_asset_depreciation_line(osv.osv):
             current_currency = line.asset_id.currency_id.id
             context.update({'date': depreciation_date})
             amount = currency_obj.compute(cr, uid, current_currency, company_currency, line.amount, context=context)
-            sign = (line.asset_id.category_id.journal_id.type == 'purchase' and 1) or -1
             asset_name = line.asset_id.name
             reference = line.name
             move_vals = {
@@ -419,7 +420,7 @@ class account_asset_depreciation_line(osv.osv):
                 'journal_id': journal_id,
                 'partner_id': partner_id,
                 'currency_id': company_currency != current_currency and  current_currency or False,
-                'amount_currency': company_currency != current_currency and - sign * line.amount or 0.0,
+                'amount_currency': company_currency != current_currency and -1 * line.amount or 0.0,
                 'date': depreciation_date,
             })
             move_line_obj.create(cr, uid, {
@@ -433,8 +434,8 @@ class account_asset_depreciation_line(osv.osv):
                 'journal_id': journal_id,
                 'partner_id': partner_id,
                 'currency_id': company_currency != current_currency and  current_currency or False,
-                'amount_currency': company_currency != current_currency and sign * line.amount or 0.0,
-                'analytic_account_id': line.asset_id.category_id.account_analytic_id.id,
+                'amount_currency': company_currency != current_currency and line.amount or 0.0,
+                'analytic_account_id': line.asset_id.account_analytic_id.id,
                 'date': depreciation_date,
                 'asset_id': line.asset_id.id
             })

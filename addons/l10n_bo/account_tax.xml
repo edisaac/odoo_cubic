@@ -5,10 +5,10 @@
     <record id="ITAX_21" model="account.tax.template">
       <field name="chart_template_id" ref="bo_chart_template"/>
       <field name="name">IVA 13% Venta</field>
-      <field name="amount">0.130000</field>
+      <field name="amount">0.14942528735632</field>
       <field name="type">percent</field>
       <field name="type_tax_use">sale</field>
-      <field name="include_base_amount">1</field>
+      <field name="price_include">1</field>
       <field name="account_collected_id" ref="231"/>
       <field name="account_paid_id" ref="231"/>
       <field name="base_code_id" ref="vat_code_base_sale"/>
@@ -19,12 +19,12 @@
     <record id="OTAX_21" model="account.tax.template">
       <field name="chart_template_id" ref="bo_chart_template"/>
       <field name="name">IVA 13% Compra</field>
-      <field name="amount">0.130000</field>
+      <field name="amount">0.14942528735632</field>
       <field name="type">percent</field>
       <field name="type_tax_use">purchase</field>
-      <field name="include_base_amount">1</field>
-      <field name="account_collected_id" ref="231"/>
-      <field name="account_paid_id" ref="231"/>
+      <field name="price_include">1</field>
+      <field name="account_collected_id" ref="126"/>
+      <field name="account_paid_id" ref="126"/>
       <field name="base_code_id" ref="vat_code_base_purchase"/>
       <field name="tax_code_id" ref="vat_code_IVA_pay"/>
       <field name="ref_base_code_id" ref="vat_code_base_purchase"/>
