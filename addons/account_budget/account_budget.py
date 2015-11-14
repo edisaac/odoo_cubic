@@ -187,6 +187,7 @@ class crossovered_budget_lines(osv.osv):
     _name = "crossovered.budget.lines"
     _description = "Budget Line"
     _columns = {
+        'sequence': fields.integer('Sequence'),
         'crossovered_budget_id': fields.many2one('crossovered.budget', 'Budget', ondelete='cascade', select=True, required=True),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account'),
         'general_budget_id': fields.many2one('account.budget.post', 'Budgetary Position',required=True),
@@ -199,6 +200,10 @@ class crossovered_budget_lines(osv.osv):
         'percentage':fields.function(_perc, string='Percentage', type='float'),
         'company_id': fields.related('crossovered_budget_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True)
     }
+    _defaults = {
+        'sequence': 5,
+    }
+    _order = 'sequence'
 
 
 class account_analytic_account(osv.osv):

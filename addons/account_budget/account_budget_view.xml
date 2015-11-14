@@ -128,6 +128,7 @@
                             <page string="Budget Lines">
                                 <field name="crossovered_budget_line" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
                                     <tree string="Budget Lines">
+                                        <field name="sequence" invisible="1"/>
                                         <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                                         <field name="general_budget_id"/>
                                         <field name="date_from"/>
@@ -152,6 +153,7 @@
                                                     <field name="date_to" class="oe_inline"/>
                                                 </div>
                                                 <field name="paid_date"/>
+                                                <field name="sequence"/>
                                                 <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                                             </group>
                                         </group>
