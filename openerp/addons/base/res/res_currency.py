@@ -49,7 +49,7 @@ class res_currency(osv.osv):
                        'WHERE currency_id = %s '
                          'AND name <= %s '
                        'ORDER BY name desc LIMIT 1',
-                       (id, date))
+                       (id, date+' 23:59:59'))
             if cr.rowcount:
                 res[id] = cr.fetchone()[0]
             elif not raise_on_no_rate:
