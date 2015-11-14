@@ -13,6 +13,7 @@
                         help="Parameters that are used by all resources."
                         domain="[('res_id','=',False)]"/>
                     <field name="fields_id"/>
+                    <field name="group_id"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                 </search>
             </field>
@@ -30,6 +31,7 @@
                         <field name="fields_id"/>
                         <field name="type"/>
                         <field name="res_id"/>
+                        <field name="group_id"/>
                     </group>
                     <group>
 	                    <field name="value_integer" attrs="{'invisible' : [('type', 'not in', ('integer', 'boolean'))]}"/>
@@ -49,6 +51,7 @@
             <field name="arch" type="xml">
                 <tree string="Parameters">
                     <field name="name"/>
+                    <field name="group_id"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                     <field name="fields_id"/>
                     <field name="res_id"/>

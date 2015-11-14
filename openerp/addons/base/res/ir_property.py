@@ -51,6 +51,7 @@ class ir_property(osv.osv):
 
         'res_id': fields.char('Resource', help="If not set, acts as a default value for new resources", select=1),
         'company_id': fields.many2one('res.company', 'Company', select=1),
+        'group_id': fields.many2one('res.groups', 'Group', domain=[('property','=',True)], select=1),
         'fields_id': fields.many2one('ir.model.fields', 'Field', ondelete='cascade', required=True, select=1),
 
         'value_float' : fields.float('Value'),
@@ -151,7 +152,7 @@ class ir_property(osv.osv):
         if domain is not None:
             domain = [('res_id', '=', res_id)] + domain
             #make the search with company_id asc to make sure that properties specific to a company are given first
-            nid = self.search(cr, uid, domain, limit=1, order='company_id asc', context=context)
+            nid = self.search(cr, uid, domain, limit=1, order='company_id asc, group_id asc', context=context)
             if not nid: return False
             record = self.browse(cr, uid, nid[0], context=context)
             return self.get_by_record(cr, uid, record, context=context)
@@ -168,8 +169,13 @@ class ir_property(osv.osv):
         if not cid:
             company = self.pool.get('res.company')
             cid = company._company_default_get(cr, uid, model, res[0], context=context)
+        
+        gid = context.get('force_group')
+        if not gid:
+            group = self.pool.get('res.groups')
+            gid = group._group_property_get(cr, uid, model, res[0], context=context)
 
-        return [('fields_id', '=', res[0]), ('company_id', 'in', [cid, False])]
+        return [('fields_id', '=', res[0]), ('company_id', 'in', [cid, False]), ('group_id', 'in', [gid, False])]
 
     @api.model
     def get_multi(self, name, model, ids):
@@ -190,7 +196,7 @@ class ir_property(osv.osv):
         domain += [('res_id', 'in', list(refs))]
 
         # note: order by 'company_id asc' will return non-null values first
-        props = self.search(domain, order='company_id asc')
+        props = self.search(domain, order='company_id asc, group_id asc')
         result = {}
         for prop in props:
             # for a given res_id, take the first property only
@@ -227,10 +233,12 @@ class ir_property(osv.osv):
         self._cr.execute("SELECT id FROM ir_model_fields WHERE name=%s AND model=%s", (name, model))
         field_id = self._cr.fetchone()[0]
         company_id = self.env['res.company']._company_default_get(model, field_id)
+        group_id = self.env['res.groups']._group_property_get(model, field_id)
         refs = {('%s,%s' % (model, id)): id for id in values}
         props = self.search([
             ('fields_id', '=', field_id),
             ('company_id', '=', company_id),
+            ('group_id', '=', group_id),
             ('res_id', 'in', list(refs)),
         ])
 
@@ -250,6 +258,7 @@ class ir_property(osv.osv):
                 self.create({
                     'fields_id': field_id,
                     'company_id': company_id,
+                    'group_id': group_id,
                     'res_id': ref,
                     'name': name,
                     'value': value,

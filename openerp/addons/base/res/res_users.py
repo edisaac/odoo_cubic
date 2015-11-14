@@ -99,6 +99,10 @@ class res_groups(osv.osv):
         'comment' : fields.text('Comment', size=250, translate=True),
         'category_id': fields.many2one('ir.module.category', 'Application', select=True),
         'full_name': fields.function(_get_full_name, type='char', string='Group Name', fnct_search=_search_group),
+        'property': fields.boolean('Property Group', help="This group is used on the property fields"),
+    }
+    _defaults = {
+        'property': False,
     }
 
     _sql_constraints = [
@@ -129,6 +133,17 @@ class res_groups(osv.osv):
         self.pool['ir.model.access'].call_cache_clearing_methods(cr)
         self.pool['res.users'].has_group.clear_cache(self.pool['res.users'])
         return res
+    
+    def _group_property_get(self, cr, uid, object=False, field=False, context=None):
+        """
+        Return the groups belong the user used on the property fields
+        """
+        if not context:
+            context = {}
+        group_ids = self.search(cr, uid, [('property','=',True),('users','in',[uid])], context=context)
+        if group_ids:
+            return group_ids[0]
+        return False
 
 class res_users(osv.osv):
     """ User class. A res.users record models an OpenERP user and is different
