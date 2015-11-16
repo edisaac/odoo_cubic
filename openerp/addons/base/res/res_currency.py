@@ -297,7 +297,7 @@ class res_currency_rate(osv.osv):
         'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
     }
     _defaults = {
-        'name': lambda *a: time.strftime('%Y-%m-%d 00:00:00'),
+        'name': lambda *a: field.date.today, #time.strftime('%Y-%m-%d 00:00:00'),
     }
     _order = "name desc"
 
