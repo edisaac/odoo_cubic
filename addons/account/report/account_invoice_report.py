@@ -69,6 +69,7 @@ class account_invoice_report(osv.osv):
         'period_id': fields.many2one('account.period', 'Force Period', domain=[('state','<>','done')], readonly=True),
         'fiscal_position': fields.many2one('account.fiscal.position', 'Fiscal Position', readonly=True),
         'currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
+        'user_currency_id': fields.many2one('res.currency', 'Currency', readonly=True),
         'categ_id': fields.many2one('product.category','Category of Product', readonly=True),
         'journal_id': fields.many2one('account.journal', 'Journal', readonly=True),
         'partner_id': fields.many2one('res.partner', 'Partner', readonly=True),
@@ -126,11 +127,11 @@ class account_invoice_report(osv.osv):
     def _select(self):
         select_str = """
             SELECT sub.id, sub.date, sub.product_id, sub.partner_id, sub.country_id,
-                sub.payment_term, sub.period_id, sub.uom_name, sub.currency_id, sub.journal_id,
+                sub.payment_term, sub.period_id, sub.uom_name, sub.currency_id, sub.user_currency_id, sub.journal_id,
                 sub.fiscal_position, sub.user_id, sub.company_id, sub.nbr, sub.type, sub.state,
                 sub.categ_id, sub.date_due, sub.account_id, sub.account_line_id, sub.partner_bank_id,
-                sub.product_qty, sub.price_total / cr.rate as price_total, sub.price_average /cr.rate as price_average,
-                cr.rate as currency_rate, sub.residual / cr.rate as residual, sub.commercial_partner_id as commercial_partner_id
+                sub.product_qty, sub.price_total / cr.rate * cru.rate as price_total, sub.price_average / cr.rate * cru.rate as price_average,
+                cr.rate as currency_rate, sub.residual / cr.rate * cru.rate as residual, sub.commercial_partner_id as commercial_partner_id
         """
         return select_str
 
@@ -140,7 +141,7 @@ class account_invoice_report(osv.osv):
                     ai.date_invoice AS date,
                     ail.product_id, ai.partner_id, ai.payment_term, ai.period_id,
                     u2.name AS uom_name,
-                    ai.currency_id, ai.journal_id, ai.fiscal_position, ai.user_id, ai.company_id,
+                    ai.currency_id, aic.currency_id as user_currency_id, ai.journal_id, ai.fiscal_position, ai.user_id, ai.company_id,
                     count(ail.*) AS nbr,
                     ai.type, ai.state, pt.categ_id, ai.date_due, ai.account_id, ail.account_id AS account_line_id,
                     ai.partner_bank_id,
@@ -182,6 +183,7 @@ class account_invoice_report(osv.osv):
         from_str = """
                 FROM account_invoice_line ail
                 JOIN account_invoice ai ON ai.id = ail.invoice_id
+                JOIN res_company aic ON ai.company_id = aic.id
                 JOIN res_partner partner ON ai.commercial_partner_id = partner.id
                 LEFT JOIN product_product pr ON pr.id = ail.product_id
                 left JOIN product_template pt ON pt.id = pr.product_tmpl_id
@@ -193,7 +195,7 @@ class account_invoice_report(osv.osv):
     def _group_by(self):
         group_by_str = """
                 GROUP BY ail.product_id, ai.date_invoice, ai.id,
-                    ai.partner_id, ai.payment_term, ai.period_id, u2.name, u2.id, ai.currency_id, ai.journal_id,
+                    ai.partner_id, ai.payment_term, ai.period_id, u2.name, u2.id, ai.currency_id, aic.currency_id, ai.journal_id,
                     ai.fiscal_position, ai.user_id, ai.company_id, ai.type, ai.state, pt.categ_id,
                     ai.date_due, ai.account_id, ail.account_id, ai.partner_bank_id, ai.residual,
                     ai.amount_total, ai.commercial_partner_id, partner.country_id
@@ -209,12 +211,20 @@ class account_invoice_report(osv.osv):
                 %s %s %s
             ) AS sub
             JOIN res_currency_rate cr ON (cr.currency_id = sub.currency_id)
+            JOIN res_currency_rate cru ON (cru.currency_id = sub.currency_id)
             WHERE
                 cr.id IN (SELECT id
                           FROM res_currency_rate cr2
                           WHERE (cr2.currency_id = sub.currency_id)
                               AND ((sub.date IS NOT NULL AND cr2.name <= sub.date)
                                     OR (sub.date IS NULL AND cr2.name <= NOW()))
+                          ORDER BY name DESC LIMIT 1)
+                and
+                cru.id IN (SELECT id
+                          FROM res_currency_rate cr3
+                          WHERE (cr3.currency_id = sub.user_currency_id)
+                              AND ((sub.date IS NOT NULL AND cr3.name <= sub.date)
+                                    OR (sub.date IS NULL AND cr3.name <= NOW()))
                           ORDER BY name DESC LIMIT 1)
         )""" % (
                     self._table,
