@@ -31,24 +31,33 @@ class report_picking_cost(models.AbstractModel):
             'doc_ids': self._ids,
             'doc_model': report.model,
             'docs': self.env[report.model].browse(self._ids),
-            'get_cost_names': self.get_cost_names,
+            'get_cost': self.get_cost,
+            'get_line': self.get_line,
             'get_cost_lines': self.get_cost_lines,
-            'get_cost_total': self.get_cost_total,
         }
         return report_obj.render('stock_landed_costs.report_picking_cost', docargs)
     
-    def get_cost_names(self, landed_costs_ids):
-        res = ""
+    def get_cost(self, landed_costs_ids):
+        res = {'names': '',
+               'total': 0.0,
+               }
         for cost in landed_costs_ids:
-            res += cost.name + " / "
-        return res and res [:-3] or ""
-    
-    def get_cost_total(self, landed_costs_ids):
-        res = 0.0
-        for cost in landed_costs_ids:
-            res += cost.amount_total 
+            res['names'] += cost.name + " / "
+            res['total'] += cost.amount_total
+        res['names'] = res['names'] and res['names'][:-3] or ""
         return res
     
+    def get_line(self, line):
+        res = {'cif': 0.0,
+               'total': 0.0,
+               }
+        for cost in line.picking_id.landed_costs_ids:
+            for val in cost.valuation_adjustment_lines:
+                if val.product_id.id == line.product_id.id:
+                    res['cif'] += val.additional_landed_cost
+                    res['total'] += (val.additional_landed_cost + line.price_unit) * line.product_qty
+        return res
+        
     def get_cost_lines(self, landed_costs_ids):
         res = []
         for cost in landed_costs_ids:

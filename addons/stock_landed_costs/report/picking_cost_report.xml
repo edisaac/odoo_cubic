@@ -7,7 +7,7 @@
                     <div class="header" style="font-family: Helvetica; font-size: 12px;">
                         <div class="row">
                         	<h1>Liquidación de Costos <span t-field="o.name"/></h1>
-                        	<h3><span t-esc="get_cost_names(o.landed_costs_ids)"/></h3>
+                        	<h3><span t-esc="get_cost(o.landed_costs_ids)['names']"/></h3>
                         	<h5><span t-field="o.date"/></h5>
                         	
                         	<table style="width: 40%">
@@ -25,7 +25,7 @@
 	                                	Costo Total :
 	                                </td>
 	                                <td class="text-right" style="width: 13mm; max-width: 13mm; white-space: nowrap; overflow: hidden;">
-	                                    <span t-raw="get_cost_total(o.landed_costs_ids)"/> <span t-raw="o.company_id.currency_id.name"/>
+	                                    <span t-raw="get_cost(o.landed_costs_ids)['total']"/> <span t-raw="o.company_id.currency_id.name"/>
 	                                </td>
 	                            </tr>
 	                          </tbody>
@@ -50,7 +50,7 @@
                                 	<span t-field="line.product_id.name"/>
                                 </td>
                                 <td >
-                                    <span t-raw="line.product_qty" t-field-options='{“widget”:’integer’}'/>
+                                    <span t-raw="get_line(line)['cif']"/>
                                 </td>
                                 <td >
                                     <span t-raw="line.product_qty" t-field-options='{“widget”:’integer’}'/>
@@ -59,7 +59,7 @@
                                     <span  t-field="line.price_unit"/>
                                 </td>
                                 <td >
-                                    <span  t-field="line.product_id.default_code"/>
+                                    <span  t-esc="get_line(line)['total']"/>
                                 </td>
 
                             </tr>
