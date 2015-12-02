@@ -28,6 +28,8 @@
                             <group>
                                 <field name="account_journal_id"/>
                                 <field name="account_move_id"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="currency_id" invisible="1"/>
                             </group>
                         </group>
                         <group>
@@ -54,13 +56,14 @@
                                         <field name="name"/>
                                         <field name="account_id"/>
                                         <field name="split_method"/>
-                                        <field name="price_unit"/>
+                                        <field name="price_unit" sum="Price Unit"/>
+                                        <field name="currency_id" groups="base.group_multi_currency"/>
                                     </tree>
                                 </field>
                             </group>
                         </group>
                         <group class="oe_subtotal_footer oe_right">
-                            <field name="amount_total"/>
+                            <field name="amount_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                         </group>
                         <group>
                             <group>
@@ -93,7 +96,7 @@
                                         <field name="quantity" readonly="1"/>
                                         <field name="former_cost_per_unit" readonly="1"/>
                                         <field name="former_cost" readonly="1"/>
-                                        <field name="additional_landed_cost"/>
+                                        <field name="additional_landed_cost" sum="Additional Cost"/>
                                     </tree>
                                 </field>
                             </group>
@@ -115,6 +118,8 @@
                 <tree string="Landed Costs">
                     <field name="name"/>
                     <field name="date"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="amount_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
                     <field name="state"/>
                 </tree>
             </field>

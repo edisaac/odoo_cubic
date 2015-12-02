@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    Copyright (C) 2015 Cubic ERP (<http://cubicerp.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,9 +19,12 @@
 #
 ##############################################################################
 
-import product
-import stock_landed_costs
-import stock
-import report
+from openerp.osv import fields, osv
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+class stock_picking(osv.osv):
+    _name = 'stock.picking'
+    _inherit = 'stock.picking'
+
+    _columns = {
+        'landed_costs_ids': fields.many2many('stock.landed.cost', string='Landed Costs', readonly=True, copy=False),
+    }

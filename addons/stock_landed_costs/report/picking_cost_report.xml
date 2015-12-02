@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="report_picking_cost">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <div class="header" style="font-family: Helvetica; font-size: 12px;">
+                        <div class="row">
+                        	<h1>Liquidación de Costos <span t-field="o.name"/></h1>
+                        	<h3><span t-esc="get_cost_names(o.landed_costs_ids)"/></h3>
+                        	<h5><span t-field="o.date"/></h5>
+                        	
+                        	<table style="width: 40%">
+	                          <tbody>
+	                            <tr style="height: 6mm;" t-foreach="get_cost_lines(o.landed_costs_ids)" t-as="line_cost">
+	                                <td style="width: 17mm; max-width: 17mm; white-space: nowrap; overflow: hidden;">
+	                                	<span t-field="line_cost.name"/> :
+	                                </td>
+	                                <td class="text-right" style="width: 13mm; max-width: 13mm; white-space: nowrap; overflow: hidden;">
+	                                    <span t-raw="line_cost.price_unit"/> <span t-raw="line_cost.currency_id.name"/>
+	                                </td>
+	                            </tr>
+	                            <tr style="height: 6mm;">
+	                                <td style="width: 17mm; max-width: 17mm; white-space: nowrap; overflow: hidden;">
+	                                	Costo Total :
+	                                </td>
+	                                <td class="text-right" style="width: 13mm; max-width: 13mm; white-space: nowrap; overflow: hidden;">
+	                                    <span t-raw="get_cost_total(o.landed_costs_ids)"/> <span t-raw="o.company_id.currency_id.name"/>
+	                                </td>
+	                            </tr>
+	                          </tbody>
+	                        </table>
+                        </div>
+                    </div>
+                    <div class="page" style="font-family: Helvetica; font-size: 12px;">
+                        
+                        <table style="width: 100%">
+                          <thead>
+                          	<tr>
+                          		<th>ITEM</th>
+                          		<th>CIF</th>
+                          		<th>CANTIDAD</th>
+                          		<th>PRECIO UNITARIO</th>
+                          		<th>PRECIO TOTAL</th>
+                          	</tr>
+                          </thead>
+                          <tbody>
+                            <tr  t-foreach="o.move_lines" t-as="line">
+                                <td >
+                                	<span t-field="line.product_id.name"/>
+                                </td>
+                                <td >
+                                    <span t-raw="line.product_qty" t-field-options='{“widget”:’integer’}'/>
+                                </td>
+                                <td >
+                                    <span t-raw="line.product_qty" t-field-options='{“widget”:’integer’}'/>
+                                </td>
+                                <td >
+                                    <span  t-field="line.price_unit"/>
+                                </td>
+                                <td >
+                                    <span  t-field="line.product_id.default_code"/>
+                                </td>
+
+                            </tr>
+                          </tbody>
+                        </table>
+                    </div>
+                    <div class="footer" style="font-family: Helvetica; font-size: 12px;">
+                    </div>
+                 </t>
+             </t>
+        </template>
+        
+        <report
+            id="stock_report_picking_cost"
+            model="stock.picking"
+            string="Landed Costs"
+            report_type="qweb-pdf"
+            name="stock_landed_costs.report_picking_cost"
+            file="stock_landed_costs.report_picking_cost"
+        />
+
+        <record id="paperformat_picking" model="report.paperformat">
+            <field name="name">Picking Landed Costs</field>
+            <field name="default" eval="True"/>
+            <field name="format">custom</field>
+            <field name="page_height">295</field>
+            <field name="page_width">215</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">70</field>
+            <field name="margin_bottom">41</field>
+            <field name="margin_left">20</field>
+            <field name="margin_right">16</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">50</field>
+            <field name="dpi">80</field>
+        </record>
+
+        <record id="stock_report_picking_cost" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="paperformat_picking" />
+        </record>
+    </data>
+</openerp>

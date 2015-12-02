@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
+#    Copyright (C) 2015 Cubic ERP (<http://cubicerp.com>).
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -19,35 +19,6 @@
 #
 ##############################################################################
 
-{
-    'name': 'WMS Landed Costs',
-    'version': '1.1',
-    'author': 'OpenERP SA',
-    'summary': 'Landed Costs',
-    'description': """
-Landed Costs Management
-=======================
-This module allows you to easily add extra costs on pickings and decide the split of these costs among their stock moves in order to take them into account in your stock valuation.
-    """,
-    'website': 'https://www.odoo.com/page/warehouse',
-    'depends': ['stock_account'],
-    'category': 'Warehouse Management',
-    'sequence': 16,
-    'demo': [
-    ],
-    'data': [
-        'security/ir.model.access.csv',
-        'stock_landed_costs_sequence.xml',
-        'product_view.xml',
-        'stock_landed_costs_view.xml',
-        'stock_landed_costs_data.xml',
-        "report/picking_cost_report.xml",
-    ],
-    'test': [
-        'test/stock_landed_costs.yml'
-    ],
-    'installable': True,
-    'auto_install': False,
-}
+import picking_cost_report
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
