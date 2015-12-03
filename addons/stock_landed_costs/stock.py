@@ -28,3 +28,24 @@ class stock_picking(osv.osv):
     _columns = {
         'landed_costs_ids': fields.many2many('stock.landed.cost', string='Landed Costs', readonly=True, copy=False),
     }
+
+# class stock_move(models.Model):
+#     _name = 'stock.move'
+#     _inherit = 'stock.move'
+#     
+#     def _price_unit_user_currency(self, cr, uid, ids, field_name, args, context=None):
+#         if context is None:
+#             context = {}
+#         currency_obj = self.pool.get('res.currency')
+#         res = {}
+#         local_context = context.copy()
+#         for move in self.browse(cr, uid, ids, context=context):
+#             local_context['date'] = move.date
+#             res[move.id] = currency_obj.compute(cr, uid, move.currency_id.id, move.company_id.currency_id.id, move.price_unit, context=local_context)
+#         return res
+#     
+#     _columns = {    
+#             'price_unit_user_currency': fields.function(_price_unit_user_currency, type='float', string='Price Unit', readonly=True,
+#                                                       help='Price unit in company currency.'),
+#         }
+    

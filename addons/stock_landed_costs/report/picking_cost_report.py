@@ -49,13 +49,13 @@ class report_picking_cost(models.AbstractModel):
     
     def get_line(self, line):
         res = {'cif': 0.0,
-               'total': 0.0,
+               'total': line.price_unit * line.product_qty,
                }
         for cost in line.picking_id.landed_costs_ids:
             for val in cost.valuation_adjustment_lines:
                 if val.product_id.id == line.product_id.id:
                     res['cif'] += val.additional_landed_cost
-                    res['total'] += (val.additional_landed_cost + line.price_unit) * line.product_qty
+                    res['total'] += (val.additional_landed_cost * line.product_qty)
         return res
         
     def get_cost_lines(self, landed_costs_ids):

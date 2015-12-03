@@ -6,60 +6,61 @@
                 <t t-foreach="docs" t-as="o">
                     <div class="header" style="font-family: Helvetica; font-size: 12px;">
                         <div class="row">
-                        	<h1>Liquidación de Costos <span t-field="o.name"/></h1>
-                        	<h3><span t-esc="get_cost(o.landed_costs_ids)['names']"/></h3>
-                        	<h5><span t-field="o.date"/></h5>
-                        	
-                        	<table style="width: 40%">
-	                          <tbody>
-	                            <tr style="height: 6mm;" t-foreach="get_cost_lines(o.landed_costs_ids)" t-as="line_cost">
-	                                <td style="width: 17mm; max-width: 17mm; white-space: nowrap; overflow: hidden;">
-	                                	<span t-field="line_cost.name"/> :
-	                                </td>
-	                                <td class="text-right" style="width: 13mm; max-width: 13mm; white-space: nowrap; overflow: hidden;">
-	                                    <span t-raw="line_cost.price_unit"/> <span t-raw="line_cost.currency_id.name"/>
-	                                </td>
-	                            </tr>
-	                            <tr style="height: 6mm;">
-	                                <td style="width: 17mm; max-width: 17mm; white-space: nowrap; overflow: hidden;">
-	                                	Costo Total :
-	                                </td>
-	                                <td class="text-right" style="width: 13mm; max-width: 13mm; white-space: nowrap; overflow: hidden;">
-	                                    <span t-raw="get_cost(o.landed_costs_ids)['total']"/> <span t-raw="o.company_id.currency_id.name"/>
-	                                </td>
-	                            </tr>
-	                          </tbody>
-	                        </table>
                         </div>
                     </div>
                     <div class="page" style="font-family: Helvetica; font-size: 12px;">
-                        
-                        <table style="width: 100%">
+                        <h1>Landed Cost</h1>
+                    	<h2><span t-field="o.origin"/> - <span t-field="o.name"/></h2>
+                    	<h4><span t-esc="get_cost(o.landed_costs_ids)['names']"/></h4>
+                    	<h5><span t-field="o.date"/></h5>
+                    	
+                    	<table style="width: 30%">
+                          <tbody>
+                            <tr style="height: 6mm;" t-foreach="get_cost_lines(o.landed_costs_ids)" t-as="line_cost">
+                                <td>
+                                	<span t-field="line_cost.name"/> :
+                                </td>
+                                <td class="text-right">
+                                    <span t-raw="'{:,.2f}'.format(line_cost.price_unit)"/> <span t-raw="line_cost.currency_id.name"/>
+                                </td>
+                            </tr>
+                            <tr style="height: 6mm;">
+                                <td>
+                                	Total Cost :
+                                </td>
+                                <td class="text-right">
+                                    <span t-raw="'{:,.2f}'.format(get_cost(o.landed_costs_ids)['total'])"/> <span t-raw="o.company_id.currency_id.name"/>
+                                </td>
+                            </tr>
+                          </tbody>
+                        </table>
+	                        
+                        <table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
                           <thead>
-                          	<tr>
-                          		<th>ITEM</th>
-                          		<th>CIF</th>
-                          		<th>CANTIDAD</th>
-                          		<th>PRECIO UNITARIO</th>
-                          		<th>PRECIO TOTAL</th>
+                          	<tr style="height: 6mm;">
+                          		<th class="text-center" style="border: 1px solid black; padding: 2px;">Product</th>
+                          		<th class="text-right" style="border: 1px solid black; padding: 2px;">Landed Cost</th>
+                          		<th class="text-right" style="border: 1px solid black; padding: 2px;">Quantity</th>
+                          		<th class="text-right" style="border: 1px solid black; padding: 2px;">Unit Price</th>
+                          		<th class="text-right" style="border: 1px solid black; padding: 2px;">Total Price</th>
                           	</tr>
                           </thead>
                           <tbody>
                             <tr  t-foreach="o.move_lines" t-as="line">
-                                <td >
+                                <td style="border: 1px solid black; padding: 2px;">
                                 	<span t-field="line.product_id.name"/>
                                 </td>
-                                <td >
-                                    <span t-raw="get_line(line)['cif']"/>
+                                <td class="text-right" style="border: 1px solid black; padding: 2px;">
+                                    <span t-raw="'{:,.2f}'.format(get_line(line)['cif'])"/>
                                 </td>
-                                <td >
-                                    <span t-raw="line.product_qty" t-field-options='{“widget”:’integer’}'/>
+                                <td class="text-right" style="border: 1px solid black; padding: 2px;">
+                                    <span t-raw="'{:,.0f}'.format(line.product_qty)"/>
                                 </td>
-                                <td >
-                                    <span  t-field="line.price_unit"/>
+                                <td class="text-right" style="border: 1px solid black; padding: 2px;">
+                                    <span  t-raw="'{:,.2f}'.format(line.price_unit)"/>
                                 </td>
-                                <td >
-                                    <span  t-esc="get_line(line)['total']"/>
+                                <td class="text-right" style="border: 1px solid black; padding: 2px;">
+                                    <span  t-raw="'{:,.2f}'.format(get_line(line)['total'])"/>
                                 </td>
 
                             </tr>
@@ -88,12 +89,12 @@
             <field name="page_height">295</field>
             <field name="page_width">215</field>
             <field name="orientation">Portrait</field>
-            <field name="margin_top">70</field>
+            <field name="margin_top">20</field>
             <field name="margin_bottom">41</field>
             <field name="margin_left">20</field>
             <field name="margin_right">16</field>
             <field name="header_line" eval="False"/>
-            <field name="header_spacing">50</field>
+            <field name="header_spacing">0</field>
             <field name="dpi">80</field>
         </record>
 
