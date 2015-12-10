@@ -83,7 +83,7 @@ class stock_landed_cost(osv.osv):
         return lines
 
     _columns = {
-        'name': fields.char('Name', track_visibility='always', readonly=True, copy=False),
+        'name': fields.char('Name', track_visibility='always', required=True, readonly=True, states={'draft':[('readonly',False)]}, copy=False),
         'date': fields.date('Date', required=True, states={'done': [('readonly', True)]}, track_visibility='onchange', copy=False),
         'picking_ids': fields.many2many('stock.picking', string='Pickings', states={'done': [('readonly', True)]}, copy=False),
         'cost_lines': fields.one2many('stock.landed.cost.lines', 'cost_id', 'Cost Lines', states={'done': [('readonly', True)]}, copy=True),
@@ -103,7 +103,7 @@ class stock_landed_cost(osv.osv):
     }
 
     _defaults = {
-        'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'stock.landed.cost'),
+        'name': "/",
         'state': 'draft',
         'date': fields.date.context_today,
         'company_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
@@ -245,6 +245,11 @@ class stock_landed_cost(osv.osv):
                             'but you could create negative landed costs to reverse them'))
         return cost.write({'state': 'cancel'})
 
+    def create(self, cr, uid, vals, context=None):
+        if vals['name'] == '/':
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'stock.landed.cost')
+        return super(stock_landed_cost, self).create(cr, uid, vals, context=context)
+    
     def unlink(self, cr, uid, ids, context=None):
         # cancel or raise first
         self.button_cancel(cr, uid, ids, context)

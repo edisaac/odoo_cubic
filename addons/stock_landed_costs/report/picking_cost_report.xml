@@ -10,11 +10,11 @@
                     </div>
                     <div class="page" style="font-family: Helvetica; font-size: 12px;">
                         <h1>Landed Cost</h1>
-                    	<h2><span t-field="o.origin"/> - <span t-field="o.name"/></h2>
+                    	<h3><span t-field="o.origin"/> - <span t-field="o.name"/></h3>
                     	<h4><span t-esc="get_cost(o.landed_costs_ids)['names']"/></h4>
                     	<h5><span t-field="o.date"/></h5>
                     	
-                    	<table style="width: 30%">
+                    	<table style="width: 45%">
                           <tbody>
                             <tr style="height: 6mm;" t-foreach="get_cost_lines(o.landed_costs_ids)" t-as="line_cost">
                                 <td>
