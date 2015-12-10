@@ -109,7 +109,7 @@
                             <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                             <field name="product_id" domain="[('type','=','product')]" attrs="{'invisible': [('filter', 'not in', ('product', 'product_owner'))], 'required': [('filter', 'in', ('product', 'product_owner'))]}"/>
                             <field name="lot_id" attrs="{'invisible': [('filter', '!=', 'lot')], 'required': [('filter', '=', 'lot')]}" groups="stock.group_production_lot" />
-                            <field name="partner_id" attrs="{'invisible': [('filter', 'not in', ('owner', 'product_owner'))], 'required': [('filter', 'in', ('owner', 'product_owner'))]}" groups="stock.group_tracking_owner"/>
+                            <field name="partner_id" context="{'default_is_company':1}" attrs="{'invisible': [('filter', 'not in', ('owner', 'product_owner'))], 'required': [('filter', 'in', ('owner', 'product_owner'))]}" groups="stock.group_tracking_owner"/>
                             <field name="package_id" attrs="{'invisible': [('filter', '!=', 'pack')], 'required': [('filter', '=', 'pack')]}" groups="stock.group_tracking_lot"/>
                         </group>
                     </group>
