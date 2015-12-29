@@ -29,8 +29,8 @@
 
 import string
 
-from osv import osv, fields
-from tools.translate import _
+from openerp.osv import osv, fields
+from openerp.tools.translate import _
 
 class res_partner(osv.osv):
     _inherit = 'res.partner'
@@ -42,22 +42,18 @@ class res_partner(osv.osv):
         if len(vat) != 9:
             return False
         else:
-            body, vdig = vat[:-1], vat[-1]
+            body, vdig = vat[:-1], vat[-1].upper()
         try:
-            operar = (range(10) + ['k'])[11-sum([int(digit)*factor for digit,factor in zip(body[::-1],2*range(2,8))])%11]
-            try:
-                if operar == int(vdig):
-                    return True
-                else:
-                    return False
-            except ValueError:
-                if operar == vdig.lower():
-                    return True
-                else:
-                    return False
+            vali = range(2,8) + [2,3]
+            operar = '0123456789K0'[11 - (sum([int(digit)*factor for digit, factor in zip(body[::-1],vali)]) % 11)]
+            if operar == vdig:
+                return True
+            else:
+                return False
         except IndexError:
             return False
+
     
 res_partner()
-
+# 830779000 no validaba y es real
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
