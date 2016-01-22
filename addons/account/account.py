@@ -190,7 +190,7 @@ class account_account_type(osv.osv):
                 obj_financial_report.write(cr, uid, [financial_report.id], {'account_type_ids': [(3, account_type_id)]})
         #write it in the good place
         if field_value != 'none':
-            return obj_financial_report.write(cr, uid, [financial_report_ref[field_value].id], {'account_type_ids': [(4, account_type_id)]})
+            return financial_report_ref.has_key(field_value) and obj_financial_report.write(cr, uid, [financial_report_ref[field_value].id], {'account_type_ids': [(4, account_type_id)]})
 
     _columns = {
         'name': fields.char('Account Type', required=True, translate=True),

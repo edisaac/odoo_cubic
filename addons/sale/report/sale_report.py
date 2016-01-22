@@ -108,6 +108,17 @@ class sale_report(osv.osv):
         """
         return group_by_str
 
+    def _select2(self):
+        return ''
+
+    def _from2(self):
+        return ''
+
+    def _group_by2(self):
+        return ''
+
+
+
     def init(self, cr):
         # self._table = sale_report
         tools.drop_view_if_exists(cr, self._table)
@@ -115,6 +126,10 @@ class sale_report(osv.osv):
             %s
             FROM ( %s )
             %s
-            )""" % (self._table, self._select(), self._from(), self._group_by()))
+            %s
+            %s 
+            %s
+            )""" % (self._table, self._select(), self._from(), self._group_by(),
+                    self._select2(), self._from2(), self._group_by2()))
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

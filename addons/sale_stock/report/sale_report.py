@@ -46,3 +46,8 @@ class sale_report(osv.osv):
     def _group_by(self):
         return super(sale_report, self)._group_by() + ", s.warehouse_id, s.shipped"
 
+#     def _select2(self):
+#         return  super(sale_report, self)._select2() and (super(sale_report, self)._select2() + ", 1 as warehouse_id, true as shipped, 1 as shipped_qty_1") or ''
+
+#     def _group_by2(self):
+#         return super(sale_report, self)._group_by() + ", s.warehouse_id, s.shipped"
