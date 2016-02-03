@@ -798,7 +798,7 @@ class res_partner(osv.Model, format_address):
         # get the information that will be injected into the display format
         # get the address format
         address_format = address.country_id.address_format or \
-              "%(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s"
+              "%(street)s\n%(street2)s\n%(city)s %(state_name)s %(zip)s\n%(country_name)s"
         args = {
             'state_code': address.state_id.code or '',
             'state_name': address.state_id.name or '',
