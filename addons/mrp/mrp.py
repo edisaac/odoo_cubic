@@ -585,6 +585,8 @@ class mrp_production(osv.osv):
         'company_id': fields.many2one('res.company', 'Company', required=True),
         'ready_production': fields.function(_moves_assigned, type='boolean', store={'stock.move': (_mrp_from_move, ['state'], 10)}),
         'group_id': fields.many2one("procurement.group", string="Procurement Group", readonly=True, states={'draft': [('readonly', False)]}),
+        'property_ids': fields.many2many('mrp.property', 'mrp_production_property_rel', 'production_id','property_id', 'Properties',
+                                         readonly=True, states={'draft': [('readonly', False)]}),
     }
 
     _defaults = {
@@ -1095,6 +1097,7 @@ class mrp_production(osv.osv):
             'production_id': production.id,
             'origin': production.name,
             'group_id': procurement and procurement.group_id.id or production.group_id.id,
+            'property_ids': [(6,False, [p.id for p in procurement.property_ids or production.property_ids])],
         }
         move_id = stock_move.create(cr, uid, data, context=context)
         #a phantom bom cannot be used in mrp order so it's ok to assume the list returned by action_confirm
@@ -1195,12 +1198,24 @@ class mrp_production(osv.osv):
             'origin': production.name,
             'warehouse_id': loc_obj.get_warehouse(cr, uid, production.location_src_id, context=context),
             'group_id': production.move_prod_id and production.move_prod_id.group_id.id or production.group_id.id,
+            'property_ids': [(6,False, self._get_mrp_properties(cr, uid, production, product, context=context))],
         }, context=context)
         
         if prev_move:
             prev_move = self._create_previous_move(cr, uid, move_id, product, prod_location_id, source_location_id, context=context)
             stock_move.action_confirm(cr, uid, [prev_move], context=context)
         return move_id
+
+    def _get_mrp_properties(self, cr, uid, production, product, context=None):
+        res = []
+        proc_obj = self.pool.get('procurement.order')
+        procs = proc_obj.search(cr, uid, [('production_id', '=', production.id)], context=context)
+        procurement = procs and\
+            proc_obj.browse(cr, uid, procs[0], context=context) or False
+        for property in procurement.property_ids or production.property_ids:
+            if property.group_id in product.property_group_ids:
+                res.append(property.id)
+        return res
 
     def _make_production_consume_line(self, cr, uid, line, context=None):
         return self._make_consume_line_from_data(cr, uid, line.production_id, line.product_id, line.product_uom.id, line.product_qty, line.product_uos.id, line.product_uos_qty, context=context)

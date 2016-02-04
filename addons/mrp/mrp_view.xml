@@ -817,6 +817,7 @@
                                     <field name="priority"/>
                                     <field name="date_start" invisible="1"/>
                                     <field name="date_finished" invisible="1"/>
+                                    <field name="property_ids" widget="many2many_tags"/>
                                 </group>
                                 <group>
                                     <field name="company_id" groups="base.group_multi_company" widget="selection" />                                     
@@ -1085,6 +1086,9 @@
                         <field string="Manufacturing" name="mo_count" widget="statinfo" />
                     </button>
                 </div>
+                <field name="default_code" position="after">
+                	<field name="property_group_ids" widget="many2many_tags"/>
+                </field>
             </field>
         </record>
 
@@ -1104,6 +1108,9 @@
                         <field string="Manufacturing" name="mo_count" widget="statinfo" />
                     </button>
                 </div>
+                <field name="default_code" position="after">
+                	<field name="property_group_ids" widget="many2many_tags"/>
+                </field>
             </field>
         </record>
 
