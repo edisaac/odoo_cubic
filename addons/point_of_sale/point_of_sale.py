@@ -332,7 +332,8 @@ class pos_session(osv.osv):
                                        readonly=True,
                                        relation='account.journal',
                                        string='Available Payment Methods'),
-        'order_ids' : fields.one2many('pos.order', 'session_id', 'Orders'),
+        'order_ids' : fields.one2many('pos.order', 'session_id', 'Orders', readonly=True,
+                                      states={'opened': [('readonly', False)]}),
 
         'statement_ids' : fields.one2many('account.bank.statement', 'pos_session_id', 'Bank Statement', readonly=True),
     }
@@ -501,6 +502,7 @@ class pos_session(osv.osv):
                         _("The type of the journal for your payment method should be bank or cash "))
                 getattr(st, 'button_confirm_%s' % st.journal_id.type)(context=context)
         self._confirm_orders(cr, uid, ids, context=context)
+        self._reconcile_orders(cr, uid, ids, context=context)
         self.write(cr, uid, ids, {'state' : 'closed'}, context=context)
 
         obj = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'point_of_sale', 'menu_point_root')[1]
@@ -510,6 +512,44 @@ class pos_session(osv.osv):
             'tag' : 'reload',
             'params' : {'menu_id': obj},
         }
+
+    def _reconcile_orders(self, cr, uid, ids, context=None):
+        res = {}
+        def res_add(k, v):
+            if not res.has_key(k):
+                res[k] = []
+            res[k] += v
+        account_move_line_obj = self.pool.get('account.move.line')
+        pos_order_obj = self.pool.get('pos.order')
+        for session in self.browse(cr, uid, ids, context=context):
+            for order in session.order_ids:
+                k = ()
+                if order.account_move:
+                    for line in order.account_move.line_id:
+                        if line.account_id.type == 'receivable':
+                            k = (line.account_id.id,order.partner_id.id,line.id)
+                            break
+                elif order.invoice_id:
+                    for line in order.invoice_id.move_lines:
+                        if line.account_id.id == order.invoice_id.account_id.id:
+                            k = (line.account_id.id,order.partner_id.id,line.id)
+                            break
+                if not k:
+                    continue
+                add_order_line = False
+                for statement_line in order.statement_ids:
+                    lines = []
+                    for line in statement_line.journal_entry_id.line_id:
+                        if line.account_id.id == k[0]:
+                            lines += [line.id]
+                    if len(lines) == 1:
+                        add_order_line = True
+                    res_add(k, lines)
+                if add_order_line:
+                    res_add(k, [k[2]])
+        for k in res:
+            res[k] = account_move_line_obj.reconcile_partial(cr, uid, res[k], context=context)
+        return res
 
     def _confirm_orders(self, cr, uid, ids, context=None):
         account_move_obj = self.pool.get('account.move')
@@ -750,13 +790,14 @@ class pos_order(osv.osv):
     }
 
     def create(self, cr, uid, values, context=None):
-        if values.get('session_id'):
-            # set name based on the sequence specified on the config
-            session = self.pool['pos.session'].browse(cr, uid, values['session_id'], context=context)
-            values['name'] = session.config_id.sequence_id._next()
-        else:
-            # fallback on any pos.order sequence
-            values['name'] = self.pool.get('ir.sequence').get_id(cr, uid, 'pos.order', 'code', context=context)
+        if values['name'] == '/': 
+            if values.get('session_id'):
+                # set name based on the sequence specified on the config
+                session = self.pool['pos.session'].browse(cr, uid, values['session_id'], context=context)
+                values['name'] = session.config_id.sequence_id._next()
+            else:
+                # fallback on any pos.order sequence
+                values['name'] = self.pool.get('ir.sequence').get_id(cr, uid, 'pos.order', 'code', context=context)
         return super(pos_order, self).create(cr, uid, values, context=context)
 
     def test_paid(self, cr, uid, ids, context=None):

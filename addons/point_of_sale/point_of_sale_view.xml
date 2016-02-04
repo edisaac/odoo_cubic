@@ -901,7 +901,21 @@
                                 <field name="state" />
                             </tree>
                         </field>
-
+						<separator string="POS Orders"/>
+						<field name="order_ids">
+							<tree string="Orders" colors="blue:state == 'draft';gray:state in ('done','cancel');black:state not in('done','cancel')">
+			                    <field name="name"/>
+			                    <field name="pos_reference"/>
+			                    <field name="partner_id"/>
+			                    <field name="date_order"/>
+			                    <field name="user_id"/>
+			                    <field name="invoice_id"/>
+			                    <field name="amount_total" sum="Amount total"/>
+			                    <field name="company_id" groups="base.group_multi_company"/>
+			                    <field name="picking_id"/>
+			                    <field name="state"/>
+							</tree>
+						</field>
                     </sheet>
                 </form>
             </field>
