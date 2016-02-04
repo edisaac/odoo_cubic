@@ -198,7 +198,8 @@ class purchase_order(osv.osv):
     READONLY_STATES = {
         'confirmed': [('readonly', True)],
         'approved': [('readonly', True)],
-        'done': [('readonly', True)]
+        'done': [('readonly', True)],
+        'cancel': [('readonly', True)]
     }
 
     _track = {
@@ -297,6 +298,7 @@ class purchase_order(osv.osv):
         'journal_id': fields.many2one('account.journal', 'Journal'),
         'bid_date': fields.date('Bid Received On', readonly=True, help="Date on which the bid was received"),
         'bid_validity': fields.date('Bid Valid Until', help="Date on which the bid expired"),
+        'group_id': fields.many2one('procurement.group', 'Procurement Group', states=READONLY_STATES),
         'picking_type_id': fields.many2one('stock.picking.type', 'Deliver To', help="This will determine picking type of incoming shipment", required=True,
                                            states={'confirmed': [('readonly', True)], 'approved': [('readonly', True)], 'done': [('readonly', True)]}),
         'related_location_id': fields.related('picking_type_id', 'default_location_dest_id', type='many2one', relation='stock.location', string="Related location", store=True),
@@ -796,7 +798,10 @@ class purchase_order(osv.osv):
         """
         stock_move = self.pool.get('stock.move')
         todo_moves = []
-        new_group = self.pool.get("procurement.group").create(cr, uid, {'name': order.name, 'partner_id': order.partner_id.id}, context=context)
+        new_group = order.group_id.id
+        if not new_group:
+            new_group = self.pool.get("procurement.group").create(cr, uid, {'name': order.name, 'partner_id': order.partner_id.id}, context=context)
+            self.write(cr, uid, [order.id], {'group_id': new_group}, context=context)
 
         for order_line in order_lines:
             if not order_line.product_id:

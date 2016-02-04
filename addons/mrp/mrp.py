@@ -180,6 +180,8 @@ class mrp_bom(osv.osv):
         'bom_line_ids': fields.one2many('mrp.bom.line', 'bom_id', 'BoM Lines', copy=True),
         'product_qty': fields.float('Product Quantity', required=True, digits_compute=dp.get_precision('Product Unit of Measure')),
         'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True, help="Unit of Measure (Unit of Measure) is the unit of measurement for the inventory control"),
+        'product_uos_qty': fields.float('Product UOS Qty'),
+        'product_uos': fields.many2one('product.uom', 'Product UOS', help="Product UOS (Unit of Sale) is the unit of measurement for the invoicing and promotion of stock."),
         'date_start': fields.date('Valid From', help="Validity of this BoM. Keep empty if it's always valid."),
         'date_stop': fields.date('Valid Until', help="Validity of this BoM. Keep empty if it's always valid."),
         'sequence': fields.integer('Sequence', help="Gives the sequence order when displaying a list of bills of material."),
@@ -582,6 +584,7 @@ class mrp_production(osv.osv):
         'user_id': fields.many2one('res.users', 'Responsible'),
         'company_id': fields.many2one('res.company', 'Company', required=True),
         'ready_production': fields.function(_moves_assigned, type='boolean', store={'stock.move': (_mrp_from_move, ['state'], 10)}),
+        'group_id': fields.many2one("procurement.group", string="Procurement Group", readonly=True, states={'draft': [('readonly', False)]}),
     }
 
     _defaults = {
@@ -590,7 +593,7 @@ class mrp_production(osv.osv):
         'date_planned': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
         'product_qty': lambda *a: 1.0,
         'user_id': lambda self, cr, uid, c: uid,
-        'name': lambda x, y, z, c: x.pool.get('ir.sequence').get(y, z, 'mrp.production') or '/',
+        'name': '/',
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'mrp.production', context=c),
         'location_src_id': _src_id_default,
         'location_dest_id': _dest_id_default
@@ -600,7 +603,7 @@ class mrp_production(osv.osv):
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per Company!'),
     ]
 
-    _order = 'priority desc, date_planned asc'
+    _order = ' date_planned desc, priority desc'
 
     def _check_qty(self, cr, uid, ids, context=None):
         for order in self.browse(cr, uid, ids, context=context):
@@ -611,6 +614,11 @@ class mrp_production(osv.osv):
     _constraints = [
         (_check_qty, 'Order quantity cannot be negative or zero!', ['product_qty']),
     ]
+
+    def create(self, cr, uid, vals, context=None):
+        if vals.get('name','/') == '/':
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'mrp.production')
+        return super(mrp_production, self).create(cr, uid, vals, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
         for production in self.browse(cr, uid, ids, context=context):
@@ -1086,7 +1094,7 @@ class mrp_production(osv.osv):
             'company_id': production.company_id.id,
             'production_id': production.id,
             'origin': production.name,
-            'group_id': procurement and procurement.group_id.id,
+            'group_id': procurement and procurement.group_id.id or production.group_id.id,
         }
         move_id = stock_move.create(cr, uid, data, context=context)
         #a phantom bom cannot be used in mrp order so it's ok to assume the list returned by action_confirm
@@ -1186,7 +1194,7 @@ class mrp_production(osv.osv):
             'price_unit': product.standard_price,
             'origin': production.name,
             'warehouse_id': loc_obj.get_warehouse(cr, uid, production.location_src_id, context=context),
-            'group_id': production.move_prod_id.group_id.id,
+            'group_id': production.move_prod_id and production.move_prod_id.group_id.id or production.group_id.id,
         }, context=context)
         
         if prev_move:
@@ -1224,6 +1232,9 @@ class mrp_production(osv.osv):
         uncompute_ids = filter(lambda x: x, [not x.product_lines and x.id or False for x in self.browse(cr, uid, ids, context=context)])
         self.action_compute(cr, uid, uncompute_ids, context=context)
         for production in self.browse(cr, uid, ids, context=context):
+            if not production.move_prod_id and not production.group_id:
+                self.write(cr, uid, [production.id], {'group_id': self.pool.get("procurement.group").create(cr, uid, {'name': production.name}, context=context)
+                                                      }, context=context)
             self._make_production_produce_line(cr, uid, production, context=context)
 
             stock_moves = []

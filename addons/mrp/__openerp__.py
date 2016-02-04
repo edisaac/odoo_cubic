@@ -69,6 +69,7 @@ Dashboard / Reports for MRP will include:
         'res_config_view.xml',
         'views/report_mrporder.xml',
         'views/report_mrpbomstructure.xml',
+        'stock_view.xml',
     ],
     'demo': ['mrp_demo.xml'],
     'test': [

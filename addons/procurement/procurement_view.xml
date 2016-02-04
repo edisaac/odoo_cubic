@@ -10,13 +10,15 @@
             <field name="name">procurement.order.tree</field>
             <field name="model">procurement.order</field>
             <field name="arch" type="xml">
-                <tree string="Procurement Lines" colors="red:date_planned&lt;current_date and state == 'exception';black:state=='running';darkgreen:state=='confirmed';gray:state in ['done','cancel'];blue:state == 'ready'">
+                <tree string="Procurement Lines" colors="gray:state in ['done','cancel'];crimson:date_planned&lt;current_date;red:state=='exception';black:state=='running';green:state=='confirmed';blue:state == 'ready'">
                     <field name="date_planned" widget="date"/>
                     <field name="origin"/>
                     <field name="product_id"/>
                     <field name="product_qty"/>
                     <field name="product_uom" string="Unit of Measure"/>
+                    <field name="priority"/>
                     <field name="state"/>
+                    <field name="group_id" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -100,16 +102,46 @@
                 <form string="Procurement group">
                     <sheet>
                         <div class="oe_right oe_button_box" name="button_box">
-                            <button name="%(do_view_procurements)d" string="Procurements" type="action"/>
+                            <!--button name="%(do_view_procurements)d" string="Procurements" type="action"/-->
                         </div>
                         <group>
-                            <field name="name"/>
-                            <field name="move_type"/>
+                        	<group>
+                        		<field name="name"/>
+                        	</group>
+                            <group>
+                        		<field name="move_type"/>
+                        		<field name="create_date"/>
+                        	</group>
                         </group>                        
+                        <notebook>
+                        	<page string="Procurements">
+                        		<field name="procurement_ids"/>
+                        	</page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>
         </record>
+        
+        <record id="procurement_group_tree_view" model="ir.ui.view">
+            <field name="name">procurement.group.tree</field>
+            <field name="model">procurement.group</field>
+            <field name="arch" type="xml">
+                <tree string="Procurement group">
+                	<field name="name"/>
+                	<field name="create_date"/>
+                    <field name="move_type"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="procurement_group_action" model="ir.actions.act_window">
+            <field name="name">Procurement Group</field>
+            <field name="res_model">procurement.group</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
         
         <record id="view_procurement_filter" model="ir.ui.view">
             <field name="name">procurement.order.select</field>
@@ -118,14 +150,18 @@
                 <search string="Search Procurement">
                     <field name="origin" string="Procurement"/>
                     <field name="date_planned"/>
+                    <filter icon="terp-accessories-archiver" string="Pending" name="pending" domain="[('state','in',['exception','confirmed'])]" help="Pending Procurements"/>
                     <filter icon="terp-emblem-important" string="Exceptions" name="exceptions" domain="[('state','=','exception')]" help="Procurement Exceptions"/>
                     <separator/>
                     <filter icon="terp-gnome-cpu-frequency-applet+" string="Late" domain="['&amp;', ('date_planned','&lt;', current_date), ('state', '=', 'confirmed')]" help="Procurement started late" />
                     <field name="product_id" />
                     <field name="state" />
+                    <field name="group_id"/>
                     <group expand="0" string="Group By">
+                        <filter string="Procurement Group" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'group_id'}"/>
                         <filter string="Product" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'product_id'}"/>
                         <filter string="Scheduled Month" icon="terp-go-month" domain="[]" context="{'group_by':'date_planned'}"/>
+                        <filter string="Priority" icon="terp-go-month" domain="[]" context="{'group_by':'priority'}"/>
                         <filter string="Status" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
                     </group>
                 </search>

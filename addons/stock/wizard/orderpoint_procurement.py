@@ -32,6 +32,13 @@ class procurement_compute(osv.osv_memory):
     _name = 'procurement.orderpoint.compute'
     _description = 'Compute Minimum Stock Rules'
 
+    _columns = {
+            'is_group': fields.boolean('Make a Group'),
+            'group_id': fields.many2one('procurement.group', string="Procurement Group", help="Leave in blank to create an automatic group for today"),
+        }
+    _defaults = {
+            'is_group': True,
+        }
 
     def _procure_calculation_orderpoint(self, cr, uid, ids, context=None):
         """
@@ -60,6 +67,14 @@ class procurement_compute(osv.osv_memory):
         @param ids: List of IDs selected
         @param context: A standard dictionary
         """
+        
+        wiz = self.browse(cr, uid, ids[0], context=context)
+        if wiz.is_group:
+            if wiz.group_id:
+                context['cbc_compute_group_id'] = wiz.group_id.id
+            else:
+                context['cbc_compute_group_id'] = self.pool.get("procurement.group").create(cr, uid, {'name': self.pool.get('ir.sequence').get(cr, uid, 'procurement.group')
+                                                                                                      }, context=context)
         
         threaded_calculation = threading.Thread(target=self._procure_calculation_orderpoint, args=(cr, uid, ids, context))
         threaded_calculation.start()

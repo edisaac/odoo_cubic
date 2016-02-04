@@ -821,6 +821,7 @@
                                 <group>
                                     <field name="company_id" groups="base.group_multi_company" widget="selection" />                                     
                                     <field name="move_prod_id" groups="stock.group_locations"/>
+                                    <field name="group_id" groups="stock.group_locations"/>
                                 </group>
                             </group>
                         </page>
@@ -850,10 +851,12 @@
                     <filter icon="terp-gnome-cpu-frequency-applet+" string="Late" domain="['&amp;', ('date_planned','&lt;', current_date), ('state', 'in', ('draft', 'confirmed', 'ready'))]"
                         help="Production started late"/>
                     <field name="product_id"/>
+                    <field name="group_id" filter_domain="['|',('group_id', 'ilike', self),('move_prod_id.group_id','ilike',self)]"/>
                     <field name="routing_id" groups="mrp.group_mrp_routings"/>
                     <group expand="0" string="Group By...">
                         <filter string="Product" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'product_id'}"/>
                         <filter string="Routing" icon="terp-stock_align_left_24" domain="[]" context="{'group_by':'routing_id'}"/>
+                        <filter string="Priority" icon="terp-stock_align_left_24" domain="[]" context="{'group_by':'priority'}"/>
                         <filter string="Status" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'state'}"/>
                         <filter string="Scheduled Month" icon="terp-go-month" domain="[]" context="{'group_by':'date_planned'}" help="Scheduled Date by Month"/>
                     </group>
@@ -990,6 +993,24 @@
                     </group>
                 </xpath>
                </data>
+            </field>
+        </record>
+
+        <record id="do_view_productions" model="ir.actions.act_window">
+            <field name="name">Productions for Groups</field>
+            <field name="res_model">mrp.production</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        	<field name="domain">['|',('group_id','=',active_id),('move_prod_id.group_id','=',active_id)]</field>
+        </record>
+        <record id="procurement_group_form_view" model="ir.ui.view">
+            <field name="name">procurement.group.form.herited.mrp</field>
+            <field name="model">procurement.group</field>
+            <field name="inherit_id" ref="procurement.procurement_group_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="%(do_view_productions)d" string="Production Orders" type="action"/>
+                </xpath>
             </field>
         </record>
 

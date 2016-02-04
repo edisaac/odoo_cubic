@@ -32,7 +32,8 @@ import openerp
 class procurement_group(osv.osv):
     _inherit = 'procurement.group'
     _columns = {
-        'partner_id': fields.many2one('res.partner', 'Partner')
+        'partner_id': fields.many2one('res.partner', 'Partner'),
+        'move_ids': fields.one2many('stock.move', 'group_id', string="Stock Moves")
     }
 
 class procurement_rule(osv.osv):
@@ -318,7 +319,7 @@ class procurement_order(osv.osv):
             'origin': orderpoint.name,
             'warehouse_id': orderpoint.warehouse_id.id,
             'orderpoint_id': orderpoint.id,
-            'group_id': orderpoint.group_id.id,
+            'group_id': context.get('cbc_compute_group_id') or orderpoint.group_id.id,
         }
 
     def _product_virtual_get(self, cr, uid, order_point):

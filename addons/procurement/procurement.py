@@ -104,7 +104,7 @@ class procurement_order(osv.osv):
     """
     _name = "procurement.order"
     _description = "Procurement"
-    _order = 'priority desc, date_planned, id asc'
+    _order = 'date_planned desc, priority desc, id desc'
     _inherit = ['mail.thread']
     _log_create = False
     _columns = {

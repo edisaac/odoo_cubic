@@ -927,7 +927,7 @@
             <field name="model">stock.move</field>
             <field eval="8" name="priority"/>
             <field name="arch" type="xml">
-                <tree colors="grey:state == 'cancel';red:(state not in ('cancel','done')) and date > current_date" string="Moves">
+                <tree colors="grey:state=='cancel';red:(state not in ('cancel','done')) and date_expected&lt;current_date;blue:state=='assigned'" string="Moves">
                     <field name="name"/>
                     <field name="picking_id" string="Reference"/>
                     <field name="origin"/>
@@ -981,6 +981,7 @@
                     <field name="remaining_qty" invisible="1"/>
                     <field name="string_availability_info"/>
                     <field name="state"/>
+                    <field name="group_id" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -1113,18 +1114,21 @@
                 <search string="Stock Moves">
                     <field name="origin" filter_domain="['|', '|', ('origin', 'ilike', self), ('name', 'ilike', self), ('picking_id', 'ilike', self)]" string="Reference"/>
                     <field name="date" groups="base.group_no_one"/>
-
+                    
                     <filter icon="terp-camera_test" string="Ready" name="ready" domain="[('state','=','assigned')]" help="Stock moves that are Available (Ready to process)"/>
                     <filter icon="terp-stock" string="To Do" name="future" domain="[('state','in',('assigned','confirmed','waiting'))]" help="Stock moves that are Confirmed, Available or Waiting"/>
                     <filter icon="terp-dialog-close" string="Done" name="done" domain="[('state','=','done')]" help="Stock moves that have been processed"/>
+                    <filter icon="terp-stock" string="Not Canceled" name="no_cancel" domain="[('state','!=','cancel')]" help="Stock movements not canceled"/>
                     <separator/>
                     <filter icon="terp-go-today" string="Today" domain="[('date','&lt;=',time.strftime('%%Y-%%m-%%d 23:59:59')),('date','&gt;=',time.strftime('%%Y-%%m-%%d 00:00:00'))]" help="Orders processed Today or planned for Today"/>
                     <field name="product_id"/>
+                    <field name="group_id"/>
                     <field name="name" string="Location" filter_domain="['|',('location_id','ilike',self),('location_dest_id','ilike',self)]"/>
                     <field name="partner_id" string="Partner"  filter_domain="[('picking_id.partner_id','child_of',self)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Product" name="by_product" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'product_id'}"/>
                         <filter string="Picking" name="groupby_picking_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'picking_id'}"/>
+                        <filter string="Procurement Group" name="groupby_group_id" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'group_id'}"/>
                         <filter string="Source" name="groupby_location_id" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'location_id'}" groups="stock.group_locations"/>
                         <filter string="Destination" name="groupby_dest_location_id" icon="terp-gtk-jump-to-ltr" domain="[]" context="{'group_by':'location_dest_id'}" groups="stock.group_locations"/>
                         <filter icon="terp-stock_effects-object-colorize" string="Status" domain="[]" context="{'group_by':'state'}"/>
@@ -1462,6 +1466,7 @@
                     <field name="product_uom" groups="product.group_uom"/>
                     <field name="product_min_qty"/>
                     <field name="product_max_qty"/>
+                    <field name="group_id"/>
                 </tree>
             </field>
         </record>
@@ -1479,6 +1484,7 @@
                     <group expand="0" string="Group By">
                         <filter string="Warehouse" icon="terp-go-home" domain="[]"  context="{'group_by':'warehouse_id'}"/>
                         <filter string="Location" icon="terp-go-home" domain="[]" context="{'group_by':'location_id'}"/>
+                        <filter string="Procurement Group" icon="terp-go-home" domain="[]" context="{'group_by':'group_id'}"/>
                     </group>
                 </search>
             </field>
@@ -1725,6 +1731,7 @@
         <menuitem action="action_procurement_compute" id="menu_procurement_compute" parent="menu_stock_sched" groups="base.group_no_one"/>
         <menuitem action="procurement.action_compute_schedulers" id="menu_stock_proc_schedulers" parent="menu_stock_sched" sequence="20" groups="stock.group_stock_manager"/>
         <menuitem action="procurement.procurement_exceptions" id="menu_stock_procurement_action" parent="menu_stock_sched" sequence="50" groups="stock.group_stock_manager"/>
+        <menuitem action="procurement.procurement_group_action" id="menu_procurement_group_action" parent="menu_stock_sched" sequence="70" groups="stock.group_stock_manager"/>
         <menuitem id="menu_stock_procurement" name="Automatic Procurements" parent="stock.menu_stock_configuration" sequence="5"/>
         <menuitem action="action_orderpoint_form" id="menu_stock_order_points" parent="stock.menu_stock_configuration" sequence="10"/>
         <menuitem id="stock.next_id_61" name="Warehouse" sequence="15" parent="base.menu_reporting" groups="group_stock_manager"/>
@@ -1927,7 +1934,7 @@
             <field name="res_model">stock.picking</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-        <field name="domain">[('group_id','=',active_id)]</field>
+        	<field name="domain">[('group_id','=',active_id)]</field>
         </record>
         <record id="procurement_group_form_view_herited" model="ir.ui.view">
             <field name="name">procurement.group.form.herited</field>
@@ -1936,6 +1943,11 @@
             <field name="arch" type="xml">
                 <xpath expr="//div[@name='button_box']" position="inside">
                     <button name="%(do_view_pickings)d" string="Pickings" type="action"/>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                	<page string="Stock Moves">
+                		<field name="move_ids"/>
+                	</page>
                 </xpath>
             </field>
         </record>

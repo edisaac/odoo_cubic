@@ -12,6 +12,10 @@
                     <group>
                         <label string="Wizard checks all the stock minimum rules and generate procurement order."/>
                     </group>
+                    <group>
+                    	<field name="is_group"/>
+                    	<field name="group_id" attrs="{'invisible':[('is_group','=',False)]}"/>
+                    </group>
                     <footer>
                         <button name="procure_calculation" string="Compute Stock" type="object"  class="oe_highlight"  />
                         or
