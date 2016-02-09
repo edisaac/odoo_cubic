@@ -15,7 +15,7 @@ Ask your functionnal question directly to the Odoo Operators with the livechat s
 
         """,
     'data': [
-        "views/im_odoo_support.xml"
+        #"views/im_odoo_support.xml"
     ],
     'depends' : ["web", "im_chat"],
     'qweb': [

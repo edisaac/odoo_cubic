@@ -108,19 +108,22 @@ class procurement_order(osv.osv):
     _inherit = ['mail.thread']
     _log_create = False
     _columns = {
-        'name': fields.text('Description', required=True),
+        'name': fields.text('Description', required=True, states={'confirmed': [('readonly', False)]}, readonly=True),
 
-        'origin': fields.char('Source Document',
+        'origin': fields.char('Source Document', states={'confirmed': [('readonly', False)]}, readonly=True,
             help="Reference of the document that created this Procurement.\n"
             "This is automatically completed by Odoo."),
-        'company_id': fields.many2one('res.company', 'Company', required=True),
+        'company_id': fields.many2one('res.company', 'Company', required=True, states={'confirmed': [('readonly', False)]}, readonly=True),
 
         # These two fields are used for shceduling
-        'priority': fields.selection(PROCUREMENT_PRIORITIES, 'Priority', required=True, select=True, track_visibility='onchange'),
-        'date_planned': fields.datetime('Scheduled Date', required=True, select=True, track_visibility='onchange'),
+        'priority': fields.selection(PROCUREMENT_PRIORITIES, 'Priority', required=True, states={'confirmed': [('readonly', False)]}, readonly=True, 
+                                     select=True, track_visibility='onchange'),
+        'date_planned': fields.datetime('Scheduled Date', required=True, states={'confirmed': [('readonly', False)], 'exception': [('readonly', False)]}, 
+                                        readonly=True, select=True, track_visibility='onchange'),
 
-        'group_id': fields.many2one('procurement.group', 'Procurement Group'),
-        'rule_id': fields.many2one('procurement.rule', 'Rule', track_visibility='onchange', help="Chosen rule for the procurement resolution. Usually chosen by the system but can be manually set by the procurement manager to force an unusual behavior."),
+        'group_id': fields.many2one('procurement.group', 'Procurement Group',  ondelete='cascade', states={'confirmed': [('readonly', False)]}, readonly=True),
+        'rule_id': fields.many2one('procurement.rule', 'Rule', track_visibility='onchange', states={'confirmed': [('readonly', False)]}, readonly=True, 
+                                   help="Chosen rule for the procurement resolution. Usually chosen by the system but can be manually set by the procurement manager to force an unusual behavior."),
 
         'product_id': fields.many2one('product.product', 'Product', required=True, states={'confirmed': [('readonly', False)]}, readonly=True),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure'), required=True, states={'confirmed': [('readonly', False)]}, readonly=True),

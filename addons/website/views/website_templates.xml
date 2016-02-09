@@ -80,7 +80,7 @@
                 and main_object.website_meta_description or website_meta_description"/>
             <meta name="keywords" t-att-content="main_object and 'website_meta_keywords' in main_object
                 and main_object.website_meta_keywords or website_meta_keywords"/>
-            <meta name="generator" content="Odoo"/>
+            <meta name="generator" content="CubicERP"/>
             <title><t t-esc="title"/></title>
 
             <t t-set="languages" t-value="website.get_languages() if website else None"/>
@@ -449,14 +449,14 @@
 
 <!-- Error and special pages -->
 
-<template id="info" name="Odoo Information">
+<template id="info" name="CubicERP Information">
     <t t-call="website.layout">
       <div id="wrap">
       </div>
     </t>
 </template>
 
-<template id="show_website_info" inherit_id="website.info" customize_show="True" name="Show Odoo Information">
+<template id="show_website_info" inherit_id="website.info" customize_show="True" name="Show CubicERP Information">
     <xpath expr="//div[@id='wrap']" position="inside">
 
         <div class="oe_structure">
