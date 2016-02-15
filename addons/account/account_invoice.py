@@ -1773,21 +1773,35 @@ class account_invoice_tax(osv.osv):
         res = []
         cr.execute('SELECT * FROM account_invoice_tax WHERE invoice_id=%s', (invoice_id,))
         for t in cr.dictfetchall():
-            if not t['amount'] \
-                    and not t['tax_code_id'] \
-                    and not t['tax_amount']:
-                continue
-            res.append({
-                'type':'tax',
-                'name':t['name'],
-                'price_unit': t['amount'],
-                'quantity': 1,
-                'price': t['amount'] or 0.0,
-                'account_id': t['account_id'],
-                'tax_code_id': t['tax_code_id'],
-                'tax_amount': t['tax_amount'],
-                'account_analytic_id': t['account_analytic_id'],
-            })
+            have_tax = have_base = False
+            if t['amount'] and t['tax_code_id'] and t['tax_amount']:
+                have_tax = True
+            if t['base'] and t['base_code_id'] and t['base_amount']:
+                have_base = True
+            if t['manual'] and have_base and not have_tax:
+                res.append({
+                    'type':'tax',
+                    'name':t['name'],
+                    'price_unit': t['amount'],
+                    'quantity': 1,
+                    'price': t['amount'] or 0.0,
+                    'account_id': t['account_id'],
+                    'tax_code_id': t['base_code_id'],
+                    'tax_amount': t['base_amount'],
+                    'account_analytic_id': t['account_analytic_id'],
+                })
+            elif have_tax:
+                res.append({
+                    'type':'tax',
+                    'name':t['name'],
+                    'price_unit': t['amount'],
+                    'quantity': 1,
+                    'price': t['amount'] or 0.0,
+                    'account_id': t['account_id'],
+                    'tax_code_id': t['tax_code_id'],
+                    'tax_amount': t['tax_amount'],
+                    'account_analytic_id': t['account_analytic_id'],
+                })
         return res
 
 
