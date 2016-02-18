@@ -1599,19 +1599,35 @@ class account_invoice_tax(models.Model):
             (invoice_id,)
         )
         for row in self._cr.dictfetchall():
-            if not (row['amount'] or row['tax_code_id'] or row['tax_amount']):
-                continue
-            res.append({
-                'type': 'tax',
-                'name': row['name'],
-                'price_unit': row['amount'],
-                'quantity': 1,
-                'price': row['amount'] or 0.0,
-                'account_id': row['account_id'],
-                'tax_code_id': row['tax_code_id'],
-                'tax_amount': row['tax_amount'],
-                'account_analytic_id': row['account_analytic_id'],
-            })
+            have_tax = have_base = False
+            if row['amount'] and row['tax_code_id'] and row['tax_amount']:
+                have_tax = True
+            if row['base'] and row['base_code_id'] and row['base_amount']:
+                have_base = True
+            if row['manual'] and have_base and not have_tax:
+                res.append({
+                    'type':'tax',
+                    'name':row['name'],
+                    'price_unit': row['amount'],
+                    'quantity': 1,
+                    'price': row['amount'] or 0.0,
+                    'account_id': row['account_id'],
+                    'tax_code_id': row['base_code_id'],
+                    'tax_amount': row['base_amount'],
+                    'account_analytic_id': row['account_analytic_id'],
+                })
+            elif have_tax:
+                res.append({
+                    'type': 'tax',
+                    'name': row['name'],
+                    'price_unit': row['amount'],
+                    'quantity': 1,
+                    'price': row['amount'] or 0.0,
+                    'account_id': row['account_id'],
+                    'tax_code_id': row['tax_code_id'],
+                    'tax_amount': row['tax_amount'],
+                    'account_analytic_id': row['account_analytic_id'],
+                })
         return res
 
 

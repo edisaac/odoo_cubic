@@ -875,6 +875,7 @@ class account_move_line(osv.osv):
         company_list = []
         if context is None:
             context = {}
+        company_currency = self.pool.get('res.users').browse(cr, uid, uid).company_id.currency_id
         for line in self.browse(cr, uid, ids, context=context):
             if company_list and not line.company_id.id in company_list:
                 raise osv.except_osv(_('Warning!'), _('To reconcile the entries company should be the same for all entries.'))
@@ -905,7 +906,7 @@ class account_move_line(osv.osv):
                     total += line.amount_currency
                 else:
                     total += (line.debit or 0.0) - (line.credit or 0.0)
-        if self.pool.get('res.currency').is_zero(cr, uid, currency_id, total):
+        if self.pool.get('res.currency').is_zero(cr, uid, company_currency, total):
             res = self.reconcile(cr, uid, merges+unmerge, context=context, writeoff_acc_id=writeoff_acc_id, writeoff_period_id=writeoff_period_id, writeoff_journal_id=writeoff_journal_id)
             return res
         # marking the lines as reconciled does not change their validity, so there is no need
