@@ -26,7 +26,7 @@
                         <field name="name"/>
                         <field name="date_order"/>
                         <field name="session_id" required="1"/>
-                        <field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer', '=', True)]" context="{'search_default_customer':1}" attrs="{'readonly': [('state','=','invoiced')]}"/>
+                        <field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer', '=', True)]" context="{'search_default_customer':1}"/>
                     </group>
                     <notebook colspan="4">
                         <page string="Products">
@@ -82,12 +82,13 @@
                             </group>
                             <group string="Accounting Information">
                                 <field name="sale_journal" domain="[('type','=','sale')]"/>
-                                <field name="invoice_id" readonly="1"
-                                    attrs="{'invisible':[('state','&lt;&gt;','invoiced')]}"/>
-                                <button name="%(pos_invoice_report)d" string="Re-Print"
-                                    icon="gtk-print" type="action" attrs="{'invisible':[('state','&lt;&gt;','invoiced')]}"/>
                                 <field name="account_move" readonly="1"
-                                    attrs="{'invisible':[('state','&lt;&gt;','done')]}"/>
+                                    attrs="{'invisible':[('account_move','=',False)]}"/>
+                                <field name="invoice_id" readonly="1"
+                                    attrs="{'invisible':[('invoice_id','=',False)]}"/>
+                                <button name="%(pos_invoice_report)d" string="Re-Print" colspan="2"
+                                    icon="gtk-print" type="action" attrs="{'invisible':[('invoice_id','=',False)]}"/>
+                                
                             </group>
                         </page>
                         <page string="Notes" >
@@ -667,7 +668,7 @@
                             <field name="stock_location_id" groups="stock.group_locations"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="pricelist_id" groups="product.group_sale_pricelist"/>
-                            <field name="journal_id" widget="selection"/>
+                            <field name="journal_id" attrs="{'required':[('group_by','=',False)]}" widget="selection"/>
                             <field name="group_by" groups="account.group_account_user"/>
                             <field name="sequence_id" readonly="1" groups="base.group_no_one"/>
                             <field name="currency_id" invisible="1"/>
@@ -901,8 +902,8 @@
                                 <field name="state" />
                             </tree>
                         </field>
-						<separator string="POS Orders"/>
-						<field name="order_ids">
+						<separator string="POS Orders" attrs="{'invisible' : [('state', '=', 'opening_control')]}"/>
+						<field name="order_ids" attrs="{'invisible' : [('state', '=', 'opening_control')]}">
 							<tree string="Orders" colors="blue:state == 'draft';gray:state in ('done','cancel');black:state not in('done','cancel')">
 			                    <field name="name"/>
 			                    <field name="pos_reference"/>

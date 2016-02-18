@@ -101,9 +101,19 @@ class pos_make_payment(osv.osv_memory):
         if active_id:
             order = order_obj.browse(cr, uid, active_id, context=context)
             session = order.session_id
+#             if not order.amount_total:
+#                 raise osv.except_osv( _('Data Error!'), _("You need fill the POS order lines with amounts different of zero!"))
         if session:
             for journal in session.config_id.journal_ids:
                 return journal.id
+        return False
+
+    def _default_session(self, cr, uid, context=None):
+        if not context:
+            context = {}
+        active_id = context and context.get('active_id', False)
+        if active_id:
+            return self.pool.get('pos.order').browse(cr, uid, active_id, context=context).session_id.id
         return False
 
     def _default_amount(self, cr, uid, context=None):
@@ -119,10 +129,12 @@ class pos_make_payment(osv.osv_memory):
         'amount': fields.float('Amount', digits=(16,2), required= True),
         'payment_name': fields.char('Payment Reference'),
         'payment_date': fields.date('Payment Date', required=True),
+        'session_id' : fields.many2one('pos.session', 'Session', readonly=True),
     }
     _defaults = {
         'journal_id' : _default_journal,
         'payment_date': lambda *a: time.strftime('%Y-%m-%d %H:%M:%S'),
+        'session_id': _default_session,
         'amount': _default_amount,
     }
 
