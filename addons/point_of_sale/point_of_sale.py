@@ -264,6 +264,8 @@ class pos_session(osv.osv):
                                       help="The physical point of sale you will use.",
                                       required=True,
                                       select=1,
+                                      readonly=True,
+                                      states={'opening_control' : [('readonly', False)]},
                                       domain="[('state', '=', 'active')]",
                                      ),
 
@@ -644,7 +646,8 @@ class pos_order(osv.osv):
             session.refresh()
 
         if not float_is_zero(order['amount_return'], self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')):
-            cash_journal = session.cash_journal_id
+            cash_journal_ids = filter(lambda st: st.journal_id.type=='cash', self.pool['pos.order'].browse(cr,uid,order_id).statement_ids)
+            cash_journal = cash_journal_ids and cash_journal_ids[0].journal_id or session.cash_journal_id
             if not cash_journal:
                 cash_journal_ids = filter(lambda st: st.journal_id.type=='cash', session.statement_ids)
                 if not len(cash_journal_ids):
