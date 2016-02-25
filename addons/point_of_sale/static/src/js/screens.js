@@ -946,9 +946,9 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
 
             this.refresh();
 
-            if (!this.pos.get('selectedOrder')._printed) {
-                this.print();
-            }
+            //if (!this.pos.get('selectedOrder')._printed) {
+            //    this.print();
+            //}
 
             //
             // The problem is that in chrome the print() is asynchronous and doesn't
