@@ -951,6 +951,13 @@ class pos_order(osv.osv):
 
         return statement_id
 
+    def _get_refund_clone_order(self, order, current_session_ids, context=None):
+        return {
+                'name': order.name + ' REFUND', # not used, name forced by create
+                'session_id': current_session_ids[0],
+                'date_order': time.strftime('%Y-%m-%d %H:%M:%S'),
+            }
+
     def refund(self, cr, uid, ids, context=None):
         """Create a copy of order  for refund order"""
         clone_list = []
@@ -963,11 +970,7 @@ class pos_order(osv.osv):
             if not current_session_ids:
                 raise osv.except_osv(_('Error!'), _('To return product(s), you need to open a session that will be used to register the refund.'))
 
-            clone_id = self.copy(cr, uid, order.id, {
-                'name': order.name + ' REFUND', # not used, name forced by create
-                'session_id': current_session_ids[0],
-                'date_order': time.strftime('%Y-%m-%d %H:%M:%S'),
-            }, context=context)
+            clone_id = self.copy(cr, uid, order.id, self._get_refund_clone_order(order, current_session_ids, context=context), context=context)
             clone_list.append(clone_id)
 
         for clone in self.browse(cr, uid, clone_list, context=context):
@@ -1304,6 +1307,9 @@ class pos_order(osv.osv):
 
     def action_payment(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'payment'}, context=context)
+    
+    def _get_sale_journal(self, cr, uid, order, context=None):
+        return order.sale_journal
     
     def number(self, cr, uid, ids, context=None):
         line_obj = self.pool.get("account.bank.statement.line")
