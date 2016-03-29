@@ -753,7 +753,8 @@ class pos_order(osv.osv):
         'amount_return': fields.function(_amount_all, 'Returned', digits_compute=dp.get_precision('Account'), multi='all'),
         'lines': fields.one2many('pos.order.line', 'order_id', 'Order Lines', states={'draft': [('readonly', False)]}, readonly=True, copy=True),
         'statement_ids': fields.one2many('account.bank.statement.line', 'pos_statement_id', 'Payments', states={'draft': [('readonly', False)]}, readonly=True),
-        'pricelist_id': fields.many2one('product.pricelist', 'Pricelist', required=True, states={'draft': [('readonly', False)]}, readonly=True),
+        'pricelist_id': fields.many2one('product.pricelist', 'Pricelist', required=True, states={'draft': [('readonly', False)]}, readonly=True,
+                                        domain=[('type','=','sale')]),
         'partner_id': fields.many2one('res.partner', 'Customer', change_default=True, select=1, states={'draft': [('readonly', False)]}, readonly=True),
         'sequence_number': fields.integer('Sequence Number', help='A session-unique sequence number for the order'),
 
@@ -795,6 +796,10 @@ class pos_order(osv.osv):
             return session_record.config_id.pricelist_id and session_record.config_id.pricelist_id.id or False
         return False
 
+    def _default_location(self, cr, uid, context=None):
+        session_id = self._default_session(cr, uid, context) 
+        return session_id and self.pool.get('pos.session').browse(cr, uid, session_id, context=context).config_id.stock_location_id.id or False
+    
     def _get_out_picking_type(self, cr, uid, context=None):
         return self.pool.get('ir.model.data').xmlid_to_res_id(
                     cr, uid, 'point_of_sale.picking_type_posout', context=context)
@@ -809,6 +814,7 @@ class pos_order(osv.osv):
         'session_id': _default_session,
         'company_id': lambda self,cr,uid,c: self.pool.get('res.users').browse(cr, uid, uid, c).company_id.id,
         'pricelist_id': _default_pricelist,
+        'location_id': _default_location,
     }
 
     def test_paid(self, cr, uid, ids, context=None):
@@ -953,7 +959,7 @@ class pos_order(osv.osv):
 
     def _get_refund_clone_order(self, order, current_session_ids, context=None):
         return {
-                'name': order.name + ' REFUND', # not used, name forced by create
+                'pos_reference': order.name + ' REFUND', # not used, name forced by create
                 'session_id': current_session_ids[0],
                 'date_order': time.strftime('%Y-%m-%d %H:%M:%S'),
             }
@@ -1035,7 +1041,7 @@ class pos_order(osv.osv):
 
             acc = order.partner_id.property_account_receivable.id
             inv = self._get_invoice_create(cr, uid, order, context=context)
-            inv.update(inv_ref.onchange_partner_id(cr, uid, [], 'out_invoice', order.partner_id.id)['value'])
+            inv.update(inv_ref.onchange_partner_id(cr, uid, [], inv['type'], order.partner_id.id)['value'])
             if not inv.get('account_id', None):
                 inv['account_id'] = acc
             inv_id = inv_ref.create(cr, uid, inv, context=context)
