@@ -363,6 +363,10 @@ class product_pricelist(osv.osv):
 
     def price_get(self, cr, uid, ids, prod_id, qty, partner=None, context=None):
         return dict((key, price[0]) for key, price in self.price_rule_get(cr, uid, ids, prod_id, qty, partner=partner, context=context).items())
+    
+    def discount_get(self, cr, uid, ids, prod_id, qty, partner=None, context=None):
+        rule_obj = self.pool.get('product.pricelist.item')
+        return dict((key, price[1] and rule_obj.browse(cr, uid, price[1], context=context).discount or 0.0) for key, price in self.price_rule_get(cr, uid, ids, prod_id, qty, partner=partner, context=context).items())
 
     def price_rule_get(self, cr, uid, ids, prod_id, qty, partner=None, context=None):
         product = self.pool.get('product.product').browse(cr, uid, prod_id, context=context)
@@ -508,6 +512,7 @@ class product_pricelist_item(osv.osv):
             digits_compute= dp.get_precision('Product Price'), help='Specify the minimum amount of margin over the base price.'),
         'price_max_margin': fields.float('Max. Price Margin',
             digits_compute= dp.get_precision('Product Price'), help='Specify the maximum amount of margin over the base price.'),
+        'discount': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
         'company_id': fields.related('price_version_id','company_id',type='many2one',
             readonly=True, relation='res.company', string='Company', store=True)
     }

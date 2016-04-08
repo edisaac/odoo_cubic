@@ -78,6 +78,7 @@
                     <field name="categ_id"/>
                     <field name="min_quantity"/>
                     <field name="base"/>
+                    <field name="discount"/>
                 </tree>
             </field>
         </record>
@@ -117,6 +118,8 @@
                         <field name="price_round" string="Rounding Method"/>
                         <field name="price_min_margin" string="Min. Margin"/>
                         <field name="price_max_margin" string="Max. Margin"/>
+                        <newline/>
+                        <field name="discount"/>
                     </group>
 
                 </form>

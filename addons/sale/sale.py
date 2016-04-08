@@ -1150,7 +1150,12 @@ class sale_order_line(osv.osv):
 
                 warning_msgs += _("No valid pricelist line found ! :") + warn_msg +"\n\n"
             else:
-                result.update({'price_unit': price})
+                discount = self.pool.get('product.pricelist').discount_get(cr, uid, [pricelist],
+                                                                            product, qty or 1.0, partner_id, {
+                                                                                'uom': uom or result.get('product_uom'),
+                                                                                'date': date_order,
+                                                                                })[pricelist]
+                result.update({'price_unit': price, 'discount': discount})
         if warning_msgs:
             warning = {
                        'title': _('Configuration Error!'),
