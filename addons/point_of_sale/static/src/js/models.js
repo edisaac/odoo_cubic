@@ -851,6 +851,57 @@ function openerp_pos_models(instance, module){ //module is instance.point_of_sal
         get_tax_details: function(){
             return this.get_all_prices().taxDetails;
         },
+        compute_all: function(taxes, price_unit) {
+            var self = this;
+            var res = [];
+            var currency_rounding = this.pos.currency.rounding;
+            if (this.pos.company.tax_calculation_rounding_method == "round_globally"){
+               currency_rounding = currency_rounding * 0.00001;
+            }
+            var base = price_unit;
+            _(taxes).each(function(tax) {
+                if (tax.price_include) {
+                    if (tax.type === "percent") {
+                        tmp =  round_pr(base - round_pr(base / (1 + tax.amount),currency_rounding),currency_rounding);
+                        data = {amount:tmp, price_include:true, id: tax.id};
+                        res.push(data);
+                    } else if (tax.type === "fixed") {
+                        tmp = tax.amount * self.get_quantity();
+                        data = {amount:tmp, price_include:true, id: tax.id};
+                        res.push(data);
+                    } else {
+                        throw "This type of tax is not supported by the point of sale: " + tax.type;
+                    }
+                } else {
+                    if (tax.type === "percent") {
+                        tmp = round_pr(tax.amount * base, currency_rounding);
+                        data = {amount:tmp, price_include:false, id: tax.id};
+                        res.push(data);
+                    } else if (tax.type === "fixed") {
+                        tmp = tax.amount * self.get_quantity();
+                        data = {amount:tmp, price_include:false, id: tax.id};
+                        res.push(data);
+                    } else {
+                        throw "This type of tax is not supported by the point of sale: " + tax.type;
+                    }
+
+                    var base_amount = data.amount;
+                    var child_amount = 0.0;
+                    if (tax.child_depend) {
+                        res.pop(); // do not use parent tax
+                        child_tax = self.compute_all(tax.child_taxes, base_amount);
+                        res.push(child_tax);
+                        _(child_tax).each(function(child) {
+                            child_amount += child.amount;
+                        });
+                    }
+                    if (tax.include_base_amount) {
+                        base += base_amount + child_amount;
+                    }
+                }
+            });
+            return res;
+        },
         get_all_prices: function(){
             var self = this;
             var currency_rounding = this.pos.currency.rounding;
