@@ -883,7 +883,10 @@ class product_product(osv.osv):
             value = product_uom_obj._compute_price(cr, uid,
                     context['uom'], value, uom.id)
         #value =  value - product.price_extra
-        
+        cr.execute("select id from product_product where product_tmpl_id=%s and active=true"%product.product_tmpl_id.id)
+        res = self.cr.dictfetchall()
+        if len(res) == 1:
+            self.pool.get('product.template').write(cr, uid, [product.product_tmpl_id.id], {'list_price': value}, context=context)
         return product.write({'list_price': value})
 
     def _get_partner_code_name(self, cr, uid, ids, product, partner_id, context=None):
