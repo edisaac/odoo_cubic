@@ -22,7 +22,7 @@
 import logging
 import time
 
-from openerp import tools
+from openerp import tools, SUPERUSER_ID
 from openerp.osv import fields, osv
 from openerp.tools import float_is_zero
 from openerp.tools.translate import _
@@ -719,6 +719,14 @@ class pos_order(osv.osv):
             return {'value': {}}
         pricelist = self.pool.get('res.partner').browse(cr, uid, part, context=context).property_product_pricelist.id
         return {'value': {'pricelist_id': pricelist}}
+
+    def onchange_lines(self, cr, uid, ids, lines):
+        max_lines = self.pool['ir.config_parameter'].get_param(cr, SUPERUSER_ID, 'point_of_sale.max_order_lines', default=30)
+        res = {}
+        if len(lines) > int(max_lines):
+            res['warning'] = {'title': 'Warning!',
+                              'message': 'The maximum number of lines in an order is %s'%max_lines}
+        return res
 
     def _amount_all(self, cr, uid, ids, name, args, context=None):
         cur_obj = self.pool.get('res.currency')
