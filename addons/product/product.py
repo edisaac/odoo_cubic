@@ -884,7 +884,7 @@ class product_product(osv.osv):
                     context['uom'], value, uom.id)
         #value =  value - product.price_extra
         cr.execute("select id from product_product where product_tmpl_id=%s and active=true"%product.product_tmpl_id.id)
-        res = self.cr.dictfetchall()
+        res = cr.dictfetchall()
         if len(res) == 1:
             self.pool.get('product.template').write(cr, uid, [product.product_tmpl_id.id], {'list_price': value}, context=context)
         return product.write({'list_price': value})
