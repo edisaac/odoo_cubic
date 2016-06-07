@@ -750,7 +750,7 @@ class pos_order(osv.osv):
         return res
 
     _columns = {
-        'name': fields.char('Order Ref', required=True, readonly=True, copy=False),
+        'name': fields.char('Order Ref', required=True, states={'draft': [('readonly', False)]}, readonly=True, copy=False),
         'company_id':fields.many2one('res.company', 'Company', required=True, readonly=True),
         'date_order': fields.datetime('Order Date', readonly=True, select=True),
         'user_id': fields.many2one('res.users', 'Salesman', states={'draft': [('readonly', False)]}, readonly=True,
