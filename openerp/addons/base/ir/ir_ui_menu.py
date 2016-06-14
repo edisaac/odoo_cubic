@@ -76,6 +76,10 @@ class ir_ui_menu(osv.osv):
                     continue
 
                 self._cache[key] = False
+                if menu.hidden_groups_id:
+                    hidden_to_groups = [g.id for g in menu.hidden_groups_id]
+                    if user_groups.intersection(hidden_to_groups):
+                        continue
                 if menu.groups_id:
                     restrict_to_groups = [g.id for g in menu.groups_id]
                     if not user_groups.intersection(restrict_to_groups):
@@ -350,6 +354,8 @@ class ir_ui_menu(osv.osv):
         'groups_id': fields.many2many('res.groups', 'ir_ui_menu_group_rel',
             'menu_id', 'gid', 'Groups', help="If you have groups, the visibility of this menu will be based on these groups. "\
                 "If this field is empty, OpenERP will compute visibility based on the related object's read access."),
+        'hidden_groups_id': fields.many2many('res.groups', 'ir_ui_menu_hide_group_rel',
+            'menu_id', 'gid', 'Hidden Groups', help="This menu will be hidden on these groups"),
         'complete_name': fields.function(_get_full_name,
             string='Full Path', type='char', size=128),
         'icon': fields.selection(tools.icons, 'Icon', size=64),

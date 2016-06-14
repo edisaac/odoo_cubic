@@ -67,6 +67,7 @@ class groups(osv.osv):
         'rule_groups': fields.many2many('ir.rule', 'rule_group_rel',
             'group_id', 'rule_group_id', 'Rules', domain=[('global', '=', False)]),
         'menu_access': fields.many2many('ir.ui.menu', 'ir_ui_menu_group_rel', 'gid', 'menu_id', 'Access Menu'),
+        'menu_hidden': fields.many2many('ir.ui.menu', 'ir_ui_menu_hide_group_rel', 'gid', 'menu_id', 'Hidden Menu'),
         'view_access': fields.many2many('ir.ui.view', 'ir_ui_view_group_rel', 'group_id', 'view_id', 'Views'),
         'comment' : fields.text('Comment', size=250, translate=True),
         'category_id': fields.many2one('ir.module.category', 'Application', select=True),
@@ -516,6 +517,8 @@ class res_users(osv.osv):
         :return: True if the current user is a member of the group with the
            given external ID (XML ID), else False.
         """
+        if group_ext_id.isdigit():
+            return self.has_group_id(cr,uid, group_ext_id)
         assert group_ext_id and '.' in group_ext_id, "External ID must be fully qualified"
         module, ext_id = group_ext_id.split('.')
         cr.execute("""SELECT 1 FROM res_groups_users_rel WHERE uid=%s AND gid IN
@@ -523,6 +526,16 @@ class res_users(osv.osv):
                    (uid, module, ext_id))
         return bool(cr.fetchone())
 
+    def has_group_id(self, cr, uid, group_id):
+        """Checks whether user belongs to given group id.
+
+        :param int group_id: Group ID.
+        :return: True if the current user is a member of the group with the
+           given ID, else False.
+        """
+        cr.execute("""SELECT 1 FROM res_groups_users_rel WHERE uid=%s AND gid=%s""",
+                   (uid, group_id))
+        return bool(cr.fetchone())
 
 #
 # Extension of res.groups and res.users with a relation for "implied" or

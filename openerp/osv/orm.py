@@ -1110,6 +1110,11 @@ class BaseModel(object):
         else:
             self._rec_name = 'name'
 
+        # Mark the column with '0' to load values from database in function check_group
+        for field in self._columns:
+            self._columns[field].readonly_groups = ','.join(['0'] + (self._columns[field].readonly_groups and
+                                                            self._columns[field].readonly_groups.split(',') or []))
+
 
     def __export_row(self, cr, uid, row, fields, context=None):
         if context is None:
@@ -1754,6 +1759,37 @@ class BaseModel(object):
             """
             if node.tag == 'field' and node.get('name') in self._all_columns:
                 column = self._all_columns[node.get('name')].column
+                if column.readonly_groups and column.readonly_groups[0:1] == '0':
+                    # Delete '0' mark put in the __init__ method
+                    for field in self._columns:
+                        self._columns[field].readonly_groups = type(self._columns[field].readonly_groups) is str and \
+                                                               self._columns[field].readonly_groups.split(',')[1:] and \
+                                                               ','.join(self._columns[field].readonly_groups.split(',')[1:]) or False
+                    # Load groups from database
+                    cr.execute(
+                        'SELECT name, group_id FROM ir_model_fields as mf join ir_model_fields_group_rel as fgr on (mf.id = fgr.field_id) WHERE model=%s',
+                        (self._name,))
+                    for field in cr.dictfetchall():
+                        self._columns[field['name']].groups = ','.join((self._columns[field['name']].groups and
+                                                                        self._columns[field['name']].groups.split(
+                                                                            ',') or []) + [str(field['group_id'])])
+                    cr.execute(
+                        'SELECT name, group_id FROM ir_model_fields as mf join ir_model_fields_inv_group_rel as fgr on (mf.id = fgr.field_id) WHERE model=%s',
+                        (self._name,))
+                    for field in cr.dictfetchall():
+                        self._columns[field['name']].invisible_groups = ','.join((self._columns[field[
+                            'name']].invisible_groups and self._columns[field['name']].invisible_groups.split(
+                            ',') or []) + [str(field['group_id'])])
+                    cr.execute(
+                        'SELECT name, group_id FROM ir_model_fields as mf join ir_model_fields_ro_group_rel as fgr on (mf.id = fgr.field_id) WHERE model=%s',
+                        (self._name,))
+                    for field in cr.dictfetchall():
+                        self._columns[field['name']].readonly_groups = ','.join((self._columns[
+                                                                                     field['name']].readonly_groups and
+                                                                                 self._columns[field[
+                                                                                     'name']].readonly_groups.split(
+                                                                                     ',') or []) + [
+                                                                                    str(field['group_id'])])
                 if column.groups and not self.user_has_groups(cr, user,
                                                               groups=column.groups,
                                                               context=context):
@@ -1761,6 +1797,20 @@ class BaseModel(object):
                     fields.pop(node.get('name'), None)
                     # no point processing view-level ``groups`` anymore, return
                     return False
+                if column.invisible_groups and self.user_has_groups(cr, user,
+                                                                    groups=column.invisible_groups,
+                                                                    context=context):
+                    node.set('invisible', '1')
+                    modifiers['invisible'] = True
+                    if 'attrs' in node.attrib:
+                        del (node.attrib['attrs'])  # avoid making field visible later
+                elif column.readonly_groups and self.user_has_groups(cr, user,
+                                                                   groups=column.readonly_groups,
+                                                                   context=context):
+                    node.set('readonly', '1')
+                    modifiers['readonly'] = True
+                    if 'attrs' in node.attrib:
+                        del (node.attrib['attrs'])  # avoid making field visible later
             if node.get('groups'):
                 can_see = self.user_has_groups(cr, user,
                                                groups=node.get('groups'),
@@ -1771,6 +1821,21 @@ class BaseModel(object):
                     if 'attrs' in node.attrib:
                         del(node.attrib['attrs']) #avoid making field visible later
                 del(node.attrib['groups'])
+            elif node.get('invisible_groups'):
+                if self.user_has_groups(cr, user, groups=node.get('invisible_groups'), context=context):
+                    node.set('invisible', '1')
+                    modifiers['invisible'] = True
+                    if 'attrs' in node.attrib:
+                        del (node.attrib['attrs'])  # avoid making field visible later
+                del (node.attrib['invisible_groups'])
+            elif node.get('readonly_groups'):
+                if self.user_has_groups(cr, user, groups=node.get('readonly_groups'), context=context):
+                    node.set('readonly', '1')
+                    modifiers['readonly'] = True
+                    if 'attrs' in node.attrib:
+                        del (node.attrib['attrs'])  # avoid making field visible later
+                del (node.attrib['readonly_groups'])
+
             return True
 
         if node.tag in ('field', 'node', 'arrow'):

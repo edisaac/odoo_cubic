@@ -115,6 +115,8 @@ class _column(object):
         self.selectable = True
         self.group_operator = args.get('group_operator', False)
         self.groups = False  # CSV list of ext IDs of groups that can access this field
+        self.invisible_groups = False # CSV list of ext IDs or ids of groups that can't see this field
+        self.readonly_groups = False  # CSV list of ext IDs of or ids groups that can't modify this field
         self.deprecated = False # Optional deprecation warning
         for a in args:
             setattr(self, a, args[a])

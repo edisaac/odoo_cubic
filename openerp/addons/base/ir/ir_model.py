@@ -246,7 +246,12 @@ class ir_model_fields(osv.osv):
         'domain': fields.char('Domain', size=256, help="The optional domain to restrict possible values for relationship fields, "
             "specified as a Python expression defining a list of triplets. "
             "For example: [('color','=','red')]"),
-        'groups': fields.many2many('res.groups', 'ir_model_fields_group_rel', 'field_id', 'group_id', 'Groups'),
+        'groups': fields.many2many('res.groups', 'ir_model_fields_group_rel', 'field_id', 'group_id', 'Groups',
+                                   help="You must restart the server to take effect this change."),
+        'invisible_groups': fields.many2many('res.groups', 'ir_model_fields_inv_group_rel', 'field_id', 'group_id', 'Invisible Groups',
+                                             help="You must restart the server to take effect this change."),
+        'readonly_groups': fields.many2many('res.groups', 'ir_model_fields_ro_group_rel', 'field_id', 'group_id', 'Readonly Groups',
+                                            help="You must restart the server to take effect this change."),
         'view_load': fields.boolean('View Auto-Load'),
         'selectable': fields.boolean('Selectable'),
         'modules': fields.function(_in_modules, type='char', size=128, string='In Modules', help='List of modules in which the field is defined'),
@@ -420,10 +425,18 @@ class ir_model_fields(osv.osv):
                     obj = self.pool.get(item.model)
 
                 if item.state != 'manual':
-                    raise except_orm(_('Error!'),
-                        _('Properties of base fields cannot be altered in this manner! '
-                          'Please modify them through Python code, '
-                          'preferably through a custom addon!'))
+                    vals2 = {}
+                    for key in vals:
+                        if key == 'state':
+                            continue
+                        elif key in ['groups','invisible_groups','readonly_groups']:
+                            vals2[key] = vals[key]
+                        else:
+                            raise except_orm(_('Error!'),
+                                             _('Properties of base fields cannot be altered in this manner! '
+                                               'Please modify them through Python code, '
+                                               'preferably through a custom addon!'))
+                    return super(ir_model_fields,self).write(cr, user, item.id, vals2, context=context)
 
                 if item.ttype == 'selection' and 'selection' in vals \
                         and not checked_selection:

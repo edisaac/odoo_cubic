@@ -55,8 +55,17 @@
                                             <field name="modules"/>
                                         </group>
                                     </group>
-                                    <separator string="Groups"/>
-                                    <field name="groups"/>
+                                    <notebook>
+                                      <page string="Groups">
+                                          <field name="groups"/>
+                                      </page>
+                                      <page string="Invisible Groups">
+                                          <field name="invisible_groups"/>
+                                      </page>
+                                      <page string="Readonly Groups">
+                                          <field name="readonly_groups"/>
+                                      </page>
+                                  </notebook>
                                 </form>
                             </field>
                             <button
@@ -163,7 +172,17 @@
                             <field name="translate"/>
                         </group>
                     </group>
-                    <field name="groups" invisible="1"/>
+                      <notebook>
+                          <page string="Groups">
+                              <field name="groups"/>
+                          </page>
+                          <page string="Invisible Groups">
+                              <field name="invisible_groups"/>
+                          </page>
+                          <page string="Readonly Groups">
+                              <field name="readonly_groups"/>
+                          </page>
+                      </notebook>
                   </sheet>
                 </form>
             </field>
