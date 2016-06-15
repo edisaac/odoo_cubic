@@ -84,8 +84,8 @@
                                 <field name="sale_journal" domain="[('type','=','sale')]"/>
                                 <field name="account_move" readonly="1"
                                     attrs="{'invisible':[('account_move','=',False)]}"/>
-                                <field name="invoice_id" readonly="1"
-                                    attrs="{'invisible':[('invoice_id','=',False)]}"/>
+                                <field name="invoice_id" domain="[('partner_id','=',partner_id),('state','=','open'),('residual','=',amount_total)]"
+                                       attrs="{'invisible':[('invoice_id','=',False)]}"/>
                                 <button name="%(pos_invoice_report)d" string="Re-Print" colspan="2"
                                     icon="gtk-print" type="action" attrs="{'invisible':[('invoice_id','=',False)]}"/>
                                 

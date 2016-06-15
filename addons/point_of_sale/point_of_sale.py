@@ -697,7 +697,7 @@ class pos_order(osv.osv):
         bsl_obj = self.pool.get("account.bank.statement.line")
         if 'partner_id' in vals:
             for posorder in self.browse(cr, uid, ids, context=context):
-                if posorder.invoice_id:
+                if vals['partner_id'] != posorder.invoice_id.partner_id.id:
                     raise osv.except_osv( _('Error!'), _("You cannot change the partner of a POS order for which an invoice has already been issued."))
                 if vals['partner_id']:
                     p_id = partner_obj.browse(cr, uid, vals['partner_id'], context=context)
@@ -780,7 +780,7 @@ class pos_order(osv.osv):
                                    ('invoiced', 'Invoiced')],
                                   'Status', readonly=True, copy=False),
 
-        'invoice_id': fields.many2one('account.invoice', 'Invoice', copy=False),
+        'invoice_id': fields.many2one('account.invoice', 'Invoice', copy=False, states={'draft': [('readonly', False)]}, readonly=True),
         'account_move': fields.many2one('account.move', 'Journal Entry', readonly=True, copy=False),
         'picking_id': fields.many2one('stock.picking', 'Picking', readonly=True, copy=False),
         'picking_type_id': fields.related('session_id', 'config_id', 'picking_type_id', string="Picking Type", type='many2one', relation='stock.picking.type'),
@@ -1041,6 +1041,9 @@ class pos_order(osv.osv):
 
         for order in self.pool.get('pos.order').browse(cr, uid, ids, context=context):
             if order.invoice_id:
+                if order.state == 'paid':
+                    self.write(cr, uid, [order.id], {'state': 'invoiced'}, context=context)
+                    self.signal_workflow(cr, uid, [order.id], 'invoice')
                 inv_ids.append(order.invoice_id.id)
                 continue
 
