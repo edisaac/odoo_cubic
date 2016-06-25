@@ -248,11 +248,19 @@ class stock_quant(osv.osv):
         for cost, qty in quant_cost_qty.items():
             move_lines = self._prepare_account_move_line(cr, uid, move, qty, cost, credit_account_id, debit_account_id, context=context)
             period_id = context.get('force_period', self.pool.get('account.period').find(cr, uid, context=context)[0])
-            move_obj.create(cr, uid, {'journal_id': journal_id,
-                                      'line_id': move_lines,
-                                      'period_id': period_id,
-                                      'date': fields.date.context_today(self, cr, uid, context=context),
-                                      'ref': move.picking_id.name}, context=context)
+            move_obj.write(cr, uid, [self._get_account_move(cr, uid, move, period_id, journal_id, context=context)],
+                           {'line_id': move_lines}, context=context)
+
+    def _get_account_move(self, cr, uid, move, period_id, journal_id, context=None):
+        if context is None:
+            context = {}
+        res = context.get('cbc_account_move_id', False)
+        if not res:
+            res = self.pool.get('account.move').create(cr, uid, {'journal_id': journal_id,
+                                                                 'period_id': period_id,
+                                                                 'date': fields.date.context_today(self, cr, uid, context=context),
+                                                                 'ref': move.picking_id.name}, context=context)
+        return res
     
     #def _reconcile_single_negative_quant(self, cr, uid, to_solve_quant, quant, quant_neg, qty, context=None):
     #    move = self._get_latest_move(cr, uid, to_solve_quant, context=context)
