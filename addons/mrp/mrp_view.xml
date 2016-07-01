@@ -987,6 +987,7 @@
                 <xpath expr="//field[@name='origin']" position="before">
                     <field name="bom_id" domain="[('product_id','=',product_id)]"/>
                     <field name="production_id" attrs="{'invisible': [('production_id','=',False)]}"/>
+                    <field name="location_dest_id"/>
                 </xpath>
                 <xpath expr="//field[@name='origin']" position="after">
                     <group colspan="4"  groups="product.group_mrp_properties">

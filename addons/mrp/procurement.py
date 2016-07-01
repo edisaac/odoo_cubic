@@ -39,6 +39,8 @@ class procurement_order(osv.osv):
         'bom_id': fields.many2one('mrp.bom', 'BoM', ondelete='cascade', select=True),
         'property_ids': fields.many2many('mrp.property', 'procurement_property_rel', 'procurement_id','property_id', 'Properties'),
         'production_id': fields.many2one('mrp.production', 'Manufacturing Order'),
+        'location_dest_id': fields.many2one('stock.location', 'Destination Location',
+                                       states={'confirmed': [('readonly', False)]}, readonly=True),
     }
 
     def propagate_cancel(self, cr, uid, procurement, context=None):
@@ -97,7 +99,7 @@ class procurement_order(osv.osv):
             'product_uos_qty': procurement.product_uos and procurement.product_uos_qty or False,
             'product_uos': procurement.product_uos and procurement.product_uos.id or False,
             'location_src_id': procurement.location_id.id,
-            'location_dest_id': procurement.location_id.id,
+            'location_dest_id': procurement.location_dest_id.id or procurement.location_id.id,
             'bom_id': bom_id,
             'routing_id': routing_id,
             'date_planned': newdate.strftime('%Y-%m-%d %H:%M:%S'),
