@@ -39,7 +39,7 @@ class purchase_requisition(osv.osv):
         return result
 
     _columns = {
-        'name': fields.char('Call for Bids Reference', required=True, copy=False),
+        'name': fields.char('Requisition', required=True, copy=False),
         'origin': fields.char('Source Document'),
         'ordering_date': fields.date('Scheduled Ordering Date'),
         'date_end': fields.datetime('Bid Submission Deadline'),
@@ -72,9 +72,14 @@ class purchase_requisition(osv.osv):
         'exclusive': 'multiple',
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.requisition', context=c),
         'user_id': lambda self, cr, uid, c: self.pool.get('res.users').browse(cr, uid, uid, c).id,
-        'name': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'purchase.order.requisition'),
+        'name': '/',
         'picking_type_id': _get_picking_in,
     }
+
+    def create(self, cr, uid, vals, context=None):
+        if vals.get('name','/') == '/':
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.requisition')
+        return super(purchase_requisition, self).create(cr, uid, vals, context=context)
 
     def tender_cancel(self, cr, uid, ids, context=None):
         purchase_order_obj = self.pool.get('purchase.order')
@@ -154,7 +159,7 @@ class purchase_requisition(osv.osv):
         po_line_obj = self.pool.get('purchase.order.line')
         product_uom = self.pool.get('product.uom')
         product = requisition_line.product_id
-        default_uom_po_id = product.uom_po_id.id
+        default_uom_po_id = product and product.uom_po_id.id or po_line_obj._get_uom_id(cr, uid, context=context)
         ctx = context.copy()
         ctx['tz'] = requisition.user_id.tz
         date_order = requisition.ordering_date and fields.date.date_to_datetime(self, cr, uid, requisition.ordering_date, context=ctx) or fields.datetime.now()
@@ -172,6 +177,10 @@ class purchase_requisition(osv.osv):
             'account_analytic_id': requisition_line.account_analytic_id.id,
             'taxes_id': [(6, 0, vals.get('taxes_id', []))],
         })
+        if requisition_line.name:
+            vals['name'] = vals['name'] and "%s - %s"%(vals['name'], requisition_line.name) or requisition_line.name
+        if not vals.get('date_planned', False):
+            vals['date_planned'] = requisition_line.schedule_date
         return vals
 
     def make_purchase_order(self, cr, uid, ids, partner_id, context=None):
@@ -302,13 +311,16 @@ class purchase_requisition_line(osv.osv):
 
     _columns = {
         'product_id': fields.many2one('product.product', 'Product', domain=[('purchase_ok', '=', True)]),
+        'name': fields.text('Description'),
         'product_uom_id': fields.many2one('product.uom', 'Product Unit of Measure'),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
         'requisition_id': fields.many2one('purchase.requisition', 'Call for Bids', ondelete='cascade'),
         'company_id': fields.related('requisition_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic Account',),
-        'schedule_date': fields.date('Scheduled Date'),
+        'schedule_date': fields.date('Scheduled Date',  required=True),
     }
+
+    _sql_constraints =[('check_product_name', 'CHECK(not(product_id is null and name is null))', 'You must fill the description or the product!')]
 
     def onchange_product_id(self, cr, uid, ids, product_id, product_uom_id, parent_analytic_account, analytic_account, parent_date, date, context=None):
         """ Changes UoM and name if product_id changes.
@@ -328,6 +340,8 @@ class purchase_requisition_line(osv.osv):
 
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'purchase.requisition.line', context=c),
+        'product_qty': 1.0,
+        'product_uom_id': lambda self, cr, uid, c: self.pool.get('purchase.order.line')._get_uom_id(cr, uid, context=c),
     }
 
 class purchase_order(osv.osv):

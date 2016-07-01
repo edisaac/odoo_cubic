@@ -42,19 +42,11 @@
                 <div class="oe_right oe_button_box" style="margin-top: 10px">
                     <button name="open_product_line" type="object" string="View Products Lines"
                         attrs="{'invisible': ['|', ('state', 'not in', ('open','done')), ('exclusive', '=', 'exclusive')]}" groups="purchase.group_advance_bidding"/>
-                    
                 </div>
-                <div class="pull-left">
-                    <label for="name" class="oe_edit_only oe_inline"/>
+                <div class="oe_title">
                     <h1>
-                        <field name="name" class="oe_inline" attrs="{'readonly': [('state','not in',('draft'))]}"/>
-                    </h1>
-                </div>
-                <div class="pull-left">
-                    <label for="origin" class="oe_edit_only oe_inline"/>
-                    <h1>
-                        <label string="," attrs="{'invisible':[('origin','=',False)]}"/>
-                        <field name="origin" class="oe_inline" placeholder="e.g. PO0025"/>
+                        <label for="name"/>
+                        <field name="name" class="oe_inline" readonly="1"/>
                     </h1>
                 </div>
                 <group>
@@ -78,6 +70,7 @@
                         <field name="line_ids" attrs="{'readonly': [('state','not in',('draft'))]}">
                             <tree string="Products" editable="bottom">
                                 <field name="product_id" on_change="onchange_product_id(product_id,product_uom_id,parent.account_analytic_id,account_analytic_id,parent.schedule_date,schedule_date)"/>
+                                <field name="name"/>
                                 <field name="product_qty"/>
                                 <field name="product_uom_id" groups="product.group_uom"/>
                                 <field name="schedule_date"/>
@@ -87,6 +80,7 @@
                             <form string="Products">
                                 <group>
                                     <field name="product_id" />
+                                    <field name="name" />
                                     <field name="product_qty"/>
                                     <field name="product_uom_id" />
                                     <field name="schedule_date"/>
