@@ -48,21 +48,20 @@ class stock_history(osv.osv):
         date = context.get('history_date')
         prod_dict = {}
         if 'inventory_value' in fields:
-<<<<<<< HEAD
-            cr.execute('''select pph.company_id,pph.product_template_id,ppph.cost
-                        from (select company_id,product_template_id,max(datetime) as datetime
-                                from product_price_history 
-                               where datetime <= %s
-                               group by company_id,product_template_id) as pph
-                       inner join product_price_history as ppph on (ppph.company_id=pph.company_id 
-                                                                    and ppph.product_template_id=pph.product_template_id
-                                                                    and ppph.datetime = pph.datetime)''',(date,))
-            pphs = cr.dictfetchall()
-            pph = {}
-            for ph in pphs:
-                pph["%s-%s"%(ph['company_id'],ph['product_template_id'])] = ph['cost']
+            # cr.execute('''select pph.company_id,pph.product_template_id,ppph.cost
+            #             from (select company_id,product_template_id,max(datetime) as datetime
+            #                     from product_price_history
+            #                    where datetime <= %s
+            #                    group by company_id,product_template_id) as pph
+            #            inner join product_price_history as ppph on (ppph.company_id=pph.company_id
+            #                                                         and ppph.product_template_id=pph.product_template_id
+            #                                                         and ppph.datetime = pph.datetime)''',(date,))
+            # pphs = cr.dictfetchall()
+            # pph = {}
+            # for ph in pphs:
+            #     pph["%s-%s"%(ph['company_id'],ph['product_template_id'])] = ph['cost']
+
             
-=======
             group_lines = {}
             for line in res:
                 domain = line.get('__domain', domain)
@@ -88,7 +87,8 @@ class stock_history(osv.osv):
             histories_dict = {}
             for history in histories:
                 histories_dict[(history['product_template_id'], history['company_id'])] = history['cost']
->>>>>>> upstream/8.0
+
+
             for line in res:
                 lines = self.search(cr, uid, line.get('__domain', []), context=context)
                 inv_value = 0.0
