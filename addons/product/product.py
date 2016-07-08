@@ -25,8 +25,7 @@ import time
 from _common import ceiling
 
 
-from openerp import SUPERUSER_ID
-from openerp import tools
+from openerp import api, tools, SUPERUSER_ID
 from openerp.osv import osv, fields, expression
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
@@ -109,18 +108,21 @@ class product_uom(osv.osv):
     def name_create(self, cr, uid, name, context=None):
         """ The UoM category and factor are required, so we'll have to add temporary values
             for imported UoMs """
+        if not context:
+            context = {}
         uom_categ = self.pool.get('product.uom.categ')
+        values = {self._rec_name: name, 'factor': 1}
         # look for the category based on the english name, i.e. no context on purpose!
         # TODO: should find a way to have it translated but not created until actually used
-        categ_misc = 'Unsorted/Imported Units'
-        categ_id = uom_categ.search(cr, uid, [('name', '=', categ_misc)])
-        if categ_id:
-            categ_id = categ_id[0]
-        else:
-            categ_id, _ = uom_categ.name_create(cr, uid, categ_misc)
-        uom_id = self.create(cr, uid, {self._rec_name: name,
-                                       'category_id': categ_id,
-                                       'factor': 1})
+        if not context.get('default_category_id'):
+            categ_misc = 'Unsorted/Imported Units'
+            categ_id = uom_categ.search(cr, uid, [('name', '=', categ_misc)])
+            if categ_id:
+                values['category_id'] = categ_id[0]
+            else:
+                values['category_id'] = uom_categ.name_create(
+                    cr, uid, categ_misc, context=context)[0]
+        uom_id = self.create(cr, uid, values, context=context)
         return self.name_get(cr, uid, [uom_id], context=context)[0]
 
     def create(self, cr, uid, data, context=None):
@@ -235,19 +237,17 @@ class product_ul(osv.osv):
 #----------------------------------------------------------
 class product_category(osv.osv):
 
-    def name_get(self, cr, uid, ids, context=None):
-        if isinstance(ids, (list, tuple)) and not len(ids):
-            return []
-        if isinstance(ids, (long, int)):
-            ids = [ids]
-        reads = self.read(cr, uid, ids, ['name','parent_id'], context=context)
-        res = []
-        for record in reads:
-            name = record['name']
-            if record['parent_id']:
-                name = record['parent_id'][1]+' / '+name
-            res.append((record['id'], name))
-        return res
+    @api.multi
+    def name_get(self):
+        def get_names(cat):
+            """ Return the list [cat.name, cat.parent_id.name, ...] """
+            res = []
+            while cat:
+                res.append(cat.name)
+                cat = cat.parent_id
+            return res
+
+        return [(cat.id, " / ".join(reversed(get_names(cat)))) for cat in self]
 
     def name_search(self, cr, uid, name, args=None, operator='ilike', context=None, limit=100):
         if not args:
@@ -256,8 +256,25 @@ class product_category(osv.osv):
             context = {}
         if name:
             # Be sure name_search is symetric to name_get
-            name = name.split(' / ')[-1]
-            ids = self.search(cr, uid, [('name', operator, name)] + args, limit=limit, context=context)
+            categories = name.split(' / ')
+            parents = list(categories)
+            child = parents.pop()
+            domain = [('name', operator, child)]
+            if parents:
+                names_ids = self.name_search(cr, uid, ' / '.join(parents), args=args, operator='ilike', context=context, limit=limit)
+                category_ids = [name_id[0] for name_id in names_ids]
+                if operator in expression.NEGATIVE_TERM_OPERATORS:
+                    category_ids = self.search(cr, uid, [('id', 'not in', category_ids)])
+                    domain = expression.OR([[('parent_id', 'in', category_ids)], domain])
+                else:
+                    domain = expression.AND([[('parent_id', 'in', category_ids)], domain])
+                for i in range(1, len(categories)):
+                    domain = [[('name', operator, ' / '.join(categories[-1 - i:]))], domain]
+                    if operator in expression.NEGATIVE_TERM_OPERATORS:
+                        domain = expression.AND(domain)
+                    else:
+                        domain = expression.OR(domain)
+            ids = self.search(cr, uid, expression.AND([domain, args]), limit=limit, context=context)
         else:
             ids = self.search(cr, uid, args, limit=limit, context=context)
         return self.name_get(cr, uid, ids, context)
@@ -330,6 +347,7 @@ class produce_price_history(osv.osv):
 class product_attribute(osv.osv):
     _name = "product.attribute"
     _description = "Product Attribute"
+    _order = 'name'
     _columns = {
         'name': fields.char('Name', translate=True, required=True),
         'value_ids': fields.one2many('product.attribute.value', 'attribute_id', 'Values', copy=True),
@@ -414,6 +432,14 @@ class product_attribute_line(osv.osv):
         'attribute_id': fields.many2one('product.attribute', 'Attribute', required=True, ondelete='restrict'),
         'value_ids': fields.many2many('product.attribute.value', id1='line_id', id2='val_id', string='Product Attribute Value'),
     }
+
+    def _check_valid_attribute(self, cr, uid, ids, context=None):
+        obj_pal = self.browse(cr, uid, ids[0], context=context)
+        return obj_pal.value_ids <= obj_pal.attribute_id.value_ids
+
+    _constraints = [
+        (_check_valid_attribute, 'Error ! You cannot use this attribute with the following value.', ['attribute_id'])
+    ]
 
 
 #----------------------------------------------------------
@@ -600,7 +626,7 @@ class product_template(osv.osv):
             if ptype != 'standard_price':
                 res[product.id] = product[ptype] or 0.0
             else:
-                company_id = product.env.user.company_id.id
+                company_id = context.get('force_company') or product.env.user.company_id.id
                 product = product.with_context(force_company=company_id)
                 res[product.id] = res[product.id] = product.sudo()[ptype]
             if ptype == 'lst_price':
@@ -633,6 +659,9 @@ class product_template(osv.osv):
         except ValueError:
             res = False
         return res
+
+    def onchange_type(self, cr, uid, ids, type):
+        return {}
 
     def onchange_uom(self, cursor, user, ids, uom_id, uom_po_id):
         if uom_id:
@@ -701,7 +730,7 @@ class product_template(osv.osv):
             # unlink or inactive product
             for variant_id in map(int,variants_inactive):
                 try:
-                    with cr.savepoint():
+                    with cr.savepoint(), tools.mute_logger('openerp.sql_db'):
                         product_obj.unlink(cr, uid, [variant_id], context=ctx)
                 except (psycopg2.Error, osv.except_osv):
                     product_obj.write(cr, uid, [variant_id], {'active': False}, context=ctx)
@@ -748,15 +777,16 @@ class product_template(osv.osv):
             ctx.update(active_test=False)
             product_ids = []
             for product in self.browse(cr, uid, ids, context=ctx):
-                product_ids = map(int,product.product_variant_ids)
+                product_ids += map(int, product.product_variant_ids)
             self.pool.get("product.product").write(cr, uid, product_ids, {'active': vals.get('active')}, context=ctx)
         return res
 
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
-        template = self.browse(cr, uid, id, context=context)
-        default['name'] = _("%s (copy)") % (template['name'])
+        if 'name' not in default:
+            template = self.browse(cr, uid, id, context=context)
+            default['name'] = _("%s (copy)") % (template['name'])
         return super(product_template, self).copy(cr, uid, id, default=default, context=context)
 
     _defaults = {
@@ -804,18 +834,25 @@ class product_template(osv.osv):
         if not name or any(term[0] == 'id' for term in (args or [])):
             return super(product_template, self).name_search(
                 cr, user, name=name, args=args, operator=operator, context=context, limit=limit)
-
+        template_ids = set()
         product_product = self.pool['product.product']
-        results = product_product.name_search(
-            cr, user, name, args, operator=operator, context=context, limit=limit)
+        results = product_product.name_search(cr, user, name, args, operator=operator, context=context, limit=limit)
         product_ids = [p[0] for p in results]
-        template_ids = [p.product_tmpl_id.id
-                            for p in product_product.browse(
-                                cr, user, product_ids, context=context)]
+        for p in product_product.browse(cr, user, product_ids, context=context):
+            template_ids.add(p.product_tmpl_id.id)
+        while (results and len(template_ids) < limit):
+            domain = [('product_tmpl_id', 'not in', list(template_ids))]
+            args = args if args is not None else []
+            results = product_product.name_search(
+                cr, user, name, args+domain, operator=operator, context=context, limit=limit)
+            product_ids = [p[0] for p in results]
+            for p in product_product.browse(cr, user, product_ids, context=context):
+                template_ids.add(p.product_tmpl_id.id)
+
 
         # re-apply product.template order + name_get
         return super(product_template, self).name_search(
-            cr, user, '', args=[('id', 'in', template_ids)],
+            cr, user, '', args=[('id', 'in', list(template_ids))],
             operator='ilike', context=context, limit=limit)
 
 class product_product(osv.osv):
@@ -927,17 +964,22 @@ class product_product(osv.osv):
     def _get_image_variant(self, cr, uid, ids, name, args, context=None):
         result = dict.fromkeys(ids, False)
         for obj in self.browse(cr, uid, ids, context=context):
-            result[obj.id] = obj.image_variant or getattr(obj.product_tmpl_id, name)
+            if context.get('bin_size'):
+                result[obj.id] = obj.image_variant
+            else:
+                result[obj.id] = tools.image_get_resized_images(obj.image_variant, return_big=True, avoid_resize_medium=True)[name]
+            if not result[obj.id]:
+                result[obj.id] = getattr(obj.product_tmpl_id, name)
         return result
 
     def _set_image_variant(self, cr, uid, id, name, value, args, context=None):
         image = tools.image_resize_image_big(value)
-        res = self.write(cr, uid, [id], {'image_variant': image}, context=context)
+
         product = self.browse(cr, uid, id, context=context)
-        if not product.product_tmpl_id.image:
-            product.write({'image_variant': None})
-            product.product_tmpl_id.write({'image': image})
-        return res
+        if product.product_tmpl_id.image:
+            product.image_variant = image
+        else:
+            product.product_tmpl_id.image = image
 
     def _get_price_extra(self, cr, uid, ids, name, args, context=None):
         result = dict.fromkeys(ids, False)
@@ -1007,6 +1049,9 @@ class product_product(osv.osv):
         # products due to ondelete='cascade'
         self.pool.get('product.template').unlink(cr, uid, unlink_product_tmpl_ids, context=context)
         return res
+
+    def onchange_type(self, cr, uid, ids, type):
+        return {}
 
     def onchange_uom(self, cursor, user, ids, uom_id, uom_po_id):
         if uom_id and uom_po_id:

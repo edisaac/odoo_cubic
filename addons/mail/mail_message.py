@@ -39,7 +39,9 @@ def decode(text):
     """Returns unicode() string conversion of the the given encoded smtp header text"""
     if text:
         text = decode_header(text.replace('\r', ''))
-        return ''.join([tools.ustr(x[0], x[1]) for x in text])
+        # The joining space will not be needed as of Python 3.3
+        # See https://hg.python.org/cpython/rev/8c03fe231877
+        return ' '.join([tools.ustr(x[0], x[1]) for x in text])
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -450,7 +452,7 @@ class mail_message(osv.Model):
             exp_domain = domain + [('id', '<', min(message_unload_ids + message_ids))]
         else:
             exp_domain = domain + ['!', ('id', 'child_of', message_unload_ids + parent_tree.keys())]
-        more_count = self.search_count(cr, uid, exp_domain, context=context)
+        more_count = self.search(cr, uid, exp_domain, context=context, limit=1)
         if more_count:
             # inside a thread: prepend
             if parent_id:
@@ -846,7 +848,7 @@ class mail_message(osv.Model):
             Call mail_notification.notify to manage the email sending
         """
         notification_obj = self.pool.get('mail.notification')
-        message = self.browse(cr, uid, newid, context=context)
+        message = self.browse(cr, SUPERUSER_ID, newid, context=context)
         partners_to_notify = set([])
 
         # all followers of the mail.message document have to be added as partners and notified if a subtype is defined (otherwise: log message)
@@ -877,16 +879,20 @@ class mail_message(osv.Model):
             cr, uid, newid, partners_to_notify=list(partners_to_notify), context=context,
             force_send=force_send, user_signature=user_signature
         )
-        message.refresh()
 
         # An error appear when a user receive a notification without notifying
         # the parent message -> add a read notification for the parent
         if message.parent_id:
-            # all notified_partner_ids of the mail.message have to be notified for the parented messages
-            partners_to_parent_notify = set(message.notified_partner_ids).difference(message.parent_id.notified_partner_ids)
-            for partner in partners_to_parent_notify:
-                notification_obj.create(cr, uid, {
-                        'message_id': message.parent_id.id,
-                        'partner_id': partner.id,
-                        'is_read': True,
-                    }, context=context)
+            parent_id = message.parent_id
+            check = set()
+            while parent_id and parent_id not in check:
+                # all notified_partner_ids of the mail.message have to be notified for the parented messages
+                partners_to_parent_notify = set(message.notified_partner_ids).difference(parent_id.notified_partner_ids)
+                for partner in partners_to_parent_notify:
+                    notification_obj.create(cr, uid, {
+                            'message_id': parent_id.id,
+                            'partner_id': partner.id,
+                            'is_read': True,
+                        }, context=context)
+                check.add(parent_id)
+                parent_id = parent_id.parent_id

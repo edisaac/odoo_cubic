@@ -15,6 +15,7 @@ from openerp.addons.website.models.website import slug, url_for, _UNSLUG_RE
 from openerp.http import request
 from openerp.tools import config
 from openerp.osv import orm
+from openerp.tools.safe_eval import safe_eval as eval
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ class ir_http(orm.AbstractModel):
         else:
             request.uid = request.session.uid
 
-    bots = "bot|crawl|slurp|spider|curl|wget".split("|")
+    bots = "bot|crawl|slurp|spider|curl|wget|facebookexternalhit".split("|")
     def is_a_bot(self):
         # We don't use regexp and ustr voluntarily
         # timeit has been done to check the optimum method
@@ -51,6 +52,17 @@ class ir_http(orm.AbstractModel):
             return any(bot in ua for bot in self.bots)
         except UnicodeDecodeError:
             return any(bot in ua.encode('ascii', 'ignore') for bot in self.bots)
+
+    def get_nearest_lang(self, lang):
+        # Try to find a similar lang. Eg: fr_BE and fr_FR
+        short = lang.partition('_')[0]
+        short_match = False
+        for code, name in request.website.get_languages():
+            if code == lang:
+                return lang
+            if not short_match and code.startswith(short):
+                short_match = code
+        return short_match
 
     def _dispatch(self):
         first_pass = not hasattr(request, 'website')
@@ -102,48 +114,39 @@ class ir_http(orm.AbstractModel):
             request.website = request.registry['website'].get_current_website(request.cr, request.uid, context=request.context)
             langs = [lg[0] for lg in request.website.get_languages()]
             path = request.httprequest.path.split('/')
-
             if first_pass:
-                if request.website_multilang:
-                    is_a_bot = self.is_a_bot()
-                    # If the url doesn't contains the lang and that it's the first connection, we to retreive the user preference if it exists.
-                    if not path[1] in langs and not is_a_bot:
-                        request.lang = cook_lang or request.lang
-                        if request.lang not in langs:
-                            # Try to find a similar lang. Eg: fr_BE and fr_FR
-                            short = request.lang.split('_')[0]
-                            langs_withshort = [lg[0] for lg in request.website.get_languages() if lg[0].startswith(short)]
-                            if len(langs_withshort):
-                                request.lang = langs_withshort[0]
-                            else:
-                                request.lang = request.website.default_lang_code
-                    else:
-                        request.lang = request.website.default_lang_code
+                nearest_lang = not func and self.get_nearest_lang(path[1])
+                url_lang = nearest_lang and path[1]
+                preferred_lang = ((cook_lang if cook_lang in langs else False)
+                                  or self.get_nearest_lang(request.lang)
+                                  or request.website.default_lang_code)
 
+                is_a_bot = self.is_a_bot()
+
+                request.lang = request.context['lang'] = nearest_lang or preferred_lang
+                # if lang in url but not the displayed or default language --> change or remove
+                # or no lang in url, and lang to dispay not the default language --> add lang
+                # and not a POST request
+                # and not a bot or bot but default lang in url
+                if ((url_lang and (url_lang != request.lang or url_lang == request.website.default_lang_code))
+                        or (not url_lang and request.website_multilang and request.lang != request.website.default_lang_code)
+                        and request.httprequest.method != 'POST') \
+                        and (not is_a_bot or (url_lang and url_lang == request.website.default_lang_code)):
+                    if url_lang:
+                        path.pop(1)
                     if request.lang != request.website.default_lang_code:
                         path.insert(1, request.lang)
-                        path = '/'.join(path) or '/'
-                        redirect = request.redirect(path + '?' + request.httprequest.query_string)
-                        redirect.set_cookie('website_lang', request.lang)
-                        return redirect
-
-            request.context['lang'] = request.lang
-            if not func:
-                if path[1] in langs:
-                    request.lang = request.context['lang'] = path.pop(1)
                     path = '/'.join(path) or '/'
-                    if request.lang == request.website.default_lang_code:
-                        # If language is in the url and it is the default language, redirect
-                        # to url without language so google doesn't see duplicate content
-                        resp = request.redirect(path + '?' + request.httprequest.query_string, code=301)
-                        if cook_lang != request.lang:  # If default lang setted in url directly
-                            resp.set_cookie('website_lang', request.lang)
-                        return resp
-                    return self.reroute(path)
+                    redirect = request.redirect(path + '?' + request.httprequest.query_string)
+                    redirect.set_cookie('website_lang', request.lang)
+                    return redirect
+                elif url_lang:
+                    path.pop(1)
+                    return self.reroute('/'.join(path) or '/')
             # bind modified context
             request.website = request.website.with_context(request.context)
         resp = super(ir_http, self)._dispatch()
-        if not cook_lang:
+        if request.website_enabled and cook_lang != request.lang and hasattr(resp, 'set_cookie'):
             resp.set_cookie('website_lang', request.lang)
         return resp
 
@@ -225,7 +228,8 @@ class ir_http(orm.AbstractModel):
                 logger.error("500 Internal Server Error:\n\n%s", values['traceback'])
                 if 'qweb_exception' in values:
                     view = request.registry.get("ir.ui.view")
-                    views = view._views_get(request.cr, request.uid, exception.qweb['template'], request.context)
+                    views = view._views_get(request.cr, request.uid, exception.qweb['template'],
+                                            context=request.context)
                     to_reset = [v for v in views if v.model_data_id.noupdate is True and not v.page]
                     values['views'] = to_reset
             elif code == 403:

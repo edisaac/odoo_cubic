@@ -3,7 +3,6 @@ from openerp.tools import mute_logger
 from openerp.tests import common
 
 UID = common.ADMIN_USER_ID
-DB = common.DB
 
 
 class TestORM(common.TransactionCase):
@@ -166,6 +165,10 @@ class TestORM(common.TransactionCase):
         rg = self.partner.read_group(self.cr, self.uid, [('id', 'in', all_partners)], 
                         ['date'], ['date:month', 'date:day'], lazy=False)
         self.assertEqual(len(rg), len(all_partners))
+
+    def test_write_duplicate(self):
+        cr, uid, p1 = self.cr, self.uid, self.p1
+        self.partner.write(cr, uid, [p1, p1], {'name': 'X'})
 
 
 class TestInherits(common.TransactionCase):

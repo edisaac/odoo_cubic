@@ -47,10 +47,14 @@ from psycopg2 import Binary
 
 import openerp
 import openerp.tools as tools
+from openerp.sql_db import LazyCursor
 from openerp.tools.translate import _
 from openerp.tools import float_repr, float_round, frozendict, html_sanitize
 import simplejson
-from openerp import SUPERUSER_ID, registry
+from openerp import SUPERUSER_ID
+
+# deprecated; kept for backward compatibility only
+_get_cursor = LazyCursor
 
 EMPTY_DICT = frozendict()
 
@@ -151,6 +155,8 @@ class _column(object):
 
     def __getattr__(self, name):
         """ Access a non-slot attribute. """
+        if name == '_args':
+            raise AttributeError(name)
         try:
             return self._args[name]
         except KeyError:
@@ -191,8 +197,6 @@ class _column(object):
         """ return a dictionary with all the arguments to pass to the field """
         base_items = [
             ('copy', self.copy),
-        ]
-        truthy_items = filter(itemgetter(1), [
             ('index', self.select),
             ('manual', self.manual),
             ('string', self.string),
@@ -203,6 +207,8 @@ class _column(object):
             ('groups', self.groups),
             ('change_default', self.change_default),
             ('deprecated', self.deprecated),
+        ]
+        truthy_items = filter(itemgetter(1), [
             ('group_operator', self.group_operator),
             ('size', self.size),
             ('ondelete', self.ondelete),
@@ -365,6 +371,7 @@ class html(text):
     def to_field_args(self):
         args = super(html, self).to_field_args()
         args['sanitize'] = self._sanitize
+        args['strip_style'] = self._strip_style
         return args
 
 import __builtin__
@@ -386,7 +393,7 @@ class float(_column):
     @property
     def digits(self):
         if self._digits_compute:
-            with registry().cursor() as cr:
+            with LazyCursor() as cr:
                 return self._digits_compute(cr)
         else:
             return self._digits
@@ -803,12 +810,9 @@ class one2many(_column):
                     else:
                         cr.execute('update '+_table+' set '+self._fields_id+'=null where id=%s', (act[1],))
                 elif act[0] == 4:
-                    # table of the field (parent_model in case of inherit)
-                    field = obj.pool[self._obj]._fields[self._fields_id]
-                    field_model = field.base_field.model_name
-                    field_table = obj.pool[field_model]._table
-                    cr.execute("select 1 from {0} where id=%s and {1}=%s".format(field_table, self._fields_id), (act[1], id))
-                    if not cr.fetchone():
+                    # check whether the given record is already linked
+                    rec = obj.browse(cr, SUPERUSER_ID, act[1], {'prefetch_fields': False})
+                    if int(rec[self._fields_id]) != id:
                         # Must use write() to recompute parent_store structure if needed and check access rules
                         obj.write(cr, user, [act[1]], {self._fields_id:id}, context=context or {})
                 elif act[0] == 5:
@@ -968,11 +972,10 @@ class many2many(_column):
 
         wquery = obj._where_calc(cr, user, domain, context=context)
         obj._apply_ir_rules(cr, user, wquery, 'read', context=context)
+        order_by = obj._generate_order_by(None, wquery)
         from_c, where_c, where_params = wquery.get_sql()
         if where_c:
             where_c = ' AND ' + where_c
-
-        order_by = ' ORDER BY "%s".%s' %(obj._table, obj._order.split(',')[0])
 
         limit_str = ''
         if self._limit is not None:
@@ -1001,6 +1004,25 @@ class many2many(_column):
             return
         rel, id1, id2 = self._sql_names(model)
         obj = model.pool[self._obj]
+
+        def link(ids):
+            # beware of duplicates when inserting
+            query = """ INSERT INTO {rel} ({id1}, {id2})
+                        (SELECT %s, unnest(%s)) EXCEPT (SELECT {id1}, {id2} FROM {rel} WHERE {id1}=%s)
+                    """.format(rel=rel, id1=id1, id2=id2)
+            for sub_ids in cr.split_for_in_conditions(ids):
+                cr.execute(query, (id, list(sub_ids), id))
+
+        def unlink_all():
+            # remove all records for which user has access rights
+            clauses, params, tables = obj.pool.get('ir.rule').domain_get(cr, user, obj._name, context=context)
+            cond = " AND ".join(clauses) if clauses else "1=1"
+            query = """ DELETE FROM {rel} USING {tables}
+                        WHERE {rel}.{id1}=%s AND {rel}.{id2}={table}.id AND {cond}
+                    """.format(rel=rel, id1=id1, id2=id2,
+                               table=obj._table, tables=','.join(tables), cond=cond)
+            cr.execute(query, [id] + params)
+
         for act in values:
             if not (isinstance(act, list) or isinstance(act, tuple)) or not act:
                 continue
@@ -1014,23 +1036,12 @@ class many2many(_column):
             elif act[0] == 3:
                 cr.execute('delete from '+rel+' where ' + id1 + '=%s and '+ id2 + '=%s', (id, act[1]))
             elif act[0] == 4:
-                # following queries are in the same transaction - so should be relatively safe
-                cr.execute('SELECT 1 FROM '+rel+' WHERE '+id1+' = %s and '+id2+' = %s', (id, act[1]))
-                if not cr.fetchone():
-                    cr.execute('insert into '+rel+' ('+id1+','+id2+') values (%s,%s)', (id, act[1]))
+                link([act[1]])
             elif act[0] == 5:
-                cr.execute('delete from '+rel+' where ' + id1 + ' = %s', (id,))
+                unlink_all()
             elif act[0] == 6:
-
-                d1, d2,tables = obj.pool.get('ir.rule').domain_get(cr, user, obj._name, context=context)
-                if d1:
-                    d1 = ' and ' + ' and '.join(d1)
-                else:
-                    d1 = ''
-                cr.execute('delete from '+rel+' where '+id1+'=%s AND '+id2+' IN (SELECT '+rel+'.'+id2+' FROM '+rel+', '+','.join(tables)+' WHERE '+rel+'.'+id1+'=%s AND '+rel+'.'+id2+' = '+obj._table+'.id '+ d1 +')', [id, id]+d2)
-
-                for act_nbr in act[2]:
-                    cr.execute('insert into '+rel+' ('+id1+','+id2+') values (%s, %s)', (id, act_nbr))
+                unlink_all()
+                link(act[2])
 
     #
     # TODO: use a name_search
@@ -1049,6 +1060,8 @@ def get_nice_size(value):
         size = value
     elif value: # this is supposed to be a string
         size = len(value)
+        if size < 12:  # suppose human size
+            return value
     return tools.human_size(size)
 
 # See http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char
@@ -1307,7 +1320,7 @@ class function(_column):
     @property
     def digits(self):
         if self._digits_compute:
-            with registry().cursor() as cr:
+            with LazyCursor() as cr:
                 return self._digits_compute(cr)
         else:
             return self._digits
@@ -1391,6 +1404,7 @@ class function(_column):
     def to_field_args(self):
         args = super(function, self).to_field_args()
         args['store'] = bool(self.store)
+        args['company_dependent'] = False
         if self._type in ('float',):
             args['digits'] = self._digits_compute or self._digits
         elif self._type in ('selection', 'reference'):
@@ -1571,6 +1585,8 @@ class sparse(function):
         """
 
         if self._type == 'many2many':
+            if not value:
+                return []
             assert value[0][0] == 6, 'Unsupported m2m value for sparse field: %s' % value
             return value[0][2]
 

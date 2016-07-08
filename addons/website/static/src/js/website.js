@@ -137,15 +137,17 @@
             dialog.modal('show');
             field.focus();
             dialog.on('click', '.btn-primary', function () {
+                var backdrop = $('.modal-backdrop');
                 def.resolve(field.val(), field, dialog);
                 dialog.remove();
-                $('.modal-backdrop').remove();
+                backdrop.remove();
             });
         });
         dialog.on('hidden.bs.modal', function () {
+            var backdrop = $('.modal-backdrop');
             def.reject();
             dialog.remove();
-            $('.modal-backdrop').remove();
+            backdrop.remove();
         });
         if (field.is('input[type="text"], select')) {
             field.keypress(function (e) {
@@ -368,8 +370,8 @@
             // retrieve the hash before the redirect
             var redirect = {
                 lang: self.data('lang'),
-                url: self.attr('href'),
-                hash: location.hash
+                url: encodeURIComponent(self.attr('href')),
+                hash: encodeURIComponent(location.hash)
             };
             location.href = _.str.sprintf("/website/lang/%(lang)s?r=%(url)s%(hash)s", redirect);
         });
@@ -392,6 +394,11 @@
         $('#oe_applications').before($collapse);
         $collapse.wrap('<div class="visible-xs"/>');
         $('[data-target="#oe_applications"]').attr("data-target", "#oe_applications_collapse");
+    });
+
+    openerp.Tour.autoRunning = false;
+    website.ready().then(function () {
+        setTimeout(openerp.Tour.running,0);
     });
 
     return website;

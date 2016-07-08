@@ -354,6 +354,8 @@ class TinyPoFile(object):
                 elif line.startswith('#,') and (line[2:].strip() == 'fuzzy'):
                     fuzzy = True
                 line = self.lines.pop(0).strip()
+            if not self.lines:
+                raise StopIteration()
             while not line:
                 # allow empty lines between comments and msgid
                 line = self.lines.pop(0).strip()
@@ -669,6 +671,10 @@ def trans_generate(lang, modules, cr):
         query += ' WHERE module IN %s'
         query_models += ' AND imd.module in %s'
         query_param = (tuple(modules),)
+    else:
+        query += ' WHERE module != %s'
+        query_models += ' AND imd.module != %s'
+        query_param = ('__export__',)
     query += ' ORDER BY module, model, name'
     query_models += ' ORDER BY module, model'
 
@@ -740,10 +746,10 @@ def trans_generate(lang, modules, cr):
                 _logger.error("name error in %s: %s", xml_name, str(exc))
                 continue
             objmodel = registry.get(obj.model)
-            if (objmodel is None or field_name not in objmodel._columns
+            if (objmodel is None or field_name not in objmodel._fields
                     or not objmodel._translate):
                 continue
-            field_def = objmodel._columns[field_name]
+            field_def = objmodel._fields[field_name]
 
             name = "%s,%s" % (encode(obj.model), field_name)
             push_translation(module, 'field', name, 0, encode(field_def.string))
@@ -751,7 +757,7 @@ def trans_generate(lang, modules, cr):
             if field_def.help:
                 push_translation(module, 'help', name, 0, encode(field_def.help))
 
-            if field_def.translate:
+            if getattr(field_def, 'translate', None):
                 ids = objmodel.search(cr, uid, [])
                 obj_values = objmodel.read(cr, uid, ids, [field_name])
                 for obj_value in obj_values:
@@ -841,16 +847,19 @@ def trans_generate(lang, modules, cr):
         lambda m: m['name'],
         registry['ir.module.module'].search_read(cr, uid, [('state', '=', 'installed')], fields=['name']))
 
-    path_list = list(openerp.modules.module.ad_paths)
+    path_list = [(path, True) for path in openerp.modules.module.ad_paths]
     # Also scan these non-addon paths
-    for bin_path in ['osv', 'report' ]:
-        path_list.append(os.path.join(config.config['root_path'], bin_path))
+    for bin_path in ['osv', 'report', 'modules', 'service', 'tools']:
+        path_list.append((os.path.join(config.config['root_path'], bin_path), True))
 
+    # non-recursive scan for individual files in root directory but without
+    # scanning subdirectories that may contain addons
+    path_list.append((config.config['root_path'], False))
     _logger.debug("Scanning modules at paths: %s", path_list)
 
     def get_module_from_path(path):
-        for mp in path_list:
-            if path.startswith(mp) and os.path.dirname(path) != mp:
+        for (mp, rec) in path_list:
+            if rec and path.startswith(mp) and os.path.dirname(path) != mp:
                 path = path[len(mp)+1:]
                 return path.split(os.path.sep)[0]
         return 'base' # files that are not in a module are considered as being in 'base' module
@@ -861,6 +870,8 @@ def trans_generate(lang, modules, cr):
         display_path = "addons%s" % frelativepath
         module = get_module_from_path(fabsolutepath)
         if ('all' in modules or module in modules) and module in installed_modules:
+            if os.path.sep != '/':
+                display_path = display_path.replace(os.path.sep, '/')
             return module, fabsolutepath, frelativepath, display_path
         return None, None, None, None
 
@@ -883,7 +894,7 @@ def trans_generate(lang, modules, cr):
         finally:
             src_file.close()
 
-    for path in path_list:
+    for (path, recursive) in path_list:
         _logger.debug("Scanning files of modules at %s", path)
         for root, dummy, files in osutil.walksymlinks(path):
             for fname in fnmatch.filter(files, '*.py'):
@@ -902,6 +913,9 @@ def trans_generate(lang, modules, cr):
                 for fname in fnmatch.filter(files, '*.xml'):
                     babel_extract_terms(fname, path, root, 'openerp.tools.translate:babel_extract_qweb',
                                         extra_comments=[WEB_TRANSLATION_COMMENT])
+            if not recursive:
+                # due to topdown, first iteration is in first level
+                break
 
     out = []
     # translate strings marked as to be translated
@@ -1021,7 +1035,8 @@ def trans_load_data(cr, fileobj, fileformat, lang, lang_name=None, verbose=True,
             if isinstance(res_id, (int, long)) or \
                     (isinstance(res_id, basestring) and res_id.isdigit()):
                 dic['res_id'] = int(res_id)
-                dic['module'] = module_name
+                if module_name:
+                    dic['module'] = module_name
             else:
                 # res_id is an xml id
                 dic['res_id'] = None
@@ -1029,7 +1044,7 @@ def trans_load_data(cr, fileobj, fileformat, lang, lang_name=None, verbose=True,
                 if '.' in res_id:
                     dic['module'], dic['imd_name'] = res_id.split('.', 1)
                 else:
-                    dic['module'], dic['imd_name'] = False, res_id
+                    dic['module'], dic['imd_name'] = module_name, res_id
 
             irt_cursor.push(dic)
 

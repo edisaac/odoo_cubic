@@ -68,8 +68,24 @@ class stock_change_product_qty(osv.osv_memory):
                 try:
                     self.pool.get('stock.location').check_access_rule(cr, uid, [location_id], 'read', context=context)
                 except (orm.except_orm, ValueError):
-                   pass
+                   location_id = False
             res['location_id'] = location_id
+        return res
+
+    def _prepare_inventory_line(self, cr, uid, inventory_id, data, context=None):
+
+        product = data.product_id.with_context(location=data.location_id.id, lot_id=data.lot_id.id)
+        th_qty = product.qty_available
+
+        res = {'inventory_id': inventory_id,
+               'product_qty': data.new_quantity,
+               'location_id': data.location_id.id,
+               'product_id': data.product_id.id,
+               'product_uom_id': data.product_id.uom_id.id,
+               'theoretical_qty': th_qty,
+               'prod_lot_id': data.lot_id.id
+               }
+
         return res
 
     def change_product_qty(self, cr, uid, ids, context=None):
@@ -93,24 +109,31 @@ class stock_change_product_qty(osv.osv_memory):
             ctx = context.copy()
             ctx['location'] = data.location_id.id
             ctx['lot_id'] = data.lot_id.id
+            if data.product_id.id and data.lot_id.id:
+                filter = 'none'
+            elif data.product_id.id:
+                filter = 'product'
+            else:
+                filter = 'none'
             inventory_id = inventory_obj.create(cr, uid, {
                 'name': _('INV: %s') % tools.ustr(data.product_id.name),
+                'filter': filter,
                 'product_id': data.product_id.id,
                 'location_id': data.location_id.id,
                 'lot_id': data.lot_id.id}, context=context)
-            product = data.product_id.with_context(location=data.location_id.id, lot_id= data.lot_id.id)
-            th_qty = product.qty_available
-            line_data = {
-                'inventory_id': inventory_id,
-                'product_qty': data.new_quantity,
-                'location_id': data.location_id.id,
-                'product_id': data.product_id.id,
-                'product_uom_id': data.product_id.uom_id.id,
-                'theoretical_qty': th_qty,
-                'prod_lot_id': data.lot_id.id
-            }
-            inventory_line_obj.create(cr , uid, line_data, context=context)
+
+            line_data = self._prepare_inventory_line(cr, uid, inventory_id, data, context=context)
+
+            inventory_line_obj.create(cr, uid, line_data, context=context)
             inventory_obj.action_done(cr, uid, [inventory_id], context=context)
         return {}
+
+    def onchange_location_id(self, cr, uid, ids, location_id, product_id, context=None):
+        if location_id:
+            qty_wh = 0.0
+            qty = self.pool.get('product.product')._product_available(cr, uid, [product_id], context=dict(context or {}, location=location_id))
+            if product_id in qty:
+                qty_wh = qty[product_id]['qty_available']
+            return { 'value': { 'new_quantity': qty_wh } }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
