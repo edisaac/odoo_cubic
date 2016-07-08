@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp import models, fields, api
+from openerp.exceptions import Warning
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
@@ -63,7 +64,8 @@ class stock_transfer_details(models.TransientModel):
         picking = self.pool.get('stock.picking').browse(cr, uid, picking_id, context=context)
         items = []
         packs = []
-        picking.do_prepare_partial()
+        if not picking.pack_operation_ids:
+            picking.do_prepare_partial()
         for op in picking.pack_operation_ids:
             item = self.get_pack_operation_item(cr, uid, op, context=context)
             if op.product_id:
@@ -76,6 +78,9 @@ class stock_transfer_details(models.TransientModel):
 
     @api.one
     def do_detailed_transfer(self):
+        if self.picking_id.state not in ['assigned', 'partially_available']:
+            raise Warning(_('You cannot transfer a picking in state \'%s\'.') % self.picking_id.state)
+
         processed_ids = []
         # Create new and update existing pack operations
         for lstits in [self.item_ids, self.packop_ids]:
@@ -93,7 +98,7 @@ class stock_transfer_details(models.TransientModel):
                     'owner_id': prod.owner_id.id,
                 }
                 if prod.packop_id:
-                    prod.packop_id.write(pack_datas)
+                    prod.packop_id.with_context(no_recompute=True).write(pack_datas)
                     processed_ids.append(prod.packop_id.id)
                 else:
                     pack_datas['picking_id'] = self.picking_id.id
@@ -101,8 +106,7 @@ class stock_transfer_details(models.TransientModel):
                     processed_ids.append(packop_id.id)
         # Delete the others
         packops = self.env['stock.pack.operation'].search(['&', ('picking_id', '=', self.picking_id.id), '!', ('id', 'in', processed_ids)])
-        for packop in packops:
-            packop.unlink()
+        packops.unlink()
 
         # Execute the transfer of the picking
         self.picking_id.do_transfer()

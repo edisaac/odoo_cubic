@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp.osv import fields, osv
+from openerp.tools import float_is_zero
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 from openerp.report import report_sxw
@@ -29,9 +30,11 @@ import time
 
 class account_bank_statement(osv.osv):
     def create(self, cr, uid, vals, context=None):
+        if not context:
+            context = {}
         if vals.get('name', '/') == '/':
             journal_id = vals.get('journal_id', self._default_journal_id(cr, uid, context=context))
-            vals['name'] = self._compute_default_statement_name(cr, uid, journal_id, context=context)
+            vals['name'] = self._compute_default_statement_name(cr, uid, journal_id, context=dict(context, period_id=vals.get('period_id')))
         if 'line_ids' in vals:
             for idx, line in enumerate(vals['line_ids']):
                 line[2]['sequence'] = idx + 1
@@ -74,7 +77,7 @@ class account_bank_statement(osv.osv):
     def _compute_default_statement_name(self, cr, uid, journal_id, context=None):
         context = dict(context or {})
         obj_seq = self.pool.get('ir.sequence')
-        period = self.pool.get('account.period').browse(cr, uid, self._get_period(cr, uid, context=context), context=context)
+        period = self.pool.get('account.period').browse(cr, uid, context.get('period_id') or self._get_period(cr, uid, context=context), context=context)
         context['fiscalyear_id'] = period.fiscalyear_id.id
         journal = self.pool.get('account.journal').browse(cr, uid, journal_id, None)
         return obj_seq.next_by_id(cr, uid, journal.sequence_id.id, context=context)
@@ -530,7 +533,9 @@ class account_bank_statement_line(osv.osv):
                   ('reconcile_id', '=', False),
                   ('state', '=', 'valid'),
                   ('account_id.reconcile', '=', True),
-                  ('id', 'not in', excluded_ids)]
+                  ('id', 'not in', excluded_ids),]
+        if st_line.partner_id:
+            domain.append(('partner_id', '=', st_line.partner_id.id))
         return domain
 
     def get_reconciliation_proposition(self, cr, uid, st_line, excluded_ids=None, context=None):
@@ -540,8 +545,8 @@ class account_bank_statement_line(osv.osv):
         # Look for structured communication
         if st_line.name:
             domain = self._domain_reconciliation_proposition(cr, uid, st_line, excluded_ids=excluded_ids, context=context)
-            match_id = mv_line_pool.search(cr, uid, domain, offset=0, limit=1, context=context)
-            if match_id:
+            match_id = mv_line_pool.search(cr, uid, domain, offset=0, limit=2, context=context)
+            if match_id and len(match_id) == 1:
                 mv_line_br = mv_line_pool.browse(cr, uid, match_id, context=context)
                 target_currency = st_line.currency_id or st_line.journal_id.currency or st_line.journal_id.company_id.currency_id
                 mv_line = mv_line_pool.prepare_move_lines_for_reconciliation_widget(cr, uid, mv_line_br, target_currency=target_currency, target_date=st_line.date, context=context)[0]
@@ -571,8 +576,12 @@ class account_bank_statement_line(osv.osv):
 
         # Look for a matching amount
         domain_exact_amount = domain + [(amount_field, '=', float_round(sign * amount, precision_digits=precision_digits))]
-        match_id = self.get_move_lines_for_reconciliation(cr, uid, st_line, excluded_ids=excluded_ids, offset=0, limit=1, additional_domain=domain_exact_amount)
-        if match_id:
+        domain_exact_amount_ref = domain_exact_amount + [('ref', '=', st_line.ref)]
+        match_id = self.get_move_lines_for_reconciliation(cr, uid, st_line, excluded_ids=excluded_ids, offset=0, limit=2, additional_domain=domain_exact_amount_ref)
+        if not match_id:
+            match_id = self.get_move_lines_for_reconciliation(cr, uid, st_line, excluded_ids=excluded_ids, offset=0, limit=2, additional_domain=domain_exact_amount)
+
+        if match_id and len(match_id) == 1:
             return match_id
 
         if not st_line.partner_id.id:
@@ -584,10 +593,10 @@ class account_bank_statement_line(osv.osv):
         else:
             domain += [('account_id.type', '=', 'payable')]
         if amount_field == 'amount_currency' and amount < 0:
-            domain += [(amount_field, '<', 0), (amount_field, '>', (sign * amount))]
+            domain += [(amount_field, '<', 0), (amount_field, '>=', (sign * amount))]
         else:
-            domain += [(amount_field, '>', 0), (amount_field, '<', (sign * amount))]
-        mv_lines = self.get_move_lines_for_reconciliation(cr, uid, st_line, excluded_ids=excluded_ids, limit=5, additional_domain=domain)
+            domain += [(amount_field, '>', 0), (amount_field, '<=', (sign * amount))]
+        mv_lines = self.get_move_lines_for_reconciliation(cr, uid, st_line, excluded_ids=excluded_ids, limit=5, additional_domain=domain, context=context)
         ret = []
         total = 0
         for line in mv_lines:
@@ -710,6 +719,60 @@ class account_bank_statement_line(osv.osv):
             'account_id': account_id
             }
 
+    def _get_exchange_lines(self, cr, uid, st_line, mv_line, currency_diff, currency_id, move_id, context=None):
+        '''
+        Prepare the two lines in company currency due to currency rate difference.
+
+        :param line: browse record of the voucher.line for which we want to create currency rate difference accounting
+            entries
+        :param move_id: Account move wher the move lines will be.
+        :param currency_diff: Amount to be posted.
+        :param company_currency: id of currency of the company to which the voucher belong
+        :param current_currency: id of currency of the voucher
+        :return: the account move line and its counterpart to create, depicted as mapping between fieldname and value
+        :rtype: tuple of dict
+        '''
+        if currency_diff > 0:
+            exchange_account_id = st_line.company_id.expense_currency_exchange_account_id.id
+        else:
+            exchange_account_id = st_line.company_id.income_currency_exchange_account_id.id
+        # Even if the amount_currency is never filled, we need to pass the foreign currency because otherwise
+        # the receivable/payable account may have a secondary currency, which render this field mandatory
+        if mv_line.account_id.currency_id:
+            account_currency_id = mv_line.account_id.currency_id.id
+        else:
+            account_currency_id = st_line.company_id.currency_id.id != currency_id and currency_id or False
+        move_line = {
+            'journal_id': st_line.journal_id.id,
+            'period_id': st_line.statement_id.period_id.id,
+            'name': _('change') + ': ' + (st_line.name or '/'),
+            'account_id': mv_line.account_id.id,
+            'move_id': move_id,
+            'partner_id': st_line.partner_id.id,
+            'currency_id': account_currency_id,
+            'amount_currency': 0.0,
+            'quantity': 1,
+            'credit': currency_diff > 0 and currency_diff or 0.0,
+            'debit': currency_diff < 0 and -currency_diff or 0.0,
+            'date': st_line.date,
+            'counterpart_move_line_id': mv_line.id,
+        }
+        move_line_counterpart = {
+            'journal_id': st_line.journal_id.id,
+            'period_id': st_line.statement_id.period_id.id,
+            'name': _('change') + ': ' + (st_line.name or '/'),
+            'account_id': exchange_account_id,
+            'move_id': move_id,
+            'amount_currency': 0.0,
+            'partner_id': st_line.partner_id.id,
+            'currency_id': account_currency_id,
+            'quantity': 1,
+            'debit': currency_diff > 0 and currency_diff or 0.0,
+            'credit': currency_diff < 0 and -currency_diff or 0.0,
+            'date': st_line.date,
+        }
+        return (move_line, move_line_counterpart)
+
     def process_reconciliations(self, cr, uid, data, context=None):
         for datum in data:
             self.process_reconciliation(cr, uid, datum[0], datum[1], context=context)
@@ -793,8 +856,13 @@ class account_bank_statement_line(osv.osv):
                 if mv_line_dict.get('counterpart_move_line_id'):
                     #post an account line that use the same currency rate than the counterpart (to balance the account) and post the difference in another line
                     ctx['date'] = mv_line.date
-                    debit_at_old_rate = currency_obj.compute(cr, uid, st_line_currency.id, company_currency.id, mv_line_dict['debit'], context=ctx)
-                    credit_at_old_rate = currency_obj.compute(cr, uid, st_line_currency.id, company_currency.id, mv_line_dict['credit'], context=ctx)
+                    if mv_line.currency_id.id == mv_line_dict['currency_id'] \
+                            and float_is_zero(abs(mv_line.amount_currency) - abs(mv_line_dict['amount_currency']), precision_rounding=mv_line.currency_id.rounding):
+                        debit_at_old_rate = mv_line.credit
+                        credit_at_old_rate = mv_line.debit
+                    else:
+                        debit_at_old_rate = currency_obj.compute(cr, uid, st_line_currency.id, company_currency.id, mv_line_dict['debit'], context=ctx)
+                        credit_at_old_rate = currency_obj.compute(cr, uid, st_line_currency.id, company_currency.id, mv_line_dict['credit'], context=ctx)
                     mv_line_dict['credit'] = credit_at_old_rate
                     mv_line_dict['debit'] = debit_at_old_rate
                     if debit_at_old_rate - debit_at_current_rate:
@@ -803,6 +871,19 @@ class account_bank_statement_line(osv.osv):
                     if credit_at_old_rate - credit_at_current_rate:
                         currency_diff = credit_at_current_rate - credit_at_old_rate
                         to_create.append(self.get_currency_rate_line(cr, uid, st_line, currency_diff, move_id, context=context))
+                    if mv_line.currency_id and mv_line_dict['currency_id'] == mv_line.currency_id.id:
+                        amount_unreconciled = mv_line.amount_residual_currency
+                    else:
+                        amount_unreconciled = currency_obj.compute(cr, uid, company_currency.id, mv_line_dict['currency_id'] , mv_line.amount_residual, context=ctx)
+                    if float_is_zero(mv_line_dict['amount_currency'] + amount_unreconciled, precision_rounding=mv_line.currency_id.rounding):
+                        amount = mv_line_dict['debit'] or mv_line_dict['credit']
+                        sign = -1 if mv_line_dict['debit'] else 1
+                        currency_rate_difference = sign * (mv_line.amount_residual - amount)
+                        if not company_currency.is_zero(currency_rate_difference):
+                            exchange_lines = self._get_exchange_lines(cr, uid, st_line, mv_line, currency_rate_difference, mv_line_dict['currency_id'], move_id, context=context)
+                            for exchange_line in exchange_lines:
+                                to_create.append(exchange_line)
+
                 else:
                     mv_line_dict['debit'] = debit_at_current_rate
                     mv_line_dict['credit'] = credit_at_current_rate
@@ -843,7 +924,7 @@ class account_bank_statement_line(osv.osv):
         user = self.pool.get("res.users").browse(cr, uid, uid)
         return ['|', ('company_id', '=', False), ('company_id', 'child_of', [user.company_id.id]), ('journal_entry_id', '=', False), ('account_id', '=', False)]
 
-    _order = "statement_id desc, sequence"
+    _order = "statement_id desc, sequence, id"
     _name = "account.bank.statement.line"
     _description = "Bank Statement Line"
     _inherit = ['ir.needaction_mixin']
@@ -866,8 +947,9 @@ class account_bank_statement_line(osv.osv):
         'currency_id': fields.many2one('res.currency', 'Currency', help="The optional other currency if it is a multi-currency entry."),
     }
     _defaults = {
-        'name': lambda self,cr,uid,context={}: self.pool.get('ir.sequence').get(cr, uid, 'account.bank.statement.line'),
+        'name': lambda self,cr,uid,context={}: self.pool.get('ir.sequence').get(cr, uid, 'account.bank.statement.line', context=context),
         'date': lambda self,cr,uid,context={}: context.get('date', fields.date.context_today(self,cr,uid,context=context)),
+        'sequence': 1,
     }
 
 class account_statement_operation_template(osv.osv):

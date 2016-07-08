@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+from openerp import api
 from openerp.osv import osv, fields
 import uuid
 import time
@@ -131,7 +132,7 @@ class sale_order(osv.osv):
         for order in self.browse(cr, uid, ids, context=context):
             total = 0.0
             for line in order.order_line:
-                total += (line.product_uom_qty * line.price_unit)
+                total += line.price_subtotal + line.price_unit * ((line.discount or 0.0) / 100.0) * line.product_uom_qty
             res[order.id] = total
         return res
 
@@ -184,6 +185,7 @@ class sale_order(osv.osv):
                 'product_uom': line.product_uom_id.id,
                 'website_description': line.website_description,
                 'state': 'draft',
+                'delay': self.pool['sale.order']._get_customer_lead(cr, uid, line.product_id.product_tmpl_id)
             })
             lines.append((0, 0, data))
         options = []
@@ -267,6 +269,8 @@ class sale_quote_option(osv.osv):
             'name': product_obj.name,
             'uom_id': product_obj.product_tmpl_id.uom_id.id,
         })
+        if product_obj.description_sale:
+            vals['name'] += '\n'+product_obj.description_sale
         return {'value': vals}
 
 class sale_order_option(osv.osv):
@@ -288,6 +292,8 @@ class sale_order_option(osv.osv):
     _defaults = {
         'quantity': 1,
     }
+
+    # TODO master: to remove, replaced by onchange of the new api
     def on_change_product_id(self, cr, uid, ids, product, context=None):
         vals = {}
         if not product:
@@ -299,7 +305,24 @@ class sale_order_option(osv.osv):
             'name': product_obj.name,
             'uom_id': product_obj.product_tmpl_id.uom_id.id,
         })
+        if product_obj.description_sale:
+            vals['name'] += '\n'+product_obj.description_sale
         return {'value': vals}
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        product = self.product_id.with_context(lang=self.order_id.partner_id.lang)
+        self.price_unit = product.list_price
+        self.website_description = product.quote_description or product.website_description
+        self.name = product.name
+        if product.description_sale:
+            self.name += '\n' + product.description_sale
+        self.uom_id = product.product_tmpl_id.uom_id
+        if product and self.order_id.pricelist_id:
+            partner_id = self.order_id.partner_id.id
+            pricelist = self.order_id.pricelist_id.id
+            self.price_unit = self.order_id.pricelist_id.price_get(product.id, self.quantity, partner_id)[pricelist]
+
 
 class product_template(osv.Model):
     _inherit = "product.template"

@@ -276,7 +276,7 @@ class gamification_challenge(osv.Model):
         # close scheduled challenges
         planned_challenge_ids = self.search(cr, uid, [
             ('state', '=', 'inprogress'),
-            ('end_date', '>=', fields.date.today())])
+            ('end_date', '<', fields.date.today())])
         if planned_challenge_ids:
             self.write(cr, uid, planned_challenge_ids, {'state': 'done'}, context=context)
 
@@ -380,6 +380,9 @@ class gamification_challenge(osv.Model):
 
         Create goals that haven't been created yet (eg: if added users)
         Recompute the current value for each goal related"""
+        goal_obj = self.pool['gamification.goal']
+        goal_ids = goal_obj.search(cr, uid, [('challenge_id', 'in', ids), ('state', '=', 'inprogress')], context=context)
+        goal_obj.unlink(cr, uid, goal_ids, context=context)
         return self._update_all(cr, uid, ids=ids, context=context)
 
     def action_report_progress(self, cr, uid, ids, context=None):

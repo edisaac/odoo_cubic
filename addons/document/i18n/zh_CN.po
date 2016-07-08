@@ -1,25 +1,29 @@
-# Chinese (Simplified) translation for openobject-addons
-# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
-# This file is distributed under the same license as the openobject-addons package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
-#
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * document
+# 
+# Translators:
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# Jeffery Chenn <jeffery9@gmail.com>, 2015
+# Jeffery Chenn <jeffery9@gmail.com>, 2015-2016
+# liAnGjiA <liangjia@qq.com>, 2016
+# niulinlnc <admin@niulin.net>, 2015
 msgid ""
 msgstr ""
-"Project-Id-Version: openobject-addons\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"Project-Id-Version: Odoo 8.0\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2014-08-14 16:10+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Chinese (Simplified) <zh_CN@li.org>\n"
+"PO-Revision-Date: 2016-06-23 14:23+0000\n"
+"Last-Translator: Jeffery Chenn <jeffery9@gmail.com>\n"
+"Language-Team: Chinese (China) (http://www.transifex.com/odoo/odoo-8/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-01-22 07:39+0000\n"
-"X-Generator: Launchpad (build 17306)\n"
+"Content-Transfer-Encoding: \n"
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: document
-#: field:report.document.file,nbr:0
-#: field:report.document.user,nbr:0
+#: field:report.document.file,nbr:0 field:report.document.user,nbr:0
 msgid "# of Files"
 msgstr "# 文件"
 
@@ -31,8 +35,7 @@ msgid "%s (%s)"
 msgstr "%s (%s)"
 
 #. module: document
-#: code:addons/document/document.py:117
-#: code:addons/document/document.py:307
+#: code:addons/document/document.py:117 code:addons/document/document.py:307
 #, python-format
 msgid "%s (copy)"
 msgstr "%s (副本)"
@@ -43,35 +46,23 @@ msgid ""
 "<p class=\"oe_view_nocontent_create\">\n"
 "            Click to create a new document. \n"
 "          </p><p>\n"
-"            The Documents repository gives you access to all attachments, "
-"such\n"
+"            The Documents repository gives you access to all attachments, such\n"
 "            as mails, project documents, invoices etc.\n"
 "          </p>\n"
 "        "
-msgstr ""
-"<p class=\"oe_view_nocontent_create\">\n"
-"            单击，以创建新文档. \n"
-"          </p><p>\n"
-"            The Documents repository gives you access to all attachments, "
-"such\n"
-"            as mails, project documents, invoices etc.\n"
-"          </p>\n"
-"        "
+msgstr "<p class=\"oe_view_nocontent_create\">\n            单击，以创建新文档. \n          </p><p>\n            The Documents repository gives you access to all attachments, such\n            as mails, project documents, invoices etc.\n          </p>\n        "
 
 #. module: document
 #: help:document.directory.dctx,expr:0
 msgid ""
 "A python expression used to evaluate the field.\n"
-"You can use 'dir_id' for current dir, 'res_id', 'res_model' as a reference "
-"to the current record, in dynamic folders"
-msgstr ""
-"用于填充字段内容的python表达式\n"
-"在动态目录中，可以用'dir_id'表示当前目录，用'res_id', 'res_model' 来表示当前记录。"
+"You can use 'dir_id' for current dir, 'res_id', 'res_model' as a reference to the current record, in dynamic folders"
+msgstr "用于填充字段内容的python表达式\n在动态目录中，可以用'dir_id'表示当前目录，用'res_id', 'res_model' 来表示当前记录。"
 
 #. module: document
 #: field:document.directory.content.type,active:0
 msgid "Active"
-msgstr "生效"
+msgstr "有效"
 
 #. module: document
 #: model:ir.actions.act_window,name:document.action_view_all_document_tree1
@@ -81,7 +72,7 @@ msgstr "所有用户的文件"
 #. module: document
 #: view:report.document.user:document.view_report_document_user_search
 msgid "All users files"
-msgstr "所有用户文件"
+msgstr "所有用户的文件"
 
 #. module: document
 #: help:document.directory,ressource_id:0
@@ -93,7 +84,7 @@ msgstr "跟随上级对象，这个ID把这个目录附加在上级对象的一�
 #. module: document
 #: selection:report.document.user,month:0
 msgid "April"
-msgstr "4月"
+msgstr "四月"
 
 #. module: document
 #. openerp-web
@@ -110,29 +101,26 @@ msgstr "附件"
 #. module: document
 #: selection:report.document.user,month:0
 msgid "August"
-msgstr "8月"
+msgstr "八月"
 
 #. module: document
 #: help:document.directory.content,include_name:0
 msgid ""
-"Check this field if you want that the name of the file to contain the record "
-"name.\n"
+"Check this field if you want that the name of the file to contain the record name.\n"
 "If set, the directory will have to be a resource one."
-msgstr ""
-"如果需要文件名包含记录的名称值，勾这个勾\n"
-"要让这个选项生效，你的目录必须是对应的对象"
+msgstr "如果需要文件名包含记录的名称值，勾这个勾\n要让这个选项生效，你的目录必须是对应的对象"
 
 #. module: document
 #: help:document.directory,ressource_tree:0
 msgid ""
-"Check this if you want to use the same tree structure as the object selected "
-"in the system."
+"Check this if you want to use the same tree structure as the object selected"
+" in the system."
 msgstr "如果你想在系统中对选择的对象使用树结构, 请选择这"
 
 #. module: document
 #: field:document.directory,child_ids:0
 msgid "Children"
-msgstr "子目录"
+msgstr "下级"
 
 #. module: document
 #: view:document.directory:document.view_document_directory_filter
@@ -173,7 +161,7 @@ msgstr "上下文字段"
 #: field:document.directory.dctx,create_uid:0
 #: field:document.storage,create_uid:0
 msgid "Created by"
-msgstr ""
+msgstr "创建人"
 
 #. module: document
 #: field:document.configuration,create_date:0
@@ -182,7 +170,7 @@ msgstr ""
 #: field:document.directory.dctx,create_date:0
 #: field:document.storage,create_date:0
 msgid "Created on"
-msgstr ""
+msgstr "创建"
 
 #. module: document
 #: field:document.directory,create_uid:0
@@ -203,7 +191,7 @@ msgstr "修改日期"
 #. module: document
 #: selection:report.document.user,month:0
 msgid "December"
-msgstr "12月"
+msgstr "十二月"
 
 #. module: document
 #: view:document.directory:document.view_document_directory_form
@@ -253,7 +241,7 @@ msgstr "目录内容"
 #. module: document
 #: model:ir.model,name:document.model_document_directory_content_type
 msgid "Directory Content Type"
-msgstr "目录里内容的类型"
+msgstr "目录里内容类型"
 
 #. module: document
 #: model:ir.model,name:document.model_document_directory_dctx
@@ -269,7 +257,7 @@ msgstr "目录类型"
 #. module: document
 #: sql_constraint:document.directory:0
 msgid "Directory cannot be parent of itself!"
-msgstr "目录不能设为自己的父目录。"
+msgstr "目录不能设为自己的上级目录。"
 
 #. module: document
 #: code:addons/document/document.py:347
@@ -278,8 +266,7 @@ msgid "Directory name contains special characters!"
 msgstr "目录名中有特殊字符！"
 
 #. module: document
-#: code:addons/document/document.py:337
-#: code:addons/document/document.py:342
+#: code:addons/document/document.py:337 code:addons/document/document.py:342
 #, python-format
 msgid "Directory name must be unique!"
 msgstr "目录名必须唯一！"
@@ -307,7 +294,7 @@ msgstr "文档"
 #. module: document
 #: field:document.directory,domain:0
 msgid "Domain"
-msgstr "过滤条件"
+msgstr "领域"
 
 #. module: document
 #: view:document.directory:document.view_document_directory_form
@@ -319,11 +306,10 @@ msgstr "动态上下文"
 msgid ""
 "Each directory can either have the type Static or be linked to another "
 "resource. A static directory, as with Operating Systems, is the classic "
-"directory that can contain a set of files. The directories linked to systems "
-"resources automatically possess sub-directories for each of resource types "
+"directory that can contain a set of files. The directories linked to systems"
+" resources automatically possess sub-directories for each of resource types "
 "defined in the parent directory."
-msgstr ""
-"每个目录都可以是静态的或者链接到其它资源。静态的目录就是操作系统上存储文件的目录。目录链接系统资源会根据父级目录的对象类型配置自动创建子目录"
+msgstr "每个目录都可以是静态的或者链接到其它资源。静态的目录就是操作系统上存储文件的目录。目录链接系统资源会根据上级目录的对象类型配置自动创建子目录"
 
 #. module: document
 #: code:addons/document/document.py:573
@@ -349,7 +335,7 @@ msgstr "扩展"
 #. module: document
 #: selection:report.document.user,month:0
 msgid "February"
-msgstr "2月"
+msgstr "二月"
 
 #. module: document
 #: field:document.directory.dctx,field:0
@@ -444,24 +430,21 @@ msgstr "自动生成的文件列表"
 #. module: document
 #: view:document.directory:document.view_document_directory_filter
 msgid "Group By"
-msgstr ""
+msgstr "分组于"
 
 #. module: document
 #: field:document.directory,group_ids:0
 msgid "Groups"
-msgstr "组"
+msgstr "群组"
 
 #. module: document
-#: field:document.configuration,id:0
-#: field:document.directory,id:0
+#: field:document.configuration,id:0 field:document.directory,id:0
 #: field:document.directory.content,id:0
 #: field:document.directory.content.type,id:0
-#: field:document.directory.dctx,id:0
-#: field:document.storage,id:0
-#: field:report.document.file,id:0
-#: field:report.document.user,id:0
+#: field:document.directory.dctx,id:0 field:document.storage,id:0
+#: field:report.document.file,id:0 field:report.document.user,id:0
 msgid "ID"
-msgstr ""
+msgstr "标识"
 
 #. module: document
 #: help:document.directory,resource_find_all:0
@@ -473,12 +456,11 @@ msgstr "如勾选，所有与该记录匹配的附件都会被找到。如不选
 #. module: document
 #: help:document.directory,ressource_parent_type_id:0
 msgid ""
-"If you put an object here, this directory template will appear bellow all of "
-"these objects. Such directories are \"attached\" to the specific model or "
+"If you put an object here, this directory template will appear bellow all of"
+" these objects. Such directories are \"attached\" to the specific model or "
 "record, just like attachments. Don't put a parent directory if you select a "
 "parent model."
-msgstr ""
-"你在这里输入一个对象，这个目录模版会在所有这个对象的记录上出现。这些目录附加在对应的对象或记录上，就像附件一样。如果选择了上级模式就不要输入上级目录。"
+msgstr "你在这里输入一个对象，这个目录模版会在所有这个对象的记录上出现。这些目录附加在对应的对象或记录上，就像附件一样。如果选择了上级模式就不要输入上级目录。"
 
 #. module: document
 #: field:document.directory.content,include_name:0
@@ -494,22 +476,22 @@ msgstr "内容索引"
 #. module: document
 #: selection:report.document.user,month:0
 msgid "January"
-msgstr "1月"
+msgstr "一月"
 
 #. module: document
 #: selection:report.document.user,month:0
 msgid "July"
-msgstr "7月"
+msgstr "七月"
 
 #. module: document
 #: selection:report.document.user,month:0
 msgid "June"
-msgstr "6月"
+msgstr "六月"
 
 #. module: document
 #: view:document.configuration:document.view_auto_config_form
 msgid "Knowledge Application Configuration"
-msgstr "知识管理应用设置"
+msgstr "知识应用配置"
 
 #. module: document
 #: field:document.directory,write_uid:0
@@ -523,7 +505,7 @@ msgstr "最近修改用户"
 #: field:document.directory.dctx,write_uid:0
 #: field:document.storage,write_uid:0
 msgid "Last Updated by"
-msgstr ""
+msgstr "最后更新"
 
 #. module: document
 #: field:document.configuration,write_date:0
@@ -532,17 +514,17 @@ msgstr ""
 #: field:document.directory.dctx,write_date:0
 #: field:document.storage,write_date:0
 msgid "Last Updated on"
-msgstr ""
+msgstr "最后一次更新"
 
 #. module: document
 #: selection:report.document.user,month:0
 msgid "March"
-msgstr "3月"
+msgstr "三月"
 
 #. module: document
 #: selection:report.document.user,month:0
 msgid "May"
-msgstr "5月"
+msgstr "五月"
 
 #. module: document
 #: field:document.directory.content.type,mimetype:0
@@ -552,7 +534,7 @@ msgstr "MIME 类型"
 #. module: document
 #: field:ir.actions.report.xml,model_id:0
 msgid "Model Id"
-msgstr "模块ID"
+msgstr "模型ID"
 
 #. module: document
 #: view:ir.attachment:document.view_document_file_form
@@ -565,8 +547,7 @@ msgid "Modified Date"
 msgstr "修改日期"
 
 #. module: document
-#: field:report.document.file,month:0
-#: field:report.document.user,month:0
+#: field:report.document.file,month:0 field:report.document.user,month:0
 msgid "Month"
 msgstr "月份"
 
@@ -588,12 +569,12 @@ msgstr "名称字段"
 #. module: document
 #: selection:report.document.user,month:0
 msgid "November"
-msgstr "11月"
+msgstr "十一月"
 
 #. module: document
 #: selection:report.document.user,month:0
 msgid "October"
-msgstr "10月"
+msgstr "十月"
 
 #. module: document
 #: view:document.configuration:document.view_auto_config_form
@@ -602,7 +583,7 @@ msgid ""
 "documents. The virtual folder of a document can be used to manage the files "
 "attached to the document, or to print and download any report. This tool "
 "will create directories automatically according to modules installed."
-msgstr ""
+msgstr "Odoo的文档管理系统支持为文档映射虚拟文件夹。文档的虚拟文件夹将用于管理该文档的附件文件，或者用于打印和下载任何报表。此工具将按照已安装的模块自动创建目录。"
 
 #. module: document
 #: view:document.directory:document.view_document_directory_form
@@ -615,8 +596,7 @@ msgstr "只有这些用户组的成员才有权限访问该目录和其中的文
 #: view:document.directory:document.view_document_directory_filter
 #: field:document.directory,user_id:0
 #: view:ir.attachment:document.view_attach_filter_inherit2
-#: field:ir.attachment,user_id:0
-#: field:report.document.user,user_id:0
+#: field:ir.attachment,user_id:0 field:report.document.user,user_id:0
 msgid "Owner"
 msgstr "所有者"
 
@@ -628,7 +608,7 @@ msgstr "PDF报表"
 #. module: document
 #: field:document.directory,parent_id:0
 msgid "Parent Directory"
-msgstr "父目录"
+msgstr "上级目录"
 
 #. module: document
 #: field:document.directory,ressource_parent_type_id:0
@@ -692,7 +672,7 @@ msgstr "在这里选择一个对象并且这资源的每个记录有一个目录
 #. module: document
 #: selection:report.document.user,month:0
 msgid "September"
-msgstr "9月"
+msgstr "九月"
 
 #. module: document
 #: view:document.directory:document.view_document_directory_form
@@ -702,7 +682,7 @@ msgstr "序列"
 #. module: document
 #: field:document.directory.content,sequence:0
 msgid "Sequence"
-msgstr "序列"
+msgstr "序号"
 
 #. module: document
 #: view:document.directory:document.view_document_directory_filter
@@ -761,7 +741,7 @@ msgstr "类型"
 #: help:document.directory,domain:0
 msgid ""
 "Use a domain if you want to apply an automatic filter on visible resources."
-msgstr "如果要自动筛选可见的资源，请使用过滤条件"
+msgstr "如果要自动筛选可见的资源，请使用领域"
 
 #. module: document
 #: view:report.document.user:document.view_report_document_user_search
@@ -769,8 +749,7 @@ msgid "Users File"
 msgstr "用户文件"
 
 #. module: document
-#: code:addons/document/document.py:337
-#: code:addons/document/document.py:342
+#: code:addons/document/document.py:337 code:addons/document/document.py:342
 #: code:addons/document/document.py:347
 #, python-format
 msgid "ValidateError"
@@ -784,8 +763,8 @@ msgstr "虚拟文件"
 #. module: document
 #: view:document.configuration:document.view_auto_config_form
 msgid ""
-"When executing this wizard, it will configure your directories automatically "
-"according to modules installed."
+"When executing this wizard, it will configure your directories automatically"
+" according to modules installed."
 msgstr "当执行此向导时将自动通过已安装的模块进行目录配置。"
 
 #. module: document
@@ -806,4 +785,4 @@ msgstr "res_config_contents"
 #. module: document
 #: field:report.document.user,user:0
 msgid "unknown"
-msgstr "未知"
+msgstr "unknown"

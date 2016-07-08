@@ -384,6 +384,7 @@
                                     <field name="date_start"/>
                                     <field name="date_stop"/>
                                     <field name="attribute_value_ids" widget="many2many_tags" domain="[('product_ids.product_tmpl_id', '=', parent.product_tmpl_id)]"/>
+                                    <field name="property_ids" widget="many2many_tags"/>
                                 </tree>
                             </field>
                         </page>
@@ -766,7 +767,7 @@
                                 </group>
                                 <group string="Produced Products">
                                     <field name="move_created_ids2" nolabel="1" options="{'reload_on_button': true}">
-                                        <tree colors="red:scrapped==True;blue:state == 'draft';black:state in('confirmed','ready','in_production');gray:state in('cancel','done') " string="Finished Products">
+                                        <tree colors="red:scrapped==True;blue:state == 'draft';black:state in('confirmed','ready','in_production');gray:state == 'cancel' " string="Finished Products">
                                             <field name="product_id" readonly="1"/>
                                             <field name="product_uom_qty" readonly="1"/>
                                             <field name="restrict_lot_id" groups="stock.group_production_lot"/>

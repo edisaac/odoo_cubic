@@ -492,17 +492,17 @@
 .openerp .oe_button.oe_link span:hover {
   text-decoration: underline;
 }
-.openerp .oe_webclient .oe_star_on, .openerp .oe_webclient .oe_star_off {
+.openerp .oe_webclient .oe_star_on, .openerp .oe_webclient .oe_star_off, .openerp .modal-body .oe_star_on, .openerp .modal-body .oe_star_off {
   color: #cccccc;
   text-shadow: 0 0 2px black;
   vertical-align: top;
   position: relative;
   top: -8px;
 }
-.openerp .oe_webclient .oe_star_on:hover, .openerp .oe_webclient .oe_star_off:hover {
+.openerp .oe_webclient .oe_star_on:hover, .openerp .oe_webclient .oe_star_off:hover, .openerp .modal-body .oe_star_on:hover, .openerp .modal-body .oe_star_off:hover {
   text-decoration: none;
 }
-.openerp .oe_webclient .oe_star_on {
+.openerp .oe_webclient .oe_star_on, .openerp .modal-body .oe_star_on {
   color: gold;
 }
 .openerp p.oe_grey {
@@ -567,6 +567,8 @@
   border-radius: 3px;
   background: #f0f0fa;
   color: #4C4C4C;
+  display: inline-block;
+  word-break: break-word;
 }
 .openerp .oe_tag_dark {
   background: #7C7BAD;
@@ -603,12 +605,14 @@
 }
 .openerp .oe_tags .text-wrap {
   width: 100% !important;
+  position: static;
 }
 .openerp .oe_tags .text-wrap textarea {
   width: 100% !important;
 }
 .openerp .oe_tags .text-core {
-  min-height: 22px;
+  height: initial !important;
+  word-break: break-word;
 }
 .openerp .oe_tags .text-core .text-wrap .text-dropdown .text-list .text-suggestion em {
   font-style: italic;
@@ -903,7 +907,6 @@
 }
 .openerp .oe_leftbar > div > div > div > div.oe_secondary_menus_container {
   position: absolute;
-  position: static\9;
   top: 0;
   bottom: 0;
   left: 0;
@@ -1064,7 +1067,6 @@
 }
 .openerp .oe_application > div > .oe_view_manager > .oe_view_manager_wrapper > div > .oe_view_manager_body {
   position: absolute;
-  position: static\9;
   top: 0;
   bottom: 0;
   left: 0;
@@ -1741,6 +1743,9 @@
   font-weight: 300 !important;
   margin: 0 0 0 4px;
   padding: 0;
+}
+.openerp .oe_popup_search .oe_searchview_drawer {
+  clear: right;
 }
 .openerp .oe_view_nocontent {
   padding: 15px;
@@ -2794,6 +2799,7 @@
   opacity: 0.5;
 }
 .openerp .oe_list_content > tbody > tr > td.oe_list_field_boolean input:-moz-read-only {
+  filter: alpha(opacity=100);
   opacity: 1;
 }
 .openerp .oe_list_content > tbody > tr:nth-child(odd) {
