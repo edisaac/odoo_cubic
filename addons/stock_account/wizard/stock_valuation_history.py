@@ -61,7 +61,7 @@ class stock_history(osv.osv):
             # for ph in pphs:
             #     pph["%s-%s"%(ph['company_id'],ph['product_template_id'])] = ph['cost']
 
-            
+
             group_lines = {}
             for line in res:
                 domain = line.get('__domain', domain)
