@@ -165,6 +165,7 @@ class account_account_type(osv.osv):
     def _get_financial_report_ref(self, cr, uid, context=None):
         obj_data = self.pool.get('ir.model.data')
         obj_financial_report = self.pool.get('account.financial.report')
+        financial_repor_ids = []
         financial_report_ref = {}
         for key, financial_report in [
                     ('asset','account_financial_report_assets0'),
@@ -176,8 +177,12 @@ class account_account_type(osv.osv):
                 financial_report_ref[key] = obj_financial_report.browse(cr, uid,
                     obj_data.get_object_reference(cr, uid, 'account', financial_report)[1],
                     context=context)
+                financial_repor_ids += [obj_data.get_object_reference(cr, uid, 'account', financial_report)[1]]
             except ValueError:
                 pass
+        for financial_report in obj_financial_report.browse(cr, uid, obj_financial_report.search(cr, uid, [('type','=','account_type'),
+                                                                         ('id','not in',financial_repor_ids)], context=context), context=context):
+            financial_report_ref[financial_report.id] = financial_report
         return financial_report_ref
 
     def _get_current_report_type(self, cr, uid, ids, name, arg, context=None):
@@ -200,9 +205,18 @@ class account_account_type(osv.osv):
             list_ids = [x.id for x in financial_report.account_type_ids]
             if account_type_id in list_ids:
                 obj_financial_report.write(cr, uid, [financial_report.id], {'account_type_ids': [(3, account_type_id)]})
+        if field_value and field_value != 'none':
+            self.write(cr, uid, [account_type_id], {'financial_report_id': financial_report_ref[field_value].id}, context=context)
         #write it in the good place
         if field_value != 'none':
             return financial_report_ref.has_key(field_value) and obj_financial_report.write(cr, uid, [financial_report_ref[field_value].id], {'account_type_ids': [(4, account_type_id)]})
+
+    def _get_report_type(self, cr, uid, context=None):
+        res = [('none','/')]
+        reports = self._get_financial_report_ref(cr, uid, context=context)
+        for k in reports:
+            res += [(k,reports[k].name)]
+        return res
 
     _columns = {
         'name': fields.char('Account Type', required=True, translate=True),
@@ -213,13 +227,10 @@ class account_account_type(osv.osv):
  'Balance' will generally be used for cash accounts.
  'Detail' will copy each existing journal item of the previous year, even the reconciled ones.
  'Unreconciled' will copy only the journal items that were unreconciled on the first day of the new fiscal year."""),
-        'report_type': fields.function(_get_current_report_type, fnct_inv=_save_report_type, type='selection', string='P&L / BS Category', store=True,
-            selection= [('none','/'),
-                        ('income', _('Profit & Loss (Income account)')),
-                        ('expense', _('Profit & Loss (Expense account)')),
-                        ('asset', _('Balance Sheet (Asset account)')),
-                        ('liability', _('Balance Sheet (Liability account)'))], help="This field is used to generate legal reports: profit and loss, balance sheet.", required=True),
+        'report_type': fields.function(_get_current_report_type, fnct_inv=_save_report_type, type='selection', string='P&L / BS Category',
+            selection= _get_report_type, help="This field is used to generate legal reports: profit and loss, balance sheet.", required=True),
         'note': fields.text('Description'),
+        'financial_report_id': fields.many2one('account.financial.report', string="Financial Report", readonly=True)
     }
     _defaults = {
         'close_method': 'none',

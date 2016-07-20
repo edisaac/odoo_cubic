@@ -98,7 +98,7 @@ class account_financial_report(osv.osv):
 
     _columns = {
         'name': fields.char('Report Name', required=True, translate=True),
-        'parent_id': fields.many2one('account.financial.report', 'Parent'),
+        'parent_id': fields.many2one('account.financial.report', 'Parent', domain=[('type','=','sum')]),
         'children_ids':  fields.one2many('account.financial.report', 'parent_id', 'Account Report'),
         'sequence': fields.integer('Sequence'),
         'balance': fields.function(_get_balance, 'Balance', multi='balance'),

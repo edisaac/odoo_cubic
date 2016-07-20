@@ -50,8 +50,10 @@ class account_entries_report(osv.osv):
         'reconcile_id': fields.many2one('account.move.reconcile', 'Reconciliation number', readonly=True),
         'partner_id': fields.many2one('res.partner','Partner', readonly=True),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account', readonly=True),
+        'analytic_parent_id': fields.many2one('account.analytic.account', 'Analytic Parent Account', readonly=True),
         'quantity': fields.float('Products Quantity', digits=(16,2), readonly=True),  # TDE FIXME master: rename into product_quantity
         'user_type': fields.many2one('account.account.type', 'Account Type', readonly=True),
+        'report_type': fields.many2one('account.financial.report', 'Financial Report', readonly=True),
         'type': fields.selection([
             ('receivable', 'Receivable'),
             ('payable', 'Payable'),
@@ -126,8 +128,10 @@ class account_entries_report(osv.osv):
                 am.period_id as period_id,
                 l.account_id as account_id,
                 l.analytic_account_id as analytic_account_id,
+                aaa.parent_id as analytic_parent_id,
                 a.type as type,
                 a.user_type as user_type,
+                at.financial_report_id as report_type,
                 1 as nbr,
                 l.quantity as quantity,
                 l.currency_id as currency_id,
@@ -138,8 +142,10 @@ class account_entries_report(osv.osv):
             from
                 account_move_line l
                 left join account_account a on (l.account_id = a.id)
+                left join account_account_type at on (a.user_type = at.id)
                 left join account_move am on (am.id=l.move_id)
                 left join account_period p on (am.period_id=p.id)
+                left join account_analytic_account aaa on (l.analytic_account_id = aaa.id)
                 where l.state != 'draft'
             )
         """)
