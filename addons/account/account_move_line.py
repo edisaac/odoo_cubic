@@ -1322,6 +1322,8 @@ class account_move_line(osv.osv):
         vals['journal_id'] = vals.get('journal_id') or context.get('journal_id')
         vals['period_id'] = vals.get('period_id') or context.get('period_id')
         vals['date'] = vals.get('date') or context.get('date')
+        if 'quantity' in vals and vals['quantity'] and (vals.get('credit',0.0) or vals.get('debit',0.0)):
+            vals['quantity'] = (-1.0 if vals.get('credit',False) else 1.0) * vals['quantity']
         if not move_id:
             if journal.centralisation:
                 #Check for centralisation
