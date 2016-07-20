@@ -437,6 +437,16 @@ class account_account(osv.osv):
             res[account.id] = level
         return res
 
+    def _get_chart_account(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        for account in self.browse(cr, uid, ids, context=context):
+            parent = account
+            while parent:
+                old_parent = parent
+                parent = parent.parent_id
+            res[account.id] = old_parent.id
+        return res
+
     def _set_credit_debit(self, cr, uid, account_id, name, value, arg, context=None):
         if context.get('config_invisible', True):
             return True
@@ -539,6 +549,8 @@ class account_account(osv.osv):
              store={
                     'account.account': (_get_children_and_consol, ['level', 'parent_id'], 10),
                    }),
+        'chart_account_id': fields.function(_get_chart_account, string="Chart Account", type='many2one',
+                                            relation='account.account', store=True),
     }
 
     _defaults = {
@@ -1009,7 +1021,7 @@ class account_period(osv.osv):
     _defaults = {
         'state': 'draft',
     }
-    _order = "date_start, special desc"
+    _order = "date_start, code, special desc"
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id)', 'The name of the period must be unique per company!'),
     ]

@@ -54,6 +54,7 @@ class account_entries_report(osv.osv):
         'quantity': fields.float('Products Quantity', digits=(16,2), readonly=True),  # TDE FIXME master: rename into product_quantity
         'user_type': fields.many2one('account.account.type', 'Account Type', readonly=True),
         'report_type': fields.many2one('account.financial.report', 'Financial Report', readonly=True),
+        'chart_account': fields.many2one('account.account', 'Chart Account', readonly=True),
         'type': fields.selection([
             ('receivable', 'Receivable'),
             ('payable', 'Payable'),
@@ -132,6 +133,7 @@ class account_entries_report(osv.osv):
                 a.type as type,
                 a.user_type as user_type,
                 at.financial_report_id as report_type,
+                a.chart_account_id as chart_account,
                 1 as nbr,
                 l.quantity as quantity,
                 l.currency_id as currency_id,
