@@ -1,10 +1,9 @@
-
 from openerp import tools
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 
-class wizard_valuation_history(osv.osv_memory):
 
+class wizard_valuation_history(osv.osv_memory):
     _name = 'wizard.valuation.history'
     _description = 'Wizard that opens the stock valuation history table'
     _columns = {
@@ -24,7 +23,7 @@ class wizard_valuation_history(osv.osv_memory):
         ctx = context.copy()
         ctx['history_date'] = data['date']
         ctx['search_default_group_by_product'] = True
-#         ctx['search_default_group_by_location'] = True
+        #         ctx['search_default_group_by_location'] = True
         return {
             'domain': "[('date', '<=', '" + data['date'] + "')]",
             'name': _('Stock Value At Date'),
@@ -41,66 +40,41 @@ class stock_history(osv.osv):
     _auto = False
     _order = 'date asc'
 
-    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False, lazy=True):
-        res = super(stock_history, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby, lazy=lazy)
+    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False,
+                   lazy=True):
+        res = super(stock_history, self).read_group(cr, uid, domain, fields, groupby, offset=offset, limit=limit,
+                                                    context=context, orderby=orderby, lazy=lazy)
         if context is None:
             context = {}
         date = context.get('history_date')
         prod_dict = {}
         if 'inventory_value' in fields:
-            # cr.execute('''select pph.company_id,pph.product_template_id,ppph.cost
-            #             from (select company_id,product_template_id,max(datetime) as datetime
-            #                     from product_price_history
-            #                    where datetime <= %s
-            #                    group by company_id,product_template_id) as pph
-            #            inner join product_price_history as ppph on (ppph.company_id=pph.company_id
-            #                                                         and ppph.product_template_id=pph.product_template_id
-            #                                                         and ppph.datetime = pph.datetime)''',(date,))
-            # pphs = cr.dictfetchall()
-            # pph = {}
-            # for ph in pphs:
-            #     pph["%s-%s"%(ph['company_id'],ph['product_template_id'])] = ph['cost']
-
-
-            group_lines = {}
-            for line in res:
-                domain = line.get('__domain', domain)
-                group_lines.setdefault(str(domain), self.search(cr, uid, domain, context=context))
-            line_ids = set()
-            for ids in group_lines.values():
-                for product_id in ids:
-                    line_ids.add(product_id)
-            line_ids = list(line_ids)
-            lines_rec = {}
-            if line_ids:
-                cr.execute('SELECT id, product_id, price_unit_on_quant, company_id, quantity FROM stock_history WHERE id in %s', (tuple(line_ids),))
-                lines_rec = cr.dictfetchall()
-            lines_dict = dict((line['id'], line) for line in lines_rec)
-            product_ids = list(set(line_rec['product_id'] for line_rec in lines_rec))
-            products_rec = self.pool['product.product'].read(cr, uid, product_ids, ['cost_method', 'product_tmpl_id'], context=context)
-            products_dict = dict((product['id'], product) for product in products_rec)
-            cost_method_product_tmpl_ids = list(set(product['product_tmpl_id'][0] for product in products_rec if product['cost_method'] != 'real'))
-            histories = []
-            if cost_method_product_tmpl_ids:
-                cr.execute('SELECT DISTINCT ON (product_template_id, company_id) product_template_id, company_id, cost FROM product_price_history WHERE product_template_id in %s AND datetime <= %s ORDER BY product_template_id, company_id, datetime DESC', (tuple(cost_method_product_tmpl_ids), date))
-                histories = cr.dictfetchall()
-            histories_dict = {}
-            for history in histories:
-                histories_dict[(history['product_template_id'], history['company_id'])] = history['cost']
-
+            cr.execute('''select pph.company_id,pph.product_template_id,ppph.cost
+                        from (select company_id,product_template_id,max(datetime) as datetime
+                                from product_price_history 
+                               where datetime <= %s
+                               group by company_id,product_template_id) as pph
+                       inner join product_price_history as ppph on (ppph.company_id=pph.company_id 
+                                                                    and ppph.product_template_id=pph.product_template_id
+                                                                    and ppph.datetime = pph.datetime)''', (date,))
+            pphs = cr.dictfetchall()
+            pph = {}
+            for ph in pphs:
+                pph["%s-%s" % (ph['company_id'], ph['product_template_id'])] = ph['cost']
 
             for line in res:
                 lines = self.search(cr, uid, line.get('__domain', []), context=context)
                 inv_value = 0.0
-                lines = group_lines.get(str(line.get('__domain', domain)))
-                for line_id in lines:
-                    line_rec = lines_dict[line_id]
-                    product = products_dict[line_rec['product_id']]
-                    if product['cost_method'] == 'real':
-                        price = line_rec['price_unit_on_quant']
+                product_tmpl_obj = self.pool.get("product.template")
+                lines_rec = self.browse(cr, uid, lines, context=context)
+                for line_rec in lines_rec:
+                    if line_rec.product_id.cost_method == 'real':
+                        price = line_rec.price_unit_on_quant
                     else:
                         if not line_rec.product_id.id in prod_dict:
-                            prod_dict[line_rec.product_id.id] = pph.get("%s-%s"%(line_rec.company_id.id,line_rec.product_id.product_tmpl_id.id),0.0) #product_tmpl_obj.get_history_price(cr, uid, line_rec.product_id.product_tmpl_id.id, line_rec.company_id.id, date=date, context=context)
+                            prod_dict[line_rec.product_id.id] = pph.get(
+                                "%s-%s" % (line_rec.company_id.id, line_rec.product_id.product_tmpl_id.id),
+                                0.0)  # product_tmpl_obj.get_history_price(cr, uid, line_rec.product_id.product_tmpl_id.id, line_rec.company_id.id, date=date, context=context)
                         price = prod_dict[line_rec.product_id.id]
                     inv_value += price * line_rec.quantity
                 line['inventory_value'] = inv_value
@@ -119,17 +93,19 @@ class stock_history(osv.osv):
                                group by company_id,product_template_id) as pph
                        inner join product_price_history as ppph on (ppph.company_id=pph.company_id 
                                                                     and ppph.product_template_id=pph.product_template_id
-                                                                    and ppph.datetime = pph.datetime)''',(date,))
+                                                                    and ppph.datetime = pph.datetime)''', (date,))
         pphs = cr.dictfetchall()
         pph = {}
         for ph in pphs:
-            pph["%s-%s"%(ph['company_id'],ph['product_template_id'])] = ph['cost']
-        
+            pph["%s-%s" % (ph['company_id'], ph['product_template_id'])] = ph['cost']
+
         for line in self.browse(cr, uid, ids, context=context):
             if line.product_id.cost_method == 'real':
                 res[line.id] = line.quantity * line.price_unit_on_quant
             else:
-                res[line.id] = line.quantity * pph.get("%s-%s"%(line.company_id.id,line.product_id.product_tmpl_id.id),0.0) #product_tmpl_obj.get_history_price(cr, uid, line.product_id.product_tmpl_id.id, line.company_id.id, date=date, context=context)
+                res[line.id] = line.quantity * pph.get(
+                    "%s-%s" % (line.company_id.id, line.product_id.product_tmpl_id.id),
+                    0.0)  # product_tmpl_obj.get_history_price(cr, uid, line.product_id.product_tmpl_id.id, line.company_id.id, date=date, context=context)
         return res
 
     _columns = {
@@ -147,8 +123,8 @@ class stock_history(osv.osv):
 
     def init(self, cr):
         tools.drop_view_if_exists(cr, 'stock_history')
-#         cr.execute("""
-#             CREATE MATERIALIZED VIEW stock_history AS (
+        #         cr.execute("""
+        #             CREATE MATERIALIZED VIEW stock_history AS (
         cr.execute("""
             CREATE OR REPLACE VIEW stock_history AS (
               SELECT MIN(id) as id,
@@ -217,6 +193,6 @@ class stock_history(osv.osv):
                 AS foo
                 GROUP BY move_id, location_id, company_id, product_id, product_categ_id, date, price_unit_on_quant, source
             )""")
-#         cr.execute("""
-#                 CREATE UNIQUE INDEX stock_history_pkey1 ON stock_history(id)
-#             """)
+        #         cr.execute("""
+        #                 CREATE UNIQUE INDEX stock_history_pkey1 ON stock_history(id)
+        #             """)
