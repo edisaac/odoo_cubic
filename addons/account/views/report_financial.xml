@@ -43,9 +43,9 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th class="text-right">Debit</th>
-                                <th class="text-right">Credit</th>
-                                <th class="text-right">Balance</th>
+                                <th class="text-right">Debit <span t-esc="res_company.currency_id.symbol"/></th>
+                                <th class="text-right">Credit <span t-esc="res_company.currency_id.symbol"/></th>
+                                <th class="text-right">Balance <span t-esc="res_company.currency_id.symbol"/></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -59,13 +59,13 @@
                                         <span t-att-style="style" t-esc="a.get('name')"/>
                                     </td>
                                     <td class="text-right" style="white-space: nowrap;">
-                                        <span t-att-style="style" t-esc="formatLang(a.get('debit'), currency_obj=res_company.currency_id)"/>
+                                        <span t-att-style="style" t-esc="formatLang(a.get('debit'))"/>
                                     </td>
                                     <td class="text-right" style="white-space: nowrap;">
-                                        <span t-att-style="style" t-esc="formatLang(a.get('credit'), currency_obj=res_company.currency_id)"/>
+                                        <span t-att-style="style" t-esc="formatLang(a.get('credit'))"/>
                                     </td>
                                     <td class="text-right" style="white-space: nowrap;">
-                                        <span t-att-style="style" t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/>
+                                        <span t-att-style="style" t-esc="formatLang(a.get('balance'))"/>
                                     </td>
                                 </t>
                             </tr>
@@ -76,7 +76,7 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th class="text-right">Balance</th>
+                                <th class="text-right">Balance <span t-esc="res_company.currency_id.symbol"/></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,7 +89,7 @@
                                         <span style="color: white;" t-esc="'..' * a.get('level', 0)"/>
                                         <span t-att-style="style" t-esc="a.get('name')"/>
                                     </td>
-                                    <td class="text-right"><span t-att-style="style" t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/></td>
+                                    <td class="text-right"><span t-att-style="style" t-esc="formatLang(a.get('balance'))"/></td>
                                 </t>
                             </tr>
                         </tbody>
@@ -99,8 +99,8 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th class="text-right">Balance</th>
-                                <th class="text-right"><span t-esc="data['form']['label_filter']"/></th>
+                                <th class="text-right">Balance <span t-esc="res_company.currency_id.symbol"/></th>
+                                <th class="text-right"><span t-esc="data['form']['label_filter']"/> <span t-esc="res_company.currency_id.symbol"/></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -113,8 +113,8 @@
                                         <span style="color: white;" t-esc="'..' * a.get('level', 0)"/>
                                         <span t-att-style="style" t-esc="a.get('name')"/>
                                     </td>
-                                    <td class="text-right"><span t-att-style="style" t-esc="formatLang(a.get('balance'), currency_obj=res_company.currency_id)"/></td>
-                                    <td class="text-right"><span t-att-style="style" t-esc="formatLang(a.get('balance_cmp'), currency_obj=res_company.currency_id)"/></td>
+                                    <td class="text-right"><span t-att-style="style" t-esc="formatLang(a.get('balance'))"/></td>
+                                    <td class="text-right"><span t-att-style="style" t-esc="formatLang(a.get('balance_cmp'))"/></td>
                                 </t>
                             </tr>
                         </tbody>
