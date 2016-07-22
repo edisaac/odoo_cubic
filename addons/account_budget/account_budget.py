@@ -126,10 +126,32 @@ class crossovered_budget_lines(osv.osv):
             acc_ids = account_obj._get_children_and_consol(cr, uid, acc_ids, context=context)
             date_to = line.date_to
             date_from = line.date_from
-            if line.analytic_account_id.id:
+            if line.analytic_account_id.id and line.position_restrict:
+                cr.execute("SELECT SUM(amount) FROM account_analytic_line aal join account_move_line aml on (aal.move_id=aml.id) "
+                           "WHERE aml.budget_post_id=%s AND aal.account_id=%s AND (aal.date "
+                           "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
+                           "aal.general_account_id=ANY(%s)", (line.general_budget_id.id,line.analytic_account_id.id, date_from, date_to, acc_ids,))
+                result = cr.fetchone()[0]
+            elif line.analytic_account_id.id:
                 cr.execute("SELECT SUM(amount) FROM account_analytic_line WHERE account_id=%s AND (date "
                        "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
                        "general_account_id=ANY(%s)", (line.analytic_account_id.id, date_from, date_to,acc_ids,))
+                result = cr.fetchone()[0]
+            elif line.position_restrict:
+                cr.execute(
+                    "SELECT SUM(debit-credit) FROM account_move_line "
+                    "WHERE budget_post_id=%s AND (date "
+                    "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
+                    "account_id=ANY(%s)",
+                    (line.general_budget_id.id, date_from, date_to, acc_ids,))
+                result = cr.fetchone()[0]
+            else:
+                cr.execute(
+                    "SELECT SUM(debit-credit) FROM account_move_line "
+                    "WHERE (date "
+                    "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
+                    "account_id=ANY(%s)",
+                    (date_from, date_to, acc_ids,))
                 result = cr.fetchone()[0]
             if result is None:
                 result = 0.00
@@ -200,7 +222,8 @@ class crossovered_budget_lines(osv.osv):
         'practical_amount':fields.function(_prac, string='Practical Amount', type='float', digits_compute=dp.get_precision('Account')),
         'theoritical_amount':fields.function(_theo, string='Theoretical Amount', type='float', digits_compute=dp.get_precision('Account')),
         'percentage':fields.function(_perc, string='Percentage', type='float'),
-        'company_id': fields.related('crossovered_budget_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True)
+        'company_id': fields.related('crossovered_budget_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
+        'position_restrict': fields.boolean("Position Restricted"),
     }
     _defaults = {
         'sequence': 5,
@@ -213,6 +236,13 @@ class account_analytic_account(osv.osv):
 
     _columns = {
         'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'analytic_account_id', 'Budget Lines'),
+    }
+
+class account_move_line(osv.osv):
+    _inherit = "account.move.line"
+
+    _columns = {
+        'budget_post_id': fields.many2one('account.budget.post', 'Budget Position'),
     }
 
 
