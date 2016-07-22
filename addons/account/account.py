@@ -189,6 +189,9 @@ class account_account_type(osv.osv):
         res = {}
         financial_report_ref = self._get_financial_report_ref(cr, uid, context=context)
         for record in self.browse(cr, uid, ids, context=context):
+            if record.financial_report_id and record.financial_report_id.id in financial_report_ref:
+                res[record.id] = record.financial_report_id.id
+                continue
             res[record.id] = 'none'
             for key, financial_report in financial_report_ref.items():
                 list_ids = [x.id for x in financial_report.account_type_ids]
