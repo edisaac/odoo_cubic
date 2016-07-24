@@ -155,7 +155,7 @@ class crossovered_budget_lines(osv.osv):
                 result = cr.fetchone()[0]
             if result is None:
                 result = 0.00
-            res[line.id] = result
+            res[line.id] = result * line.coefficient
         return res
 
     def _prac(self, cr, uid, ids, name, args, context=None):
@@ -224,9 +224,11 @@ class crossovered_budget_lines(osv.osv):
         'percentage':fields.function(_perc, string='Percentage', type='float'),
         'company_id': fields.related('crossovered_budget_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'position_restrict': fields.boolean("Position Restricted"),
+        'coefficient': fields.float("Coefficient", required=True),
     }
     _defaults = {
         'sequence': 5,
+        'coefficient': 1.0,
     }
     _order = 'sequence'
 

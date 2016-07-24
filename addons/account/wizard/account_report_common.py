@@ -44,6 +44,7 @@ class account_common_report(osv.osv_memory):
         'chart_account_id': fields.many2one('account.account', 'Chart of Account', help='Select Charts of Accounts', required=True, domain = [('parent_id','=',False)]),
         'company_id': fields.related('chart_account_id', 'company_id', type='many2one', relation='res.company', string='Company', readonly=True),
         'fiscalyear_id': fields.many2one('account.fiscalyear', 'Fiscal Year', help='Keep empty for all open fiscal year'),
+        'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account'),
         'filter': fields.selection([('filter_no', 'No Filters'), ('filter_date', 'Date'), ('filter_period', 'Periods')], "Filter by", required=True),
         'period_from': fields.many2one('account.period', 'Start Period'),
         'period_to': fields.many2one('account.period', 'End Period'),
@@ -155,6 +156,8 @@ class account_common_report(osv.osv_memory):
         result['journal_ids'] = 'journal_ids' in data['form'] and data['form']['journal_ids'] or False
         result['chart_account_id'] = 'chart_account_id' in data['form'] and data['form']['chart_account_id'] or False
         result['state'] = 'target_move' in data['form'] and data['form']['target_move'] or ''
+        if data['form'].get('analytic_account_id', False):
+            result['analytic_account_id'] = data['form']['analytic_account_id'][0]
         if data['form']['filter'] == 'filter_date':
             result['date_from'] = data['form']['date_from']
             result['date_to'] = data['form']['date_to']
@@ -174,7 +177,9 @@ class account_common_report(osv.osv_memory):
         data = {}
         data['ids'] = context.get('active_ids', [])
         data['model'] = context.get('active_model', 'ir.ui.menu')
-        data['form'] = self.read(cr, uid, ids, ['date_from',  'date_to',  'fiscalyear_id', 'journal_ids', 'period_from', 'period_to',  'filter',  'chart_account_id', 'target_move'], context=context)[0]
+        data['form'] = self.read(cr, uid, ids, ['date_from',  'date_to',  'fiscalyear_id', 'journal_ids', 'period_from',
+                                                'period_to',  'filter',  'chart_account_id', 'target_move',
+                                                'analytic_account_id'], context=context)[0]
         for field in ['fiscalyear_id', 'chart_account_id', 'period_from', 'period_to']:
             if isinstance(data['form'][field], tuple):
                 data['form'][field] = data['form'][field][0]

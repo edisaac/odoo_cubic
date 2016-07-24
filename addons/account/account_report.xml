@@ -145,6 +145,16 @@
             menu="False"
         />
 
+        <report
+            id="action_report_financial_xls"
+            model="account.financial.report"
+            string="Financial report xls"
+            report_type="qweb-xls"
+            name="account.report_financial_xls"
+            file="account.report_financial_xls"
+            menu="False"
+        />
+
         <report 
             id="action_report_general_ledger" 
             model="account.report.general.ledger" 

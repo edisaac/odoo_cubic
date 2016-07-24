@@ -31,6 +31,10 @@
                 </xpath>
                 <xpath expr="//notebook/page[@string='Journals']" position="replace">
                 </xpath>
+                <xpath expr="//group[@name='others']" position="inside">
+                    <field name="financial_report_type"/>
+                    <field name="label_balance"/>
+                </xpath>
             </field>
         </record>
 

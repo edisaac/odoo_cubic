@@ -31,6 +31,11 @@
                     <page string="Journals" name="journal_ids">
                         <field name="journal_ids"/>
                     </page>
+                    <page string="Others">
+                        <group name="others">
+                            <field name="analytic_account_id"/>
+                        </group>
+                    </page>
                 </notebook>
                 <footer>
                     <button name="check_report" string="Print" type="object" default_focus="1" class="oe_highlight"/>

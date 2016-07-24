@@ -128,6 +128,12 @@ class common_report_header(object):
             return self.pool.get('account.account').browse(self.cr, self.uid, data['form']['chart_account_id']).company_id.name
         return ''
 
+    def _get_analytic(self, data):
+        if data.get('form', False) and data['form'].get('analytic_account_id', False):
+            return self.pool.get('account.analytic.account').browse(self.cr, self.uid,
+                                                           data['form']['analytic_account_id'][0]).complete_name
+        return ''
+
     def _get_journal(self, data):
         codes = []
         if data.get('form', False) and data['form'].get('journal_ids', False):

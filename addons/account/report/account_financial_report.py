@@ -41,6 +41,7 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
             'get_start_date':self._get_start_date,
             'get_end_date':self._get_end_date,
             'get_target_move': self._get_target_move,
+            'get_analytic': self._get_analytic,
         })
         self.context = context
 
@@ -78,12 +79,13 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                 account_ids = account_obj._get_children_and_consol(self.cr, self.uid, [x.id for x in report.account_ids])
             elif report.type == 'account_type' and report.account_type_ids:
                 account_ids = account_obj.search(self.cr, self.uid, [('user_type','in', [x.id for x in report.account_type_ids])])
-            if report.type == 'account_type' and report.display_detail == 'detail_flat' and report.account_type_ids:
+            if report.type == 'account_type' and report.account_type_ids:
                 for report_type in report.account_type_ids:
                     flag = False
                     balance = debit = credit = balance_cmp= 0
                     account_type = 'other'
                     account = False
+                    account_vals = []
                     for account in account_obj.browse(self.cr, self.uid, account_obj.search(self.cr, self.uid, [('user_type','=',report_type.id)]),
                                                       context=data['form']['used_context']):
                         balance += account.balance
@@ -92,11 +94,35 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                         account_type = account.type
                         if data['form']['enable_filter']:
                             balance_cmp += account_obj.browse(self.cr, self.uid, account.id, context=data['form']['comparison_context']).balance
+                        if report.display_detail == 'detail_with_hierarchy':
+                            account_flag = False
+                            account_val = {
+                                'name': account.code + ' ' + account.name,
+                                'balance': account.balance != 0 and account.balance * report.sign or account.balance,
+                                'type': 'account',
+                                'level': 6,
+                                'account_type': account.type,
+                            }
+                            if data['form']['debit_credit']:
+                                account_val['debit'] = account.debit
+                                account_val['credit'] = account.credit
+                            if not currency_obj.is_zero(self.cr, self.uid, account.company_id.currency_id,
+                                                        account_val['balance']):
+                                account_flag = True
+                            if data['form']['enable_filter']:
+                                account_val['balance_cmp'] = account_obj.browse(self.cr, self.uid, account.id,
+                                                                         context=data['form'][
+                                                                             'comparison_context']).balance * report.sign or 0.0
+                                if not currency_obj.is_zero(self.cr, self.uid, account.company_id.currency_id,
+                                                            account_val['balance_cmp']):
+                                    account_flag = True
+                            if account_flag:
+                                account_vals.append(account_val)
                     vals = {
                         'name': report_type.name,
                         'balance': balance != 0 and balance * report.sign or balance,
                         'type': 'account',
-                        'level': 6,
+                        'level': 6 if report.display_detail == 'detail_flat' else 4,
                         'account_type': account_type,
                     }
                     if data['form']['debit_credit']:
@@ -109,8 +135,9 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                         if account and not currency_obj.is_zero(self.cr, self.uid, account.company_id.currency_id,
                                                     vals['balance_cmp']):
                             flag = True
-                    if flag:
+                    if flag or account_vals:
                         lines.append(vals)
+                        lines += account_vals
             elif account_ids:
                 for account in account_obj.browse(self.cr, self.uid, account_ids, context=data['form']['used_context']):
                     #if there are accounts to display, we add them to the lines with a level equals to their level in
@@ -147,4 +174,9 @@ class report_financial(osv.AbstractModel):
     _template = 'account.report_financial'
     _wrapped_report_class = report_account_common
 
+class report_financial_xls(osv.AbstractModel):
+    _name = 'report.account.report_financial_xls'
+    _inherit = 'report.abstract_report'
+    _template = 'account.report_financial_xls'
+    _wrapped_report_class = report_account_common
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

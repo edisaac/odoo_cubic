@@ -20,6 +20,7 @@
 ##############################################################################
 
 from openerp.osv import fields, osv
+from openerp.tools.translate import _
 
 
 class accounting_report(osv.osv_memory):
@@ -38,6 +39,10 @@ class accounting_report(osv.osv_memory):
         'date_from_cmp': fields.date("Start Date"),
         'date_to_cmp': fields.date("End Date"),
         'debit_credit': fields.boolean('Display Debit/Credit Columns', help="This option allows you to get more details about the way your balances are computed. Because it is space consuming, we do not allow to use it while doing a comparison."),
+        'financial_report_type': fields.selection([('account.report_financial', 'PDF'),
+                                         ('account.report_financial_xls', 'Excel')], 'Report Type', required=True),
+        'label_balance': fields.char('Balance Label', required=True,
+                                     help="This label will be displayed on report to show the balance computed."),
     }
 
     def _get_account_report(self, cr, uid, context=None):
@@ -54,6 +59,8 @@ class accounting_report(osv.osv_memory):
             'filter_cmp': 'filter_no',
             'target_move': 'posted',
             'account_report_id': _get_account_report,
+            'financial_report_type': 'account.report_financial',
+            'label_balance': _('Balance'),
     }
     
     def _build_comparison_context(self, cr, uid, ids, data, context=None):
@@ -64,6 +71,8 @@ class accounting_report(osv.osv_memory):
         result['journal_ids'] = 'journal_ids' in data['form'] and data['form']['journal_ids'] or False
         result['chart_account_id'] = 'chart_account_id' in data['form'] and data['form']['chart_account_id'] or False
         result['state'] = 'target_move' in data['form'] and data['form']['target_move'] or ''
+        if data['form'].get('analytic_account_id', False):
+            result['analytic_account_id'] = data['form']['analytic_account_id'][0]
         if data['form']['filter_cmp'] == 'filter_date':
             result['date_from'] = data['form']['date_from_cmp']
             result['date_to'] = data['form']['date_to_cmp']
@@ -79,7 +88,9 @@ class accounting_report(osv.osv_memory):
             context = {}
         res = super(accounting_report, self).check_report(cr, uid, ids, context=context)
         data = {}
-        data['form'] = self.read(cr, uid, ids, ['account_report_id', 'date_from_cmp',  'date_to_cmp',  'fiscalyear_id_cmp', 'journal_ids', 'period_from_cmp', 'period_to_cmp',  'filter_cmp',  'chart_account_id', 'target_move'], context=context)[0]
+        data['form'] = self.read(cr, uid, ids, ['account_report_id', 'date_from_cmp',  'date_to_cmp',  'fiscalyear_id_cmp',
+                                                'journal_ids', 'period_from_cmp', 'period_to_cmp',  'filter_cmp',  'chart_account_id',
+                                                'target_move', 'analytic_account_id', 'label_balance', 'financial_report_type'], context=context)[0]
         for field in ['fiscalyear_id_cmp', 'chart_account_id', 'period_from_cmp', 'period_to_cmp', 'account_report_id']:
             if isinstance(data['form'][field], tuple):
                 data['form'][field] = data['form'][field][0]
@@ -88,7 +99,9 @@ class accounting_report(osv.osv_memory):
         return res
 
     def _print_report(self, cr, uid, ids, data, context=None):
-        data['form'].update(self.read(cr, uid, ids, ['date_from_cmp',  'debit_credit', 'date_to_cmp',  'fiscalyear_id_cmp', 'period_from_cmp', 'period_to_cmp',  'filter_cmp', 'account_report_id', 'enable_filter', 'label_filter','target_move'], context=context)[0])
-        return self.pool['report'].get_action(cr, uid, [], 'account.report_financial', data=data, context=context)
+        data['form'].update(self.read(cr, uid, ids, ['date_from_cmp',  'debit_credit', 'date_to_cmp',  'fiscalyear_id_cmp',
+                                                     'period_from_cmp', 'period_to_cmp',  'filter_cmp', 'account_report_id',
+                                                     'enable_filter', 'label_filter','target_move', 'financial_report_type', 'label_balance'], context=context)[0])
+        return self.pool['report'].get_action(cr, uid, [], data['form']['financial_report_type'], data=data, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
