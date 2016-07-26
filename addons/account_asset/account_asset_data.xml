@@ -8,7 +8,7 @@
         </record>
         <record id="sequence_asset" model="ir.sequence">
             <field name="name">Account Asset</field>
-            <field name="code">aaccount.asset.code</field>
+            <field name="code">account.asset.code</field>
             <field name="prefix">ASST%(year)s-</field>
             <field eval="1" name="number_next"/>
             <field eval="1" name="number_increment"/>
