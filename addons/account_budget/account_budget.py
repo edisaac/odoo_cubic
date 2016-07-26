@@ -55,22 +55,33 @@ class account_budget_post(osv.osv):
     }
     _order = "name"
 
+class bodget_budget(osv.osv)
+    _name = "budget.budget"
+    _decription = "Main Budget"
 
+    _columns = {
+        'name': fields.char('Name', required=True, states={'draft': [('readonly', False)]}, readonly=True),
+        'state': fields.selection(
+            [('draft', 'Draft'), ('cancel', 'Cancelled'), ('confirm', 'Confirmed'), ('validate', 'Validated'),
+             ('done', 'Done')], 'Status', select=True, required=True, readonly=True, copy=False),
+
+    }
 
 class crossovered_budget(osv.osv):
     _name = "crossovered.budget"
     _description = "Budget"
 
     _columns = {
-        'name': fields.char('Name', required=True, states={'done':[('readonly',True)]}),
-        'code': fields.char('Code', size=16, required=True, states={'done':[('readonly',True)]}),
-        'creating_user_id': fields.many2one('res.users', 'Responsible User'),
+        'name': fields.char('Name', required=True, states={'draft':[('readonly',False)]}, readonly=True),
+        'code': fields.char('Code', size=16, required=True, states={'draft':[('readonly',False)]}, readonly=True),
+        'creating_user_id': fields.many2one('res.users', 'Responsible User', states={'draft':[('readonly',False)]}, readonly=True),
         'validating_user_id': fields.many2one('res.users', 'Validate User', readonly=True),
-        'date_from': fields.date('Start Date', required=True, states={'done':[('readonly',True)]}),
-        'date_to': fields.date('End Date', required=True, states={'done':[('readonly',True)]}),
+        'date_from': fields.date('Start Date', required=True, states={'draft':[('readonly',False)]}, readonly=True),
+        'date_to': fields.date('End Date', required=True, states={'draft':[('readonly',False)]}, readonly=True),
         'state' : fields.selection([('draft','Draft'),('cancel', 'Cancelled'),('confirm','Confirmed'),('validate','Validated'),('done','Done')], 'Status', select=True, required=True, readonly=True, copy=False),
-        'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'crossovered_budget_id', 'Budget Lines', states={'done':[('readonly',True)]}, copy=True),
-        'company_id': fields.many2one('res.company', 'Company', required=True),
+        'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'crossovered_budget_id', 'Budget Lines', states={'draft':[('readonly',False)]}, readonly=True, copy=True),
+        'company_id': fields.many2one('res.company', 'Company', required=True, states={'draft':[('readonly',False)]}, readonly=True),
+        'budget_id': fields.many2one('budget.budget', 'Main Budget')
     }
 
     _defaults = {

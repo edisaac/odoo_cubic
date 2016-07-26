@@ -339,7 +339,7 @@
 			<field name='inherit_id' ref='account.view_move_line_form'/>
 			<field name='arch' type='xml'>
                 <field name="analytic_account_id" position="after">
-                    <field name="budget_post_id"/>
+                    <field name="budget_post_id" domain="[('account_ids','in',account_id)]"/>
                 </field>
 			</field>
 		</record>
