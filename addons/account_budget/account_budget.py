@@ -55,7 +55,7 @@ class account_budget_post(osv.osv):
     }
     _order = "name"
 
-class bodget_budget(osv.osv)
+class bodget_budget(osv.osv):
     _name = "budget.budget"
     _decription = "Main Budget"
 
