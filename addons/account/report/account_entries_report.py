@@ -107,6 +107,15 @@ class account_entries_report(osv.osv):
             domain = domain
         return super(account_entries_report, self).read_group(cr, uid, domain, fields, groupby, offset, limit, context, orderby,lazy)
 
+    def _get_select(self):
+        return ''
+
+    def _get_from(self):
+        return ''
+
+    def _get_where(self):
+        return ''
+
     def init(self, cr):
         tools.drop_view_if_exists(cr, 'account_entries_report')
         cr.execute("""
@@ -141,6 +150,7 @@ class account_entries_report(osv.osv):
                 l.debit as debit,
                 l.credit as credit,
                 coalesce(l.debit, 0.0) - coalesce(l.credit, 0.0) as balance
+                %s
             from
                 account_move_line l
                 left join account_account a on (l.account_id = a.id)
@@ -148,8 +158,10 @@ class account_entries_report(osv.osv):
                 left join account_move am on (am.id=l.move_id)
                 left join account_period p on (am.period_id=p.id)
                 left join account_analytic_account aaa on (l.analytic_account_id = aaa.id)
+                %s
                 where l.state != 'draft'
+                %s
             )
-        """)
+        """%(self._get_select(),self._get_from(),self._get_where()))
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -73,4 +73,26 @@ class account_invoice_line(osv.osv):
         return True
 
 
+class account_entries_report(osv.osv):
+    _name = "account.entries.report"
+    _inherit = "account.entries.report"
+
+    _columns = {
+        'asset_id': fields.many2one('account.asset.asset', 'Asset', readonly=True),
+        'asset_category_id': fields.many2one('account.asset.category', 'Asset Category', readonly=True),
+    }
+
+    def _get_select(self):
+        res = super(account_entries_report, self)._get_select()
+        return """%s,
+         l.asset_id as asset_id,
+         aasset.category_id as asset_category_id
+        """%(res)
+
+    def _get_from(self):
+        res = super(account_entries_report, self)._get_from()
+        return """%s
+         left join account_asset_asset aasset on (l.asset_id = aasset.id)
+        """ % (res)
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
