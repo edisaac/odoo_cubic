@@ -151,7 +151,7 @@ class account_financial_report(osv.osv):
         for record in reads:
             name = record['name']
             if record['sequence']:
-                name = record['sequence'] + ' ' + name
+                name = str(record['sequence']) + ' ' + name
             res.append((record['id'], name))
         return res
 
