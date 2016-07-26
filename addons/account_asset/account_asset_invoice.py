@@ -79,6 +79,7 @@ class account_entries_report(osv.osv):
 
     _columns = {
         'asset_id': fields.many2one('account.asset.asset', 'Asset', readonly=True),
+        'parent_asset_id': fields.many2one('account.asset.asset', 'Asset Parent', readonly=True),
         'asset_category_id': fields.many2one('account.asset.category', 'Asset Category', readonly=True),
     }
 
@@ -86,6 +87,7 @@ class account_entries_report(osv.osv):
         res = super(account_entries_report, self)._get_select()
         return """%s,
          l.asset_id as asset_id,
+         aasset.parent_id as parent_asset_id,
          aasset.category_id as asset_category_id
         """%(res)
 

@@ -44,7 +44,7 @@ class account_budget_post(osv.osv):
     _name = "account.budget.post"
     _description = "Budgetary Position"
     _columns = {
-        'code': fields.char('Code', size=64, required=True),
+        'code': fields.char('Code', size=64),
         'name': fields.char('Name', required=True),
         'account_ids': fields.many2many('account.account', 'account_budget_rel', 'budget_id', 'account_id', 'Accounts'),
         'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'general_budget_id', 'Budget Lines'),
@@ -53,7 +53,22 @@ class account_budget_post(osv.osv):
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.budget.post', context=c)
     }
-    _order = "name"
+    _order = "code,name"
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        reads = self.read(cr, uid, ids, ['name', 'code'], context=context)
+        res = []
+        for record in reads:
+            name = record['name']
+            if record['code']:
+                name = record['code'] + ' ' + name
+            res.append((record['id'], name))
+        return res
+
 
 class bodget_budget(osv.osv):
     _name = "budget.budget"
@@ -257,6 +272,20 @@ class account_move_line(osv.osv):
     _columns = {
         'budget_post_id': fields.many2one('account.budget.post', 'Budget Position'),
     }
+
+class account_entries_report(osv.osv):
+    _name = "account.entries.report"
+    _inherit = "account.entries.report"
+
+    _columns = {
+        'budget_post_id': fields.many2one('account.budget.post', 'Budget Position', readonly=True),
+    }
+
+    def _get_select(self):
+        res = super(account_entries_report, self)._get_select()
+        return """%s,
+         l.budget_post_id as budget_post_id
+        """%(res)
 
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

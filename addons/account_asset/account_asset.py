@@ -280,7 +280,6 @@ class account_asset_asset(osv.osv):
         'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic account', readonly=True, states={'draft':[('readonly',False)]}),
     }
     _defaults = {
-        'code': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'account.asset.code'),
         'purchase_date': lambda obj, cr, uid, context: time.strftime('%Y-%m-%d'),
         'active': True,
         'state': 'draft',
@@ -306,6 +305,20 @@ class account_asset_asset(osv.osv):
         (_check_recursion, 'Error ! You cannot create recursive assets.', ['parent_id']),
         (_check_prorata, 'Prorata temporis can be applied only for time method "number of depreciations".', ['prorata']),
     ]
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        reads = self.read(cr, uid, ids, ['name', 'code'], context=context)
+        res = []
+        for record in reads:
+            name = record['name']
+            if record['code']:
+                name = record['code'] + ' ' + name
+            res.append((record['id'], name))
+        return res
 
     def onchange_category_id(self, cr, uid, ids, category_id, context=None):
         res = {'value':{}}
@@ -340,6 +353,8 @@ class account_asset_asset(osv.osv):
         return depreciation_obj.create_move(cr, uid, depreciation_ids, context=context)
 
     def create(self, cr, uid, vals, context=None):
+        if not vals.get('code', False):
+            vals['code'] = self.pool.get('ir.sequence').get(cr, uid, 'account.asset.code')
         asset_id = super(account_asset_asset, self).create(cr, uid, vals, context=context)
         self.compute_depreciation_board(cr, uid, [asset_id], context=context)
         return asset_id
