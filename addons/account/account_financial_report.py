@@ -131,7 +131,7 @@ class account_financial_report(osv.osv):
             ],'Financial Report Style', help="You can set up here the format you want this record to be displayed. If you leave the automatic formatting, it will be computed based on the financial reports hierarchy (auto-computed field 'level')."),
     }
 
-    _order = "sequence"
+    _order = "sequence,name"
 
     _defaults = {
         'type': 'sum',
@@ -140,5 +140,19 @@ class account_financial_report(osv.osv):
         'style_overwrite': 0,
     }
 
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        reads = self.read(cr, uid, ids, ['name', 'sequence'], context=context)
+        res = []
+        for record in reads:
+            name = record['name']
+            if record['sequence']:
+                name = record['sequence'] + ' ' + name
+            res.append((record['id'], name))
+        return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
