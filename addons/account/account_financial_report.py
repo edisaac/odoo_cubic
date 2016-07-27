@@ -96,10 +96,28 @@ class account_financial_report(osv.osv):
                         res[report.id][field] += value[field]
         return res
 
+    def _get_full_name(self, cr, uid, ids, name=None, args=None, context=None):
+        if context == None:
+            context = {}
+        res = {}
+        for elmt in self.browse(cr, uid, ids, context=context):
+            res[elmt.id] = self._get_one_full_name(elmt)
+        return res
+
+    def _get_one_full_name(self, elmt, level=6):
+        if level <= 0:
+            return '...'
+        if elmt.parent_id:
+            parent_path = self._get_one_full_name(elmt.parent_id, level - 1) + " / "
+        else:
+            parent_path = ''
+        return parent_path + elmt.name
+
     _columns = {
         'name': fields.char('Report Name', required=True, translate=True),
         'parent_id': fields.many2one('account.financial.report', 'Parent', domain=[('type','=','sum')]),
         'children_ids':  fields.one2many('account.financial.report', 'parent_id', 'Account Report'),
+        'complete_name': fields.function(_get_full_name, type='char', string='Full Name'),
         'sequence': fields.integer('Sequence'),
         'balance': fields.function(_get_balance, 'Balance', multi='balance'),
         'debit': fields.function(_get_balance, 'Debit', multi='balance'),

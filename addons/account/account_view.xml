@@ -2539,6 +2539,7 @@
                         <field name="type"/>
                         <field name="sign"/>
                         <field name="style_overwrite"/>
+                        <field name="complete_name"/>
                     </group>
                     <notebook attrs="{'invisible': [('type','not in',['accounts','account_type', 'account_report'])]}">
                         <page string="Report">
@@ -2559,7 +2560,7 @@
             <field name="arch" type="xml">
                 <tree string="Account Report">
                     <field name="sequence"/>
-                    <field name="name"/>
+                    <field name="complete_name"/>
                     <field name="parent_id" invisible="1"/>
                     <field name="type"/>
                     <field name="account_report_id"/>
