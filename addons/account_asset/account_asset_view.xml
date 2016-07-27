@@ -13,27 +13,29 @@
                 <group>
                     <group>
                         <field name="name"/>
+                        <field name="type"/>
+                        <field name="parent_id" context="{'default_type':'view'}"/>
                         <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                     </group>
-                    <group>
+                    <group attrs="{'invisible':[('type','=','view')]}">
                         <field name="journal_id"/>
                         <field name="account_asset_id" on_change="onchange_account_asset(account_asset_id)"/>
                         <field name="account_depreciation_id"/>
                         <field name="account_expense_depreciation_id"/>
                     </group>
-                    <group string="Depreciation Dates">
+                    <group string="Depreciation Dates" attrs="{'invisible':[('type','=','view')]}">
                         <field name="method_time"/>
                         <field name="method_number" attrs="{'invisible':[('method_time','=','end')], 'required':[('method_time','=','number')]}"/>
                         <field name="method_period"/>
                         <field name="method_end" attrs="{'required': [('method_time','=','end')], 'invisible':[('method_time','=','number')]}"/>
                     </group>
-                    <group string="Depreciation Method">
+                    <group string="Depreciation Method" attrs="{'invisible':[('type','=','view')]}">
                         <field name="method"/>
                         <field name="method_progress_factor" attrs="{'invisible':[('method','=','linear')], 'required':[('method','=','degressive')]}"/>
                         <field name="prorata"/>
                         <field name="open_asset"/>
                     </group>
-                    <group groups="analytic.group_analytic_accounting" string="Analytic Information">
+                    <group groups="analytic.group_analytic_accounting" string="Analytic Information" attrs="{'invisible':[('type','=','view')]}">
                         <field name="account_analytic_id"/>
                     </group>
                 </group>
@@ -47,10 +49,10 @@
         <field name="name">account.asset.category.tree</field>
         <field name="model">account.asset.category</field>
         <field name="arch" type="xml">
-            <tree string="Asset category">
-                <field name="name"/>
+            <tree string="Asset category" colors="blue:type=='view'">
+                <field name="complete_name"/>
                 <field name="journal_id"/>
-                <field name="method"/>
+                <field name="type"/>
                 <field name="company_id" groups="base.group_multi_company"/>
             </tree>
         </field>

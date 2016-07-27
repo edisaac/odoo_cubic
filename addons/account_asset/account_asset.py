@@ -31,22 +31,46 @@ class account_asset_category(osv.osv):
     _name = 'account.asset.category'
     _description = 'Asset category'
 
+    def _get_full_name(self, cr, uid, ids, name=None, args=None, context=None):
+        if context == None:
+            context = {}
+        res = {}
+        for elmt in self.browse(cr, uid, ids, context=context):
+            res[elmt.id] = self._get_one_full_name(elmt)
+        return res
+
+    def _get_one_full_name(self, elmt, level=6):
+        if level <= 0:
+            return '...'
+        if elmt.parent_id:
+            parent_path = self._get_one_full_name(elmt.parent_id, level - 1) + " / "
+        else:
+            parent_path = ''
+        return parent_path + elmt.name
+
     _columns = {
         'name': fields.char('Name', required=True, select=1),
+        'parent_id': fields.many2one('account.asset.category', "Parent Category", domain=[('type','=','view')]),
+        'children_ids': fields.one2many('account.asset.category', 'parent_id', 'Account Report'),
+        'complete_name': fields.function(_get_full_name, type='char', string='Full Name'),
+        'type': fields.selection([('view',"View"),
+                                  ('normal',"Normal")], string="Type", required=True),
         'note': fields.text('Note'),
         'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic account'),
-        'account_asset_id': fields.many2one('account.account', 'Asset Account', required=True, domain=[('type','=','other')]),
-        'account_depreciation_id': fields.many2one('account.account', 'Depreciation Account', required=True, domain=[('type','=','other')]),
-        'account_expense_depreciation_id': fields.many2one('account.account', 'Depr. Expense Account', required=True, domain=[('type','=','other')]),
-        'journal_id': fields.many2one('account.journal', 'Journal', required=True),
+        'account_asset_id': fields.many2one('account.account', 'Asset Account', domain=[('type','=','other')]),
+        'account_depreciation_id': fields.many2one('account.account', 'Depreciation Account', domain=[('type','=','other')]),
+        'account_expense_depreciation_id': fields.many2one('account.account', 'Depr. Expense Account', domain=[('type','=','other')]),
+        'journal_id': fields.many2one('account.journal', 'Journal'),
         'company_id': fields.many2one('res.company', 'Company', required=True),
-        'method': fields.selection([('linear','Linear'),('degressive','Degressive')], 'Computation Method', required=True, help="Choose the method to use to compute the amount of depreciation lines.\n"\
+        'method': fields.selection([('linear','Linear'),
+                                    ('degressive','Degressive')], 'Computation Method', required=True,
+                                   help="Choose the method to use to compute the amount of depreciation lines.\n"\
             "  * Linear: Calculated on basis of: Gross Value / Number of Depreciations\n" \
             "  * Degressive: Calculated on basis of: Residual Value * Degressive Factor"),
         'method_number': fields.integer('Number of Depreciations', help="The number of depreciations needed to depreciate your asset"),
         'method_period': fields.integer('Period Length', help="State here the time between 2 depreciations, in months", required=True),
         'method_progress_factor': fields.float('Degressive Factor'),
-        'method_time': fields.selection([('number','Number of Depreciations'),('end','Ending Date')], 'Time Method', required=True,
+        'method_time': fields.selection([('number','Number of Depreciations'),('end','Ending Date')], 'Time Method',
                                   help="Choose the method to use to compute the dates and number of depreciation lines.\n"\
                                        "  * Number of Depreciations: Fix the number of depreciation lines and the time between 2 depreciations.\n" \
                                        "  * Ending Date: Choose the time between 2 depreciations and the date the depreciations won't go beyond."),
@@ -57,6 +81,7 @@ class account_asset_category(osv.osv):
 
     _defaults = {
         'company_id': lambda self, cr, uid, context: self.pool.get('res.company')._company_default_get(cr, uid, 'account.asset.category', context=context),
+        'type': 'normal',
         'method': 'linear',
         'method_number': 5,
         'method_time': 'number',
@@ -477,9 +502,9 @@ class account_asset_history(osv.osv):
     _columns = {
         'name': fields.char('History name', select=1),
         'user_id': fields.many2one('res.users', 'User', required=True),
-        'date': fields.date('Date', required=True),
+        'date': fields.date('Date', required=True, select=1),
         'asset_id': fields.many2one('account.asset.asset', 'Asset', required=True),
-        'method_time': fields.selection([('number','Number of Depreciations'),('end','Ending Date')], 'Time Method', required=True,
+        'method_time': fields.selection([('number','Number of Depreciations'),('end','Ending Date')], 'Time Method',
                                   help="The method to use to compute the dates and number of depreciation lines.\n"\
                                        "Number of Depreciations: Fix the number of depreciation lines and the time between 2 depreciations.\n" \
                                        "Ending Date: Choose the time between 2 depreciations and the date the depreciations won't go beyond."),
