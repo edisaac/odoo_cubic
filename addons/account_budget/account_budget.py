@@ -312,12 +312,12 @@ class crossovered_budget_lines(osv.osv):
         for move_line in self.pool['account.move.line'].browse(cr, uid, ids, context=context):
             for post in move_line.account_id.budget_post_ids:
                 if move_line.analytic_account_id:
-                    budget_line_ids += self.search(cr, uid, [('general_budget_id', '=', post.id),
+                    budget_line_ids += self.pool['crossovered.budget.lines'].search(cr, uid, [('general_budget_id', '=', post.id),
                                                              ('analytic_account_id', '=', move_line.analytic_account_id),
                                                              ('state', 'in', ['draft', 'confirm', 'validate'])],
                                                    context=context)
                 else:
-                    budget_line_ids += self.search(cr, uid, [('general_budget_id', '=', post.id),
+                    budget_line_ids += self.pool['crossovered.budget.lines'].search(cr, uid, [('general_budget_id', '=', post.id),
                                                              ('analytic_account_id', '=', False),
                                                              ('state', 'in', ['draft', 'confirm', 'validate'])],
                                                    context=context)
