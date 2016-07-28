@@ -209,16 +209,23 @@ class crossovered_budget_lines(osv.osv):
             date_from = line.date_from
             analytic_amount = line.general_budget_id.value_type == 'quantity' and 'unit_amount' or 'amount'
             move_amount = line.general_budget_id.value_type == 'quantity' and 'quantity' or 'debit-credit'
+            analytic_account_ids = []
+            if line.analytic_account_id:
+                analytic_account_ids = \
+                self.pool.get('account.analytic.account')._child_compute(cr, uid, [line.analytic_account_id.id],
+                                                                         False, [], context=context)[line.analytic_account_id.id]
+                analytic_account_ids = tuple(analytic_account_ids + [line.analytic_account_id.id])
+
             if line.analytic_account_id.id and line.position_restrict:
                 cr.execute("SELECT SUM("+analytic_amount+") FROM account_analytic_line aal join account_move_line aml on (aal.move_id=aml.id) "
-                           "WHERE aml.budget_post_id=%s AND aal.account_id=%s AND (aal.date "
+                           "WHERE aml.budget_post_id=%s AND aal.account_id in %s AND (aal.date "
                            "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
-                           "aal.general_account_id=ANY(%s)", (line.general_budget_id.id,line.analytic_account_id.id, date_from, date_to, acc_ids,))
+                           "aal.general_account_id=ANY(%s)", (line.general_budget_id.id,analytic_account_ids, date_from, date_to, acc_ids,))
                 result = cr.fetchone()[0]
             elif line.analytic_account_id.id:
-                cr.execute("SELECT SUM("+analytic_amount+") FROM account_analytic_line WHERE account_id=%s AND (date "
+                cr.execute("SELECT SUM("+analytic_amount+") FROM account_analytic_line WHERE account_id in %s AND (date "
                        "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
-                       "general_account_id=ANY(%s)", (line.analytic_account_id.id, date_from, date_to,acc_ids,))
+                       "general_account_id=ANY(%s)", (analytic_account_ids, date_from, date_to,acc_ids,))
                 result = cr.fetchone()[0]
             elif line.position_restrict:
                 cr.execute(
