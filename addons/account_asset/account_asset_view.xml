@@ -295,6 +295,20 @@
         </field>
     </record>
 
+    <record model='ir.ui.view' id='view_move_form'>
+			<field name='name'>account.move.form.inherit.asset</field>
+			<field name='model'>account.move</field>
+			<field name='inherit_id' ref='account.view_move_form'/>
+			<field name='arch' type='xml'>
+                <xpath expr="//group[@string='Accounting Documents']" position="inside">
+                    <field name="asset_id"/>
+                </xpath>
+                <xpath expr="//tree/field[@name='analytic_account_id']" position="after">
+                    <field name="asset_id"/>
+                </xpath>
+			</field>
+		</record>
+
     <record id="view_account_move_line_filter_inherit" model="ir.ui.view">
         <field name="name">Journal Items (Search)</field>
         <field name="model">account.move.line</field>
