@@ -21,7 +21,7 @@
 
 from datetime import date, datetime
 
-from openerp.osv import fields, osv
+from openerp.osv import fields, osv, expression
 from openerp.tools import ustr, DEFAULT_SERVER_DATE_FORMAT
 from openerp.tools.translate import _
 
@@ -297,6 +297,32 @@ class crossovered_budget_lines(osv.osv):
             res[line.id] = line.planned_amount - line.practical_amount
         return res
 
+    def _get_line_from_analytic(self, cr, uid, ids, context=None):
+        budget_line_ids = []
+        for line in self.pool['account.analytic.line'].browse(cr, uid, ids, context=context):
+            for post in line.general_account_id.budget_post_ids:
+                budget_line_ids += self.search(cr, uid, [('general_budget_id', '=', post.id),
+                                                         ('analytic_account_id', '=', line.account_id),
+                                                         ('state', 'in', ['draft', 'confirm', 'validate'])],
+                                               context=context)
+        return budget_line_ids
+
+    def _get_line_from_move(self, cr, uid, ids, context=None):
+        budget_line_ids = []
+        for move_line in self.pool['account.move.line'].browse(cr, uid, ids, context=context):
+            for post in move_line.account_id.budget_post_ids:
+                if move_line.analytic_account_id:
+                    budget_line_ids += self.search(cr, uid, [('general_budget_id', '=', post.id),
+                                                             ('analytic_account_id', '=', move_line.analytic_account_id),
+                                                             ('state', 'in', ['draft', 'confirm', 'validate'])],
+                                                   context=context)
+                else:
+                    budget_line_ids += self.search(cr, uid, [('general_budget_id', '=', post.id),
+                                                             ('analytic_account_id', '=', False),
+                                                             ('state', 'in', ['draft', 'confirm', 'validate'])],
+                                                   context=context)
+        return budget_line_ids
+
     _name = "crossovered.budget.lines"
     _description = "Budget Line"
     _columns = {
@@ -313,14 +339,16 @@ class crossovered_budget_lines(osv.osv):
         'date_to': fields.date('End Date', required=True),
         'paid_date': fields.date('Paid Date'),
         'planned_amount':fields.float('Planned Amount', required=True, digits_compute=dp.get_precision('Account')),
-        'practical_amount':fields.function(_prac, string='Practical Amount', type='float', digits_compute=dp.get_precision('Account')),
+        'practical_amount':fields.function(_prac, string='Practical Amount', type='float', digits_compute=dp.get_precision('Account'),
+                                           store={'account.analytic.line': (_get_line_from_analytic, ['account_id','date','general_account_id','amount','unit_amount'], 10),
+                                                    'account.move.line': (_get_line_from_move, ['budget_post_id','date','account_id','debit','credit','quantity'], 10)}),
         'theoritical_amount':fields.function(_theo, string='Theoretical Amount', type='float', digits_compute=dp.get_precision('Account')),
         'available_amount': fields.function(_avail, string='Available Amount', type='float', digits_compute=dp.get_precision('Account')),
         'percentage':fields.function(_perc, string='Percentage', type='float'),
         'company_id': fields.related('crossovered_budget_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'position_restrict': fields.boolean("Position Restricted"),
         'coefficient': fields.float("Coefficient", required=True),
-        'state': fields.related('crossovered_budget_id','state', string="State", type="char", readonly=True)
+        'state': fields.related('crossovered_budget_id','state', string="State", type="char", readonly=True, store=True)
     }
     _defaults = {
         'sequence': 5,
@@ -328,6 +356,13 @@ class crossovered_budget_lines(osv.osv):
     }
     _order = 'sequence,name'
 
+
+class account_account(osv.osv):
+    _inherit = "account.account"
+
+    _columns = {
+        'budget_post_ids': fields.many2many('account.budget.post', 'account_budget_rel', 'account_id', 'budget_id', 'Budget Positions'),
+    }
 
 class account_analytic_account(osv.osv):
     _inherit = "account.analytic.account"
