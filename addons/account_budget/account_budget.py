@@ -40,18 +40,33 @@ def strToDatetime(strdate):
 # ---------------------------------------------------------
 # Budgets
 # ---------------------------------------------------------
+class account_budget_post_type(osv.osv):
+    _name = "account.budget.post.type"
+    _description = "Kind of Budgetary Position"
+    _columns = {
+        'code': fields.char('Code', size=64),
+        'name': fields.char('Name', required=True),
+    }
+    _order = 'code,name'
+
+
 class account_budget_post(osv.osv):
     _name = "account.budget.post"
     _description = "Budgetary Position"
     _columns = {
         'code': fields.char('Code', size=64),
         'name': fields.char('Name', required=True),
+        'type_post_id': fields.many2one('account.budget.post.type', 'Position Type', required=True),
+        'value_type': fields.selection([('amount', 'Amount'),
+                                    ('quantity', 'Quantity')], 'Value Type', required=True),
         'account_ids': fields.many2many('account.account', 'account_budget_rel', 'budget_id', 'account_id', 'Accounts'),
         'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'general_budget_id', 'Budget Lines'),
         'company_id': fields.many2one('res.company', 'Company', required=True),
     }
     _defaults = {
-        'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.budget.post', context=c)
+        'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.budget.post', context=c),
+        'value_type': 'amount',
+
     }
     _order = "code,name"
 
@@ -69,18 +84,57 @@ class account_budget_post(osv.osv):
             res.append((record['id'], name))
         return res
 
+    def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=100):
+        if context is None:
+            context = {}
+        if not args:
+            args = []
+        args = args[:]
+        ids = []
 
-class bodget_budget(osv.osv):
+        if name:
+            if operator not in expression.NEGATIVE_TERM_OPERATORS:
+                plus_percent = lambda n: n + '%'
+                code_op, code_conv = {
+                    'ilike': ('=ilike', plus_percent),
+                    'like': ('=like', plus_percent),
+                }.get(operator, (operator, lambda n: n))
+
+                ids = self.search(cr, user, ['|', ('code', code_op, code_conv(name)),
+                                             ('name', operator, name)] + args, limit=limit, context=context)
+
+                if not ids and len(name.split()) >= 2:
+                    # Separating code and name of account for searching
+                    operand1, operand2 = name.split(' ', 1)  # name can contain spaces e.g. OpenERP S.A.
+                    ids = self.search(cr, user, [('code', operator, operand1), ('name', operator, operand2)] + args,
+                                      limit=limit, context=context)
+            else:
+                ids = self.search(cr, user, ['&', '!', ('code', '=like', name + "%"), ('name', operator, name)] + args,
+                                  limit=limit, context=context)
+                # as negation want to restric, do if already have results
+                if ids and len(name.split()) >= 2:
+                    operand1, operand2 = name.split(' ', 1)  # name can contain spaces e.g. OpenERP S.A.
+                    ids = self.search(cr, user, [('code', operator, operand1), ('name', operator, operand2),
+                                                 ('id', 'in', ids)] + args, limit=limit, context=context)
+        else:
+            ids = self.search(cr, user, args, context=context, limit=limit)
+        return self.name_get(cr, user, ids, context=context)
+
+
+class budget_budget(osv.osv):
     _name = "budget.budget"
     _decription = "Main Budget"
 
     _columns = {
-        'name': fields.char('Name', required=True, states={'draft': [('readonly', False)]}, readonly=True),
-        'state': fields.selection(
-            [('draft', 'Draft'), ('cancel', 'Cancelled'), ('confirm', 'Confirmed'), ('validate', 'Validated'),
-             ('done', 'Done')], 'Status', select=True, required=True, readonly=True, copy=False),
-
+        'code': fields.char('Code', size=16),
+        'name': fields.char('Name', required=True),
+        'type': fields.selection([('control', 'Control'),
+                                    ('view', 'View')], 'Type', required=True),
     }
+    _defaults = {
+        'type': 'control',
+    }
+    _order = "code,name"
 
 class crossovered_budget(osv.osv):
     _name = "crossovered.budget"
@@ -88,7 +142,7 @@ class crossovered_budget(osv.osv):
 
     _columns = {
         'name': fields.char('Name', required=True, states={'draft':[('readonly',False)]}, readonly=True),
-        'code': fields.char('Code', size=16, required=True, states={'draft':[('readonly',False)]}, readonly=True),
+        'code': fields.char('Code', size=16, states={'draft':[('readonly',False)]}, readonly=True),
         'creating_user_id': fields.many2one('res.users', 'Responsible User', states={'draft':[('readonly',False)]}, readonly=True),
         'validating_user_id': fields.many2one('res.users', 'Validate User', readonly=True),
         'date_from': fields.date('Start Date', required=True, states={'draft':[('readonly',False)]}, readonly=True),
@@ -96,7 +150,8 @@ class crossovered_budget(osv.osv):
         'state' : fields.selection([('draft','Draft'),('cancel', 'Cancelled'),('confirm','Confirmed'),('validate','Validated'),('done','Done')], 'Status', select=True, required=True, readonly=True, copy=False),
         'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'crossovered_budget_id', 'Budget Lines', states={'draft':[('readonly',False)]}, readonly=True, copy=True),
         'company_id': fields.many2one('res.company', 'Company', required=True, states={'draft':[('readonly',False)]}, readonly=True),
-        'budget_id': fields.many2one('budget.budget', 'Main Budget')
+        'budget_id': fields.many2one('budget.budget', 'Main Budget', required=True, ondelete='restrict',
+                                     states={'draft':[('readonly',False)]}, readonly=True)
     }
 
     _defaults = {
@@ -152,20 +207,22 @@ class crossovered_budget_lines(osv.osv):
             acc_ids = account_obj._get_children_and_consol(cr, uid, acc_ids, context=context)
             date_to = line.date_to
             date_from = line.date_from
+            analytic_amount = line.general_budget_id.value_type == 'quantity' and 'unit_amount' or 'amount'
+            move_amount = line.general_budget_id.value_type == 'quantity' and 'quantity' or 'debit-credit'
             if line.analytic_account_id.id and line.position_restrict:
-                cr.execute("SELECT SUM(amount) FROM account_analytic_line aal join account_move_line aml on (aal.move_id=aml.id) "
+                cr.execute("SELECT SUM("+analytic_amount+") FROM account_analytic_line aal join account_move_line aml on (aal.move_id=aml.id) "
                            "WHERE aml.budget_post_id=%s AND aal.account_id=%s AND (aal.date "
                            "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
                            "aal.general_account_id=ANY(%s)", (line.general_budget_id.id,line.analytic_account_id.id, date_from, date_to, acc_ids,))
                 result = cr.fetchone()[0]
             elif line.analytic_account_id.id:
-                cr.execute("SELECT SUM(amount) FROM account_analytic_line WHERE account_id=%s AND (date "
+                cr.execute("SELECT SUM("+analytic_amount+") FROM account_analytic_line WHERE account_id=%s AND (date "
                        "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
                        "general_account_id=ANY(%s)", (line.analytic_account_id.id, date_from, date_to,acc_ids,))
                 result = cr.fetchone()[0]
             elif line.position_restrict:
                 cr.execute(
-                    "SELECT SUM(debit-credit) FROM account_move_line "
+                    "SELECT SUM("+move_amount+") FROM account_move_line "
                     "WHERE budget_post_id=%s AND (date "
                     "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
                     "account_id=ANY(%s)",
@@ -173,7 +230,7 @@ class crossovered_budget_lines(osv.osv):
                 result = cr.fetchone()[0]
             else:
                 cr.execute(
-                    "SELECT SUM(debit-credit) FROM account_move_line "
+                    "SELECT SUM("+move_amount+") FROM account_move_line "
                     "WHERE (date "
                     "between to_date(%s,'yyyy-mm-dd') AND to_date(%s,'yyyy-mm-dd')) AND "
                     "account_id=ANY(%s)",
@@ -234,29 +291,42 @@ class crossovered_budget_lines(osv.osv):
                 res[line.id] = 0.00
         return res
 
+    def _avail(self, cr, uid, ids, name, args, context=None):
+        res = {}
+        for line in self.browse(cr, uid, ids, context=context):
+            res[line.id] = line.planned_amount - line.practical_amount
+        return res
+
     _name = "crossovered.budget.lines"
     _description = "Budget Line"
     _columns = {
         'sequence': fields.integer('Sequence'),
+        'name': fields.char('Reference'),
         'crossovered_budget_id': fields.many2one('crossovered.budget', 'Budget', ondelete='cascade', select=True, required=True),
+        'main_budget_id': fields.related('crossovered_budget_id','budget_id', string="Main Budget", type="many2one",
+                                         relation="budget.budget", readonly=True, store=True),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account'),
         'general_budget_id': fields.many2one('account.budget.post', 'Budgetary Position',required=True),
+        'type_budget_id': fields.related('general_budget_id','type_post_id', string="Budget Type", type="many2one",
+                                         relation="account.budget.post.type", readonly= True, store=True),
         'date_from': fields.date('Start Date', required=True),
         'date_to': fields.date('End Date', required=True),
         'paid_date': fields.date('Paid Date'),
         'planned_amount':fields.float('Planned Amount', required=True, digits_compute=dp.get_precision('Account')),
         'practical_amount':fields.function(_prac, string='Practical Amount', type='float', digits_compute=dp.get_precision('Account')),
         'theoritical_amount':fields.function(_theo, string='Theoretical Amount', type='float', digits_compute=dp.get_precision('Account')),
+        'available_amount': fields.function(_avail, string='Available Amount', type='float', digits_compute=dp.get_precision('Account')),
         'percentage':fields.function(_perc, string='Percentage', type='float'),
         'company_id': fields.related('crossovered_budget_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'position_restrict': fields.boolean("Position Restricted"),
         'coefficient': fields.float("Coefficient", required=True),
+        'state': fields.related('crossovered_budget_id','state', string="State", type="char", readonly=True)
     }
     _defaults = {
         'sequence': 5,
         'coefficient': 1.0,
     }
-    _order = 'sequence'
+    _order = 'sequence,name'
 
 
 class account_analytic_account(osv.osv):
