@@ -85,6 +85,7 @@ class ir_ui_menu(osv.osv):
                 action_menus = menus.filtered('action')
                 folder_menus = menus - action_menus
                 visible = self.browse()
+                invisible = self.browse()
 
                 # process action menus, check whether their action is allowed
                 access = self.env['ir.model.access']
@@ -109,11 +110,23 @@ class ir_ui_menu(osv.osv):
                             if menu.hidden_groups_id:
                                 hidden_to_groups = [g.id for g in menu.hidden_groups_id]
                                 if key.intersection(hidden_to_groups):
+                                    invisible += menu
                                     menu = menu.parent_id
                                     continue
                             visible += menu
                             menu = menu.parent_id
 
+                invisibles = self.browse()
+                for inv in invisible:
+                    childs = inv.child_id
+                    while childs:
+                        invisibles += childs
+                        child_childs = self.browse()
+                        for child in childs:
+                            child_childs += child.child_ids
+                        childs = child_childs
+
+                visible = visible - invisibles
                 self._menu_cache[key] = visible._ids
 
             return self.filtered(lambda menu: menu in visible)
