@@ -107,26 +107,9 @@ class ir_ui_menu(osv.osv):
                         visible += menu
                         menu = menu.parent_id
                         while menu and menu in folder_menus and menu not in visible:
-                            if menu.hidden_groups_id:
-                                hidden_to_groups = [g.id for g in menu.hidden_groups_id]
-                                if key.intersection(hidden_to_groups):
-                                    invisible += menu
-                                    menu = menu.parent_id
-                                    continue
                             visible += menu
                             menu = menu.parent_id
 
-                invisibles = self.browse()
-                for inv in invisible:
-                    childs = inv.child_id
-                    while childs:
-                        invisibles += childs
-                        child_childs = self.browse()
-                        for child in childs:
-                            child_childs += child.child_ids
-                        childs = child_childs
-
-                visible = visible - invisibles
                 self._menu_cache[key] = visible._ids
 
             return self.filtered(lambda menu: menu in visible)
