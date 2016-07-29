@@ -95,14 +95,24 @@ class ir_ui_menu(osv.osv):
                     'ir.actions.wizard': 'model',
                     'ir.actions.server': 'model_id',
                 }
+                for menu in menus:
+                    if menu.hidden_groups_id:
+                        hidden_to_groups = [g.id for g in menu.hidden_groups_id]
+                        if key.intersection(hidden_to_groups):
+                            invisible += menu
+                            child_menus = [c for c in menu.child_id]
+                            while child_menus:
+                                for child_menu in child_menus:
+                                    invisible += child_menu
+                                child_child_menus = []
+                                for child in child_menus:
+                                    child_child_menus += [c for c in child.child_id]
+                                child_menus = child_child_menus
+                action_menus = action_menus - invisible
                 for menu in action_menus:
                     fname = model_fname.get(menu.action._name)
                     if not fname or not menu.action[fname] or \
                             access.check(menu.action[fname], 'read', False):
-                        if menu.hidden_groups_id:
-                            hidden_to_groups = [g.id for g in menu.hidden_groups_id]
-                            if key.intersection(hidden_to_groups):
-                                continue
                         # make menu visible, and its folder ancestors, too
                         visible += menu
                         menu = menu.parent_id
