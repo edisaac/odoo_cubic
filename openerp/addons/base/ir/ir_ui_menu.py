@@ -98,6 +98,10 @@ class ir_ui_menu(osv.osv):
                     fname = model_fname.get(menu.action._name)
                     if not fname or not menu.action[fname] or \
                             access.check(menu.action[fname], 'read', False):
+                        if menu.hidden_groups_id:
+                            hidden_to_groups = [g.id for g in menu.hidden_groups_id]
+                            if key.intersection(hidden_to_groups):
+                                continue
                         # make menu visible, and its folder ancestors, too
                         visible += menu
                         menu = menu.parent_id
@@ -429,6 +433,9 @@ class ir_ui_menu(osv.osv):
         'groups_id': fields.many2many('res.groups', 'ir_ui_menu_group_rel',
             'menu_id', 'gid', 'Groups', help="If you have groups, the visibility of this menu will be based on these groups. "\
                 "If this field is empty, Odoo will compute visibility based on the related object's read access."),
+        'hidden_groups_id': fields.many2many('res.groups', 'ir_ui_menu_hide_group_rel',
+                                             'menu_id', 'gid', 'Hidden Groups',
+                                             help="This menu will be hidden on these groups"),
         'complete_name': fields.function(_get_full_name,
             string='Full Path', type='char', size=128),
         'icon': fields.selection(tools.icons, 'Icon', size=64),
