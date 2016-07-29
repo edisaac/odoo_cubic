@@ -116,7 +116,9 @@ class account_move_line(osv.osv):
             query += ' AND '+obj+'.account_id IN %(child_ids)s'
 
         if context.get('analytic_account_id'):
-            child_ids = self.pool.get('account.analytic.account')._child_compute(cr, uid, [context['analytic_account_id']], False, [], context=context)[context['analytic_account_id']]
+            analytic_context = context.copy()
+            analytic_context['analytic_child_bottom'] = True
+            child_ids = self.pool.get('account.analytic.account')._child_compute(cr, uid, [context['analytic_account_id']], False, [], context=analytic_context)[context['analytic_account_id']]
             query_params['analytic_account_ids'] = tuple(child_ids+[context.get('analytic_account_id')])
             query += ' AND ' + obj + '.analytic_account_id IN %(analytic_account_ids)s'
 

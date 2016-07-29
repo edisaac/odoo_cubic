@@ -211,9 +211,11 @@ class crossovered_budget_lines(osv.osv):
             move_amount = line.general_budget_id.value_type == 'quantity' and 'quantity' or 'debit-credit'
             analytic_account_ids = []
             if line.analytic_account_id:
+                analytic_context = context.copy()
+                analytic_context['analytic_child_bottom'] = True
                 analytic_account_ids = \
                 self.pool.get('account.analytic.account')._child_compute(cr, uid, [line.analytic_account_id.id],
-                                                                         False, [], context=context)[line.analytic_account_id.id]
+                                                                         False, [], context=analytic_context)[line.analytic_account_id.id]
                 analytic_account_ids = tuple(analytic_account_ids + [line.analytic_account_id.id])
 
             if line.analytic_account_id.id and line.position_restrict:
