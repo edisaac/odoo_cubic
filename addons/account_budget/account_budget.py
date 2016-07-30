@@ -364,11 +364,11 @@ class crossovered_budget_lines(osv.osv):
                                                                                                       'position_restrict',
                                                                                                       'coefficient'],10)}),
         'theoritical_amount':fields.function(_theo, string='Theoretical Amount', type='float', digits_compute=dp.get_precision('Account')),
-        'available_amount': fields.function(_avail, string='Available Amount', type='float', digits_compute=dp.get_precision('Account')),
+        'available_amount': fields.function(_avail, string='Pending Amount', type='float', digits_compute=dp.get_precision('Account')),
         'percentage':fields.function(_perc, string='Percentage', type='float'),
         'company_id': fields.related('crossovered_budget_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'position_restrict': fields.boolean("Position Restricted"),
-        'coefficient': fields.float("Coefficient", required=True),
+        'coefficient': fields.float("Coefficient", required=True, digits=(16,8)),
         'state': fields.related('crossovered_budget_id','state', string="State", type="char", readonly=True, store=True)
     }
     _defaults = {

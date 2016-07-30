@@ -275,8 +275,8 @@
                             <field name="planned_amount"/>
                             <field name="practical_amount"/>
                             <field name="theoritical_amount"/>
-                            <field name="available_amount"/>
                             <field name="percentage"/>
+                            <field name="available_amount"/>
                             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                         </group>
                     </sheet>
