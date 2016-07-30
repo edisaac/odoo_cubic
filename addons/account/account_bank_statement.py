@@ -940,7 +940,7 @@ class account_bank_statement_line(osv.osv):
         'partner_name': fields.char('Partner Name', help="This field is used to record the third party name when importing bank statement in electronic format, when the partner doesn't exist yet in the database (or cannot be found)."),
         'ref': fields.char('Reference'),
         'note': fields.text('Notes'),
-        'sequence': fields.integer('Sequence', select=True, help="Gives the sequence order when displaying a list of bank statement lines."),
+        'sequence': fields.integer('#', select=True, help="Gives the sequence order when displaying a list of bank statement lines."),
         'company_id': fields.related('statement_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'journal_entry_id': fields.many2one('account.move', 'Journal Entry', copy=False),
         'amount_currency': fields.float('Amount Currency', help="The amount expressed in an optional other currency if it is a multi-currency entry.", digits_compute=dp.get_precision('Account')),

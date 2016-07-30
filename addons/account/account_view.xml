@@ -2378,7 +2378,7 @@
                         <page string="Cash Transactions" attrs="{'invisible': [('state','=','draft')]}">
                             <field name="line_ids" context="{'date':date}">
                                 <tree editable="bottom" string="Statement lines" colors="grey:journal_entry_id!=False">
-                                    <field name="sequence" invisible="1"/>
+                                    <field name="sequence" string="#" invisible="0"/>
                                     <field name="journal_entry_id" invisible="1"/>
                                     <field name="date" attrs="{'readonly' : [('journal_entry_id', '!=', False)] }"/>
                                     <field name="name" attrs="{'readonly' : [('journal_entry_id', '!=', False)] }"/>
@@ -2504,13 +2504,13 @@
             <field name="act_window_id" ref="action_view_bank_statement_tree"/>
         </record>
         <record model="ir.actions.act_window.view" id="act_cash_statement2_all">
-            <field name="sequence" eval="1"/>
+            <field name="sequence" eval="2"/>
             <field name="view_mode">form</field>
             <field name="view_id" ref="view_bank_statement_form2"/>
             <field name="act_window_id" ref="action_view_bank_statement_tree"/>
         </record>
         <record model="ir.actions.act_window.view" id="act_cash_statement3_all">
-            <field name="sequence" eval="1"/>
+            <field name="sequence" eval="3"/>
             <field name="view_mode">graph</field>
             <field name="view_id" ref="account_cash_statement_graph"/>
             <field name="act_window_id" ref="action_view_bank_statement_tree"/>
