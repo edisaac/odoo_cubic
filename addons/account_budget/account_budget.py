@@ -46,6 +46,8 @@ class account_budget_post_type(osv.osv):
     _columns = {
         'code': fields.char('Code', size=64),
         'name': fields.char('Name', required=True),
+        'post_ids': fields.one2many('account.budget.post','type_post_id', string="Budgetary Position"),
+        'financial_report_id': fields.many2one('account.financial.report', string="Financial Report"),
     }
     _order = 'code,name'
 
@@ -124,12 +126,14 @@ class account_budget_post(osv.osv):
 class budget_budget(osv.osv):
     _name = "budget.budget"
     _decription = "Main Budget"
+    _inherit = ['mail.thread']
 
     _columns = {
         'code': fields.char('Code', size=16),
         'name': fields.char('Name', required=True),
         'type': fields.selection([('control', 'Control'),
                                     ('view', 'View')], 'Type', required=True),
+        'budget_ids': fields.one2many('crossovered.budget', 'budget_id', string="Budgets"),
     }
     _defaults = {
         'type': 'control',
