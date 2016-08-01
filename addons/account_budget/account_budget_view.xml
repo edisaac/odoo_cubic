@@ -248,6 +248,7 @@
                                 <div>
                                     <field name="date_from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/> - 
                                     <field name="date_to" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1"/>
+                                    <button name="line_update_date" type="object" string="(update)" class="oe_link oe_edit_only oe_inline" help="Update the dates of all lines"/>
                                 </div>
                                 <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                             </group>
@@ -265,8 +266,8 @@
                                         <field name="planned_amount" sum="Planned Amount"/>
                                         <field name="practical_amount" sum="Practical Amount"/>
                                         <field name="theoritical_amount" sum="Theoretical Amount"/>
-                                        <field name="available_amount" sum="Available Amount"/>
                                         <field name="percentage"/>
+                                        <field name="available_amount" sum="Available Amount"/>
                                     </tree>
                                     <form string="Budget Lines">
                                         <group>
@@ -303,8 +304,9 @@
             <field name="model">crossovered.budget</field>
             <field name="arch" type="xml">
                <tree colors="blue:state == 'draft';gray:state in ('done','cancel');black:state in ('confirm','validate')" string="Budget">
-                    <field name="name" colspan="1"/>
-                    <field name="code" colspan="1"/>
+                    <field name="budget_id" invisible="1"/>
+                    <field name="name"/>
+                    <field name="code"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
                     <field name="company_id" widget="selection" groups="base.group_multi_company"/>
@@ -320,11 +322,20 @@
            <field name="arch" type="xml">
                <search string="Budget">
                     <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Budget"/>
-                    <field name="date_from"/>
+                   <field name="budget_id"/>
+                   <field name="date_from"/>
                     <field name="date_to"/>
+                   <filter string="Control" icon="terp-document-new" domain="[('budget_id.type','=','control')]" help="Control Budgets"/>
+                   <filter string="View" icon="terp-document-new" domain="[('budget_id.type','=','view')]" help="View Budgets"/>
+                   <separator/>
                     <filter string="Draft" icon="terp-document-new" domain="[('state','=','draft')]" help="Draft Budgets"/>
                     <filter string="To Approve" icon="terp-camera_test" domain="[('state','=','confirm')]" help="To Approve Budgets" />
-                    <field name="state"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Main Budget" context="{'group_by':'budget_id'}"/>
+                        <filter string="State" context="{'group_by':'state'}"/>
+                        <separator/>
+                        <filter string="Start Month" context="{'group_by':'date_from'}"/>
+                    </group>
                 </search>
             </field>
         </record>
@@ -364,6 +375,7 @@
                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                     <field name="crossovered_budget_id" invisible="1"/>
                     <field name="main_budget_id" invisible="1"/>
+                    <field name="main_budget_type" invisible="1"/>
                     <field name="general_budget_id"/>
                     <field name="name"/>
                     <field name="date_from"/>
@@ -372,8 +384,8 @@
                     <field name="planned_amount"/>
                     <field name="practical_amount"/>
                     <field name="theoritical_amount"/>
-                    <field name="available_amount"/>
                     <field name="percentage"/>
+                    <field name="available_amount"/>
                     <field name="type_budget_id" invisible="1"/>
                 </tree>
             </field>
@@ -425,10 +437,15 @@
                 <search string="Budget Lines">
                     <field name="name" filter_domain="['|','|','|',(name,'ilike',self),('crossovered_budget_id.name','ilike',self),('crossovered_budget_id.code','ilike',self),('main_budget_id.name','ilike',self)]"/>
                     <separator/>
+                    <filter string="Control" icon="terp-document-new" domain="[('main_budget_type','=','control')]" help="Control Budgets"/>
+                   <filter string="View" icon="terp-document-new" domain="[('main_budget_type','=','view')]" help="View Budgets"/>
+                   <separator/>
+                    <filter string="Amount" icon="terp-document-new" domain="[('post_value_type','=','amount')]" help="Amount Values"/>
+                   <filter string="Quantity" icon="terp-document-new" domain="[('post_value_type','=','quantity')]" help="Quantities Values"/>
+                   <separator/>
                     <filter name="draft" string="Draft" domain="[('state','=','draft')]" help="Draft"/>
                     <filter name="confirm" string="Confirm" domain="[('state','=','confirm')]" help="Confirm"/>
                     <filter name="validate" string="Validate" domain="[('state','=','validate')]" help="Validate"/>
-                    <filter name="done" string="Done" domain="[('state','=','done')]" help="Done"/>
                     <separator/>
                     <field name="main_budget_id"/>
                     <field name="crossovered_budget_id"/>
@@ -441,7 +458,9 @@
                         <filter string="Analytic Account" context="{'group_by':'analytic_account_id'}"/>
                         <filter string="Position Type" context="{'group_by':'type_budget_id'}"/>
                         <filter string="Position Budget" context="{'group_by':'general_budget_id'}"/>
-                        <filter string="Status" context="{'group_by':'state'}"/>
+                        <separator/>
+                        <filter string="State" context="{'group_by':'state'}"/>
+                        <filter string="Value Type" context="{'group_by':'post_value_type'}"/>
                         <separator/>
                         <filter string="Start Month" context="{'group_by':'date_from'}"/>
                         <filter string="Month Paid" context="{'group_by':'paid_date'}"/>

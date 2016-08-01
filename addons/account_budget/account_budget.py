@@ -164,35 +164,42 @@ class crossovered_budget(osv.osv):
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.budget.post', context=c)
     }
 
-    def budget_confirm(self, cr, uid, ids, *args):
+    def line_update_date(self, cr, uid, ids, context=None):
+        for budget in self.browse(cr, uid, ids, context=context):
+            self.pool['crossovered.budget.lines'].write(cr, uid, [l.id for l in budget.crossovered_budget_line],
+                                                        {'date_from': budget.date_from ,'date_to': budget.date_to},
+                                                        context=context)
+        return True
+
+    def budget_confirm(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {
             'state': 'confirm'
-        })
+        }, context=context)
         return True
 
-    def budget_draft(self, cr, uid, ids, *args):
+    def budget_draft(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {
             'state': 'draft'
-        })
+        }, context=context)
         return True
 
-    def budget_validate(self, cr, uid, ids, *args):
+    def budget_validate(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {
             'state': 'validate',
             'validating_user_id': uid,
-        })
+        }, context=context)
         return True
 
-    def budget_cancel(self, cr, uid, ids, *args):
+    def budget_cancel(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {
             'state': 'cancel'
-        })
+        }, context=context)
         return True
 
-    def budget_done(self, cr, uid, ids, *args):
+    def budget_done(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {
             'state': 'done'
-        })
+        }, context=context)
         return True
 
 
@@ -336,6 +343,13 @@ class crossovered_budget_lines(osv.osv):
                                                    context=context)
         return budget_line_ids
 
+    def _get_line_from_main_budget(self, cr, uid, ids, context=None):
+        budget_line_ids = []
+        for main_budget in self.pool['budget.budget'].browse(cr, uid, ids, context=context):
+            for budget in main_budget.budget_ids:
+                budget_line_ids += [l.id for l in budget.crossovered_budget_line]
+        return budget_line_ids
+
     _name = "crossovered.budget.lines"
     _description = "Budget Line"
     _columns = {
@@ -343,11 +357,34 @@ class crossovered_budget_lines(osv.osv):
         'name': fields.char('Reference'),
         'crossovered_budget_id': fields.many2one('crossovered.budget', 'Budget', ondelete='cascade', select=True, required=True),
         'main_budget_id': fields.related('crossovered_budget_id','budget_id', string="Main Budget", type="many2one",
-                                         relation="budget.budget", readonly=True, store=True),
+                                         relation="budget.budget", readonly=True, store={
+                'crossovered.budget': (lambda s, cr, u, i, c: [e for j in
+                                                               [[l.id for l in b.crossovered_budget_line] for b in
+                                                                s.pool['crossovered.budget'].browse(cr, u, i)] for e in
+                                                               j], ['budget_id'], 10),
+                'crossovered.budget.lines': (lambda s, cr, u, i, c: i, ['crossovered_budget_id'], 10)
+            }),
+        'main_budget_type': fields.related('crossovered_budget_id', 'budget_id', 'type', string="Main Budget Tyupe",
+                                           type="char", readonly=True, store={
+                'budget.budget': (_get_line_from_main_budget, ['type'], 10),
+                'crossovered.budget': (lambda  s,cr,u,i,c: [e for j in [[l.id for l in b.crossovered_budget_line] for b in s.pool['crossovered.budget'].browse(cr,u,i)] for e in j],['budget_id'],10),
+                'crossovered.budget.lines': (lambda s, cr, u, i, c: i, ['crossovered_budget_id'], 10)
+            }),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account'),
         'general_budget_id': fields.many2one('account.budget.post', 'Budgetary Position',required=True),
         'type_budget_id': fields.related('general_budget_id','type_post_id', string="Budget Type", type="many2one",
-                                         relation="account.budget.post.type", readonly= True, store=True),
+                                         relation="account.budget.post.type", readonly= True, store={
+                'account.budget.post': (lambda  s,cr,u,i,c: [e for j in [[l.id for l in b.crossovered_budget_line] for b in s.pool['account.budget.post'].browse(cr,u,i)] for e in j], ['type_post_id'], 10),
+                'crossovered.budget.lines': (lambda s, cr, u, i, c: i, ['general_budget_id'], 10)
+            }),
+        'post_value_type': fields.related('general_budget_id', 'value_type', string="Position Value Type", type="char",
+                                         readonly=True, store={
+                'account.budget.post': (lambda s, cr, u, i, c: [e for j in
+                                                                [[l.id for l in b.crossovered_budget_line] for b in
+                                                                 s.pool['account.budget.post'].browse(cr, u, i)] for e
+                                                                in j], ['value_type'], 10),
+                'crossovered.budget.lines': (lambda s, cr, u, i, c: i, ['general_budget_id'], 10)
+            }),
         'date_from': fields.date('Start Date', required=True),
         'date_to': fields.date('End Date', required=True),
         'paid_date': fields.date('Paid Date'),
@@ -373,13 +410,41 @@ class crossovered_budget_lines(osv.osv):
         'company_id': fields.related('crossovered_budget_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'position_restrict': fields.boolean("Position Restricted"),
         'coefficient': fields.float("Coefficient", required=True, digits=(16,8)),
-        'state': fields.related('crossovered_budget_id','state', string="State", type="char", readonly=True, store=True)
+        'state': fields.related('crossovered_budget_id','state', string="State", type="char", readonly=True, store={
+            'crossovered.budget': (lambda s, cr, u, i, c: [e for j in
+                                                           [[l.id for l in b.crossovered_budget_line] for b in
+                                                            s.pool['crossovered.budget'].browse(cr, u, i)] for e in j],
+                                   ['state'], 10),
+            'crossovered.budget.lines': (lambda s, cr, u, i, c: i, ['crossovered_budget_id'], 10)
+        })
     }
     _defaults = {
         'sequence': 5,
         'coefficient': 1.0,
     }
     _order = 'sequence,name'
+
+    def _check_overload(self, cr, uid, ids, context=None):
+        for line in self.browse(cr, uid, ids, context=context):
+            if line.main_budget_type == 'control':
+                cr.execute("select id from crossovered_budget_lines "
+                           "where analytic_account_id= %s"
+                           "  and general_budget_id= %s"
+                           "  and main_budget_type='control' and id <> %s"
+                           "  and ((date_from >= %s and date_from <= %s)"
+                           "      or (date_to >= %s and date_to <= %s))",
+                           (line.analytic_account_id.id,
+                            line.general_budget_id.id,
+                            line.id,
+                            line.date_from, line.date_to,
+                            line.date_from, line.date_to))
+                result = cr.fetchone()
+                if result:
+                    return False
+        return True
+
+    _constraints = [(_check_overload, "Overload of control budgets in lines for budgetary position  and analytic account with same dates.",
+                     ['main_budget_type', 'analytic_account_id', 'general_budget_id', 'date_from', 'date_to'])]
 
 
 class account_account(osv.osv):
