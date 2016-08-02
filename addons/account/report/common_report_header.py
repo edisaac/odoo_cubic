@@ -84,9 +84,14 @@ class common_report_header(object):
         return ''
 
     def _get_account(self, data):
-        if data.get('form', False) and data['form'].get('chart_account_id', False):
-            return self.pool.get('account.account').browse(self.cr, self.uid, data['form']['chart_account_id']).name
-        return ''
+        res = ''
+        account_obj = self.pool.get('account.account')
+        if data.get('form', False):
+            if data['form'].get('multiplan', '') == 'financial':
+                res = ", ".join([c.name for c in account_obj.browse(self.cr, self.uid, data['form']['multiplan_financial_ids'])])
+            elif data['form'].get('chart_account_id', False):
+                res = account_obj.browse(self.cr, self.uid, data['form']['chart_account_id']).name
+        return res
 
     def _get_sortby(self, data):
         raise (_('Error!'), _('Not implemented.'))
@@ -129,10 +134,14 @@ class common_report_header(object):
         return ''
 
     def _get_analytic(self, data):
-        if data.get('form', False) and data['form'].get('analytic_account_id', False):
-            return self.pool.get('account.analytic.account').browse(self.cr, self.uid,
-                                                           data['form']['analytic_account_id'][0]).complete_name
-        return ''
+        res = ''
+        analytic_obj = self.pool.get('account.analytic.account')
+        if data.get('form', False):
+            if data['form'].get('multiplan','') == 'analytic':
+                res = ", ".join([a.complete_name for a in analytic_obj.browse(self.cr, self.uid, data['form']['multiplan_analytic_ids'])])
+            elif data['form'].get('analytic_account_id', False):
+                res = analytic_obj.browse(self.cr, self.uid, data['form']['analytic_account_id'][0]).complete_name
+        return res
 
     def _get_journal(self, data):
         codes = []

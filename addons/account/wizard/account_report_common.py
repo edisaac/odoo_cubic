@@ -177,9 +177,7 @@ class account_common_report(osv.osv_memory):
         data = {}
         data['ids'] = context.get('active_ids', [])
         data['model'] = context.get('active_model', 'ir.ui.menu')
-        data['form'] = self.read(cr, uid, ids, ['date_from',  'date_to',  'fiscalyear_id', 'journal_ids', 'period_from',
-                                                'period_to',  'filter',  'chart_account_id', 'target_move',
-                                                'analytic_account_id'], context=context)[0]
+        data['form'] = self.read(cr, uid, ids, [], context=context)[0]
         for field in ['fiscalyear_id', 'chart_account_id', 'period_from', 'period_to']:
             if isinstance(data['form'][field], tuple):
                 data['form'][field] = data['form'][field][0]

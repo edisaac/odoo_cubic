@@ -57,6 +57,29 @@ class account_financial_report(osv.osv):
             res += self._get_children_by_order(cr, uid, ids2, context=context)
         return res
 
+    def _get_multiplan_list(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        local_context = context.copy()
+        vals = dict((i, []) for i in ids)
+        if context.get("multiplan", '') == 'financial':
+            for chart_account_id in context.get('multiplan_financial_ids',[]):
+                local_context['chart_account_id'] = chart_account_id
+                for k, v in self._get_balance(cr, uid, ids, ['balance'], [], context=local_context).iteritems():
+                    vals[k] += [v['balance']]
+        elif context.get("multiplan", '') == 'analytic':
+            for analytic_id in context.get('multiplan_analytic_ids',[]):
+                local_context['analytic_account_id'] = analytic_id
+                for k, v in self._get_balance(cr, uid, ids, ['balance'], [], context=local_context).iteritems():
+                    vals[k] += [v['balance']]
+        return vals
+
+    def _get_multiplan(self, cr, uid, ids, field_names, args, context=None):
+        res = self._get_multiplan_list(cr, uid, ids, context=context)
+        for k, v in res.iteritems():
+            res[k] = str(v)
+        return res
+
     def _get_balance(self, cr, uid, ids, field_names, args, context=None):
         '''returns a dictionary with key=the ID of a record and value=the balance amount 
            computed for this record. If the record is of type :
@@ -122,6 +145,7 @@ class account_financial_report(osv.osv):
         'balance': fields.function(_get_balance, 'Balance', multi='balance'),
         'debit': fields.function(_get_balance, 'Debit', multi='balance'),
         'credit': fields.function(_get_balance, 'Credit', multi="balance"),
+        'multiplan': fields.function(_get_multiplan, 'Multiplan List', type="char"),
         'level': fields.function(_get_level, string='Level', store=True, type='integer'),
         'type': fields.selection([
             ('sum','View'),
