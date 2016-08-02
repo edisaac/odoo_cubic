@@ -127,17 +127,19 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                             credit += account.credit
                             account_type = account.type
                             multiplan_val = multiplan and ['' for v in multiplan] or []
+                            if multiplan:
+                                multiplan_val[
+                                    i] = account.balance != 0 and account.balance * report.sign or account.balance
+                                multiplan_vals[i] += account.balance
+                                if account.id in account_cache:
+                                    account_vals[account_cache[account.id]]['multiplan'][i] = multiplan_val[i]
+                                    account_vals[account_cache[account.id]]['balance'] = sum(
+                                        [v or 0.0 for v in account_vals[account_cache[account.id]]['multiplan']])
+                                    continue
                             if data['form']['enable_filter']:
                                 balance_cmp += account_obj.browse(self.cr, self.uid, account.id, context=comparison_context).balance
                             if report.display_detail == 'detail_with_hierarchy':
                                 account_flag = False
-                                if multiplan:
-                                    multiplan_val[i] = account.balance != 0 and account.balance * report.sign or account.balance
-                                    multiplan_vals[i] += account.balance
-                                    if account.id in account_cache:
-                                        account_vals[account_cache[account.id]]['multiplan'][i] = multiplan_val[i]
-                                        account_vals[account_cache[account.id]]['balance'] = sum([v or 0.0 for v in account_vals[account_cache[account.id]]['multiplan']])
-                                        continue
                                 account_val = {
                                     'name': account.code + ' ' + account.name,
                                     'balance': account.balance != 0 and account.balance * report.sign or account.balance,
