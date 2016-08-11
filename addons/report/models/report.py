@@ -100,7 +100,7 @@ class Report(osv.Model):
 
         :param doc_id: id of the record to translate
         :param model: model of the record to translate
-        :param lang_field': field of the record containing the lang
+        :param lang_field': field of the record containing the lang or None to user's language
         :param template: name of the template to translate into the lang_field
         """
         ctx = context.copy()
@@ -111,7 +111,7 @@ class Report(osv.Model):
             qcontext['o'] = doc
         else:
             # Reach the lang we want to translate the doc into
-            ctx['lang'] = eval('doc.%s' % lang_field, {'doc': doc})
+            ctx['lang'] = lang_field and eval('doc.%s' % lang_field, {'doc': doc}) or self.pool['res.users'].browse(cr, uid, uid).lang
             qcontext['o'] = self.pool[model].browse(cr, uid, doc_id, context=ctx)
         return self.pool['ir.ui.view'].render(cr, uid, template, qcontext, context=ctx)
 

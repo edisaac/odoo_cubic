@@ -39,14 +39,17 @@ class accounting_report(osv.osv_memory):
         'date_from_cmp': fields.date("Start Date"),
         'date_to_cmp': fields.date("End Date"),
         'debit_credit': fields.boolean('Display Debit/Credit Columns', help="This option allows you to get more details about the way your balances are computed. Because it is space consuming, we do not allow to use it while doing a comparison."),
-        'financial_report_type': fields.selection([('account.report_financial', 'PDF'),
-                                         ('account.report_financial_xls', 'Excel')], 'Report Type', required=True),
+        'financial_report_type': fields.selection([('account.report_financial', 'PDF (Portrait)'),
+                                                   ('account.report_financial_landscape', 'PDF (Landscape)'),
+                                                   ('account.report_financial_xls', 'Excel')], 'Report Type', required=True),
         'label_balance': fields.char('Balance Label', required=True,
                                      help="This label will be displayed on report to show the balance computed."),
         'multiplan': fields.selection([('financial','Multiplan Financial Report'),
-                                       ('analytic','Multiplan Analytic Report')], string="Multiplan Report"),
+                                       ('analytic','Multiplan Analytic Report'),
+                                       ('period','Periods Report')], string="Multiplan Report"),
         'multiplan_financial_ids': fields.many2many("account.account", string="Chart Accounts", domain=[('parent_id','=',False)]),
         'multiplan_analytic_ids': fields.many2many("account.analytic.account", string="Analytic Accounts", domain=[('type', '!=','template')]),
+        'multiplan_period_ids': fields.many2many("account.period", string="Periods"),
     }
 
     def _get_account_report(self, cr, uid, context=None):
@@ -93,6 +96,7 @@ class accounting_report(osv.osv_memory):
         if res['multiplan']:
             res['multiplan_financial_ids'] = data['form'].get('multiplan_financial_ids',[])
             res['multiplan_analytic_ids'] = data['form'].get('multiplan_analytic_ids',[])
+            res['multiplan_period_ids'] = data['form'].get('multiplan_period_ids', [])
         return res
 
     def check_report(self, cr, uid, ids, context=None):
@@ -103,7 +107,7 @@ class accounting_report(osv.osv_memory):
         data['form'] = self.read(cr, uid, ids, ['account_report_id', 'date_from_cmp',  'date_to_cmp',  'fiscalyear_id_cmp',
                                                 'journal_ids', 'period_from_cmp', 'period_to_cmp',  'filter_cmp',  'chart_account_id',
                                                 'target_move', 'analytic_account_id', 'label_balance', 'financial_report_type',
-                                                'multiplan', 'multiplan_financial_ids', 'multiplan_analytic_ids'], context=context)[0]
+                                                'multiplan', 'multiplan_financial_ids', 'multiplan_analytic_ids', 'multiplan_period_ids'], context=context)[0]
         for field in ['fiscalyear_id_cmp', 'chart_account_id', 'period_from_cmp', 'period_to_cmp', 'account_report_id']:
             if isinstance(data['form'][field], tuple):
                 data['form'][field] = data['form'][field][0]
@@ -115,7 +119,7 @@ class accounting_report(osv.osv_memory):
         data['form'].update(self.read(cr, uid, ids, ['date_from_cmp',  'debit_credit', 'date_to_cmp',  'fiscalyear_id_cmp',
                                                      'period_from_cmp', 'period_to_cmp',  'filter_cmp', 'account_report_id',
                                                      'enable_filter', 'label_filter','target_move', 'financial_report_type', 'label_balance',
-                                                     'multiplan', 'multiplan_financial_ids', 'multiplan_analytic_ids'], context=context)[0])
+                                                     'multiplan', 'multiplan_financial_ids', 'multiplan_analytic_ids', 'multiplan_period_ids'], context=context)[0])
         return self.pool['report'].get_action(cr, uid, [], data['form']['financial_report_type'], data=data, context=context)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

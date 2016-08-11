@@ -72,6 +72,15 @@ class account_financial_report(osv.osv):
                 local_context['analytic_account_id'] = analytic_id
                 for k, v in self._get_balance(cr, uid, ids, ['balance'], [], context=local_context).iteritems():
                     vals[k] += [v['balance']]
+        elif context.get("multiplan", '') == 'period':
+            for period_id in context.get('multiplan_period_ids', []):
+                for ff in ['fiscalyear', 'date_from', 'date_to']:
+                    if local_context.has_key(ff):
+                        del local_context[ff]
+                local_context['period_from'] = period_id
+                local_context['period_to'] = period_id
+                for k, v in self._get_balance(cr, uid, ids, ['balance'], [], context=local_context).iteritems():
+                    vals[k] += [v['balance']]
         return vals
 
     def _get_multiplan(self, cr, uid, ids, field_names, args, context=None):

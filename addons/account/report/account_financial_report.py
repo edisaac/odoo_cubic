@@ -57,11 +57,14 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
         res = []
         analytic_obj = self.pool.get('account.analytic.account')
         account_obj = self.pool.get('account.account')
+        period_obj = self.pool.get('account.period')
         if data.get('form', False):
             if data['form'].get('multiplan', '') == 'analytic':
                 res += [a.complete_name for a in analytic_obj.browse(self.cr, self.uid, data['form']['multiplan_analytic_ids'])]
             elif data['form'].get('multiplan', '') == 'financial':
                 res += [c.name for c in account_obj.browse(self.cr, self.uid, data['form']['multiplan_financial_ids'])]
+            elif data['form'].get('multiplan', '') == 'period':
+                res += [c.name for c in period_obj.browse(self.cr, self.uid, data['form']['multiplan_period_ids'])]
         return res
 
     def get_lines(self, data):
@@ -75,7 +78,7 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
             multiplan = eval(report.multiplan)
             vals = {
                 'name': report.name,
-                'balance': sum(multiplan) if multiplan else (report.balance * report.sign or 0.0),
+                'balance': sum(multiplan) if multiplan else (report.balance * report.sign),
                 'type': 'report',
                 'level': bool(report.style_overwrite) and report.style_overwrite or report.level,
                 'account_type': report.type =='sum' and 'view' or False, #used to underline the financial report balances
@@ -101,6 +104,8 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                 multiplan_ids = used_context['multiplan_financial_ids']
             elif used_context['multiplan'] == 'analytic':
                 multiplan_ids = used_context['multiplan_analytic_ids']
+            elif used_context['multiplan'] == 'period':
+                multiplan_ids = used_context['multiplan_period_ids']
 
             if report.type == 'account_type' and report.account_type_ids:
                 for report_type in report.account_type_ids:
@@ -120,6 +125,16 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                         elif used_context['multiplan'] == 'analytic':
                             used_context['analytic_account_id'] = multiplan_id
                             comparison_context['analytic_account_id'] = multiplan_id
+                        elif used_context['multiplan'] == 'period':
+                            for ff in ['fiscalyear','date_from','date_to']:
+                                if used_context.has_key(ff):
+                                    del used_context[ff]
+                                if comparison_context.has_key(ff):
+                                    del comparison_context[ff]
+                            used_context['period_from'] = multiplan_id
+                            used_context['period_to'] = multiplan_id
+                            comparison_context['period_from'] = multiplan_id
+                            comparison_context['period_to'] = multiplan_id
 
                         for account in account_obj.browse(self.cr, self.uid, account_obj.search(self.cr, self.uid, account_dom), context=used_context):
                             balance += account.balance
@@ -128,13 +143,11 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                             account_type = account.type
                             multiplan_val = multiplan and ['' for v in multiplan] or []
                             if multiplan:
-                                multiplan_val[
-                                    i] = account.balance != 0 and account.balance * report.sign or account.balance
-                                multiplan_vals[i] += account.balance
+                                multiplan_val[i] = account.balance * report.sign
+                                multiplan_vals[i] += account.balance * report.sign
                                 if account.id in account_cache:
                                     account_vals[account_cache[account.id]]['multiplan'][i] = multiplan_val[i]
-                                    account_vals[account_cache[account.id]]['balance'] = sum(
-                                        [v or 0.0 for v in account_vals[account_cache[account.id]]['multiplan']])
+                                    account_vals[account_cache[account.id]]['balance'] = sum([v or 0.0 for v in account_vals[account_cache[account.id]]['multiplan']])
                                     continue
                             if data['form']['enable_filter']:
                                 balance_cmp += account_obj.browse(self.cr, self.uid, account.id, context=comparison_context).balance
@@ -142,7 +155,7 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                                 account_flag = False
                                 account_val = {
                                     'name': account.code + ' ' + account.name,
-                                    'balance': account.balance != 0 and account.balance * report.sign or account.balance,
+                                    'balance': account.balance * report.sign,
                                     'type': 'account',
                                     'level': 6,
                                     'account_type': account.type,
@@ -165,7 +178,7 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                                     account_cache[account.id] = len(account_vals) - 1
                     vals = {
                         'name': report_type.name,
-                        'balance': sum(multiplan_vals) if multiplan else (balance != 0 and balance * report.sign or balance),
+                        'balance': sum(multiplan_vals) if multiplan else (balance * report.sign),
                         'type': 'account',
                         'level': 6 if report.display_detail == 'detail_flat' else 4,
                         'account_type': account_type,
@@ -203,10 +216,10 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                         flag = False
                         multiplan_val = multiplan and ['' for v in multiplan] or []
                         if multiplan:
-                            multiplan_val[i] = account.balance != 0 and account.balance * report.sign or account.balance
+                            multiplan_val[i] = account.balance * report.sign
                         vals = {
                             'name': account.code + ' ' + account.name,
-                            'balance':  account.balance != 0 and account.balance * report.sign or account.balance,
+                            'balance':  account.balance * report.sign,
                             'type': 'account',
                             'level': report.display_detail == 'detail_with_hierarchy' and min(account.level + 1,6) or 6, #account.level + 1
                             'account_type': account.type,
@@ -231,6 +244,12 @@ class report_financial(osv.AbstractModel):
     _name = 'report.account.report_financial'
     _inherit = 'report.abstract_report'
     _template = 'account.report_financial'
+    _wrapped_report_class = report_account_common
+
+class report_financial(osv.AbstractModel):
+    _name = 'report.account.report_financial_landscape'
+    _inherit = 'report.abstract_report'
+    _template = 'account.report_financial_landscape'
     _wrapped_report_class = report_account_common
 
 class report_financial_xls(osv.AbstractModel):

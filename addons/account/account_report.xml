@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+
+        <record id="paperformat_account_landscape" model="report.paperformat">
+			<field name="name">A4 (landscape)</field>
+			<field name="default" eval="True"/>
+			<field name="format">A4</field>
+			<field name="orientation">Landscape</field>
+			<field name="margin_top">40</field>
+			<field name="margin_bottom">23</field>
+			<field name="margin_left">7</field>
+			<field name="margin_right">7</field>
+			<field name="header_line" eval="False"/>
+			<field name="header_spacing">35</field>
+			<field name="dpi">90</field>
+		</record>
+
         <report 
             id="account_transfers"
             model="account.transfer"
@@ -144,6 +159,19 @@
             file="account.report_financial"
             menu="False"
         />
+
+        <report
+            id="action_report_financial_landscape"
+            model="account.financial.report"
+            string="Financial report (landscape)"
+            report_type="qweb-pdf"
+            name="account.report_financial_landscape"
+            file="account.report_financial_landscape"
+            menu="False"
+        />
+        <record id="account.action_report_financial_landscape" model="ir.actions.report.xml">
+			<field name="paperformat_id" ref="account.paperformat_account_landscape" />
+		</record>
 
         <report
             id="action_report_financial_xls"

@@ -18,6 +18,8 @@
                     <field name="multiplan_financial_ids" attrs="{'invisible':['|',('multiplan','!=','financial'),('enable_filter','=',True)]}"/>
                     <separator string="Analytic Accounts" attrs="{'invisible':['|',('multiplan','!=','analytic'),('enable_filter','=',True)]}"/>
                     <field name="multiplan_analytic_ids" attrs="{'invisible':['|',('multiplan','!=','analytic'),('enable_filter','=',True)]}"/>
+                    <separator string="Periods" attrs="{'invisible':['|',('multiplan','!=','period'),('enable_filter','=',True)]}"/>
+                    <field name="multiplan_period_ids" attrs="{'invisible':['|',('multiplan','!=','period'),('enable_filter','=',True)]}"/>
                 </xpath>
                 <xpath expr="//notebook/page[@string='Filters']" position="after">
                     <page string="Comparison" attrs="{'invisible': [('enable_filter','=',False)]}">
