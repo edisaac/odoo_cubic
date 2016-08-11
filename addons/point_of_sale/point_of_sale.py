@@ -753,7 +753,7 @@ class pos_order(osv.osv):
         bsl_obj = self.pool.get("account.bank.statement.line")
         if 'partner_id' in vals:
             for posorder in self.browse(cr, uid, ids, context=context):
-                if vals['partner_id'] != posorder.invoice_id.partner_id.id:
+                if vals['partner_id'] != posorder.invoice_id.partner_id.id and vals.get('state',posorder.state) <> 'draft':
                     raise osv.except_osv( _('Error!'), _("You cannot change the partner of a POS order for which an invoice has already been issued."))
                 if vals['partner_id']:
                     p_id = partner_obj.browse(cr, uid, vals['partner_id'], context=context)

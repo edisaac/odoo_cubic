@@ -299,7 +299,7 @@ class stock_landed_cost(osv.osv):
         return cost.write({'state': 'cancel'})
 
     def create(self, cr, uid, vals, context=None):
-        if vals['name'] == '/':
+        if vals.get('name','/') == '/':
             vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'stock.landed.cost')
         return super(stock_landed_cost, self).create(cr, uid, vals, context=context)
     
