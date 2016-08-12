@@ -35,6 +35,9 @@
                         <group name="others">
                             <field name="analytic_account_id"/>
                         </group>
+                        <group string="Custom Filter">
+                            <field name="custom_filter"/>
+                        </group>
                     </page>
                 </notebook>
                 <footer>

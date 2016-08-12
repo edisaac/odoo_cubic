@@ -74,7 +74,7 @@ class account_financial_report(osv.osv):
                     vals[k] += [v['balance']]
         elif context.get("multiplan", '') == 'period':
             for period_id in context.get('multiplan_period_ids', []):
-                for ff in ['fiscalyear', 'date_from', 'date_to']:
+                for ff in ['date_from', 'date_to']:
                     if local_context.has_key(ff):
                         del local_context[ff]
                 local_context['period_from'] = period_id

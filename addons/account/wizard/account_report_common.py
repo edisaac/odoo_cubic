@@ -26,6 +26,19 @@ from openerp.osv import fields, osv
 from openerp.osv.orm import setup_modifiers
 from openerp.tools.translate import _
 
+class account_report_filter(osv.osv):
+    _name = "account.report.filter"
+    _description = "Account Common Report Filter"
+    _columns = {
+        'name': fields.char('Name', required=True),
+        'model': fields.selection([('account.account','Account Model')], string="Model", required=True),
+        'domain': fields.text('Domain', required=True),
+    }
+    _defaults = {
+        'model': 'account.account',
+        'domain': "[]",
+    }
+
 class account_common_report(osv.osv_memory):
     _name = "account.common.report"
     _description = "Account Common Report"
@@ -46,6 +59,7 @@ class account_common_report(osv.osv_memory):
         'fiscalyear_id': fields.many2one('account.fiscalyear', 'Fiscal Year', help='Keep empty for all open fiscal year'),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account'),
         'filter': fields.selection([('filter_no', 'No Filters'), ('filter_date', 'Date'), ('filter_period', 'Periods')], "Filter by", required=True),
+        'custom_filter': fields.many2one('account.report.filter', string="Custom Filter"),
         'period_from': fields.many2one('account.period', 'Start Period'),
         'period_to': fields.many2one('account.period', 'End Period'),
         'journal_ids': fields.many2many('account.journal', string='Journals', required=True),
@@ -156,6 +170,7 @@ class account_common_report(osv.osv_memory):
         result['journal_ids'] = 'journal_ids' in data['form'] and data['form']['journal_ids'] or False
         result['chart_account_id'] = 'chart_account_id' in data['form'] and data['form']['chart_account_id'] or False
         result['state'] = 'target_move' in data['form'] and data['form']['target_move'] or ''
+        result['report_custom_filter'] = 'custom_filter' in data['form'] and data['form']['custom_filter'] or False
         if data['form'].get('analytic_account_id', False):
             result['analytic_account_id'] = data['form']['analytic_account_id'][0]
         if data['form']['filter'] == 'filter_date':
@@ -178,7 +193,7 @@ class account_common_report(osv.osv_memory):
         data['ids'] = context.get('active_ids', [])
         data['model'] = context.get('active_model', 'ir.ui.menu')
         data['form'] = self.read(cr, uid, ids, [], context=context)[0]
-        for field in ['fiscalyear_id', 'chart_account_id', 'period_from', 'period_to']:
+        for field in ['fiscalyear_id', 'chart_account_id', 'period_from', 'period_to', 'custom_filter']:
             if isinstance(data['form'][field], tuple):
                 data['form'][field] = data['form'][field][0]
         used_context = self._build_contexts(cr, uid, ids, data, context=context)

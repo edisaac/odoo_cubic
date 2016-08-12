@@ -81,6 +81,8 @@ class account_move_line(osv.osv):
                 period_company_id = fiscalperiod_obj.browse(cr, uid, context['period_from'], context=context).company_id.id
                 first_period = fiscalperiod_obj.search(cr, uid, [('company_id', '=', period_company_id)], order='date_start', limit=1)[0]
                 context['periods'] = fiscalperiod_obj.build_ctx_periods(cr, uid, first_period, context['period_from'])
+            elif context.get('period_from') == context.get('period_to'):
+                context['periods'] = [context.get('period_from')]
             else:
                 context['periods'] = fiscalperiod_obj.build_ctx_periods(cr, uid, context['period_from'], context['period_to'])
         if 'periods_special' in context:
@@ -96,6 +98,8 @@ class account_move_line(osv.osv):
                     first_period = fiscalperiod_obj.browse(cr, uid, period_ids[0], context=context)
                     query_params['date_start'] = first_period.date_start
                     query = obj+".state <> 'draft' AND "+obj+".period_id IN (SELECT id FROM account_period WHERE fiscalyear_id IN %(fiscalyear_ids)s AND date_start <= %(date_start)s AND id NOT IN %(period_ids)s" + periods_special + ")" + where_move_state + where_move_lines_by_date
+            elif not periods_special and len(context.get('periods')) == 1:
+                query = obj + ".state <> 'draft' AND " + obj + ".period_id = %s"%context.get('periods')[0] + where_move_state + where_move_lines_by_date
             else:
                 query = obj+".state <> 'draft' AND "+obj+".period_id IN (SELECT id FROM account_period WHERE fiscalyear_id IN %(fiscalyear_ids)s AND id IN %(period_ids)s" + periods_special + ")" + where_move_state + where_move_lines_by_date
         else:

@@ -301,6 +301,8 @@ class account_account(osv.osv):
                 order, context=context, count=count)
 
     def _get_children_and_consol(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
         #this function search for all the children and all consolidated children (recursively) of the given account ids
         ids2 = self.search(cr, uid, [('parent_id', 'child_of', ids)], context=context)
         ids3 = []
@@ -309,7 +311,12 @@ class account_account(osv.osv):
                 ids3.append(child.id)
         if ids3:
             ids3 = self._get_children_and_consol(cr, uid, ids3, context)
-        return ids2 + ids3
+        res = ids2 + ids3
+        if context.get('report_custom_filter',False):
+            custom_filter = self.pool['account.report.filter'].browse(cr, uid, context['report_custom_filter'], context=context)
+            if custom_filter.model == 'account.account':
+                res = self.search(cr, uid, [('id','in',res)] + eval(custom_filter.domain), context=context)
+        return res
 
     def __compute(self, cr, uid, ids, field_names, arg=None, context=None,
                   query='', query_params=()):

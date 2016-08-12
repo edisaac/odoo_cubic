@@ -126,7 +126,7 @@ class report_account_common(report_sxw.rml_parse, common_report_header):
                             used_context['analytic_account_id'] = multiplan_id
                             comparison_context['analytic_account_id'] = multiplan_id
                         elif used_context['multiplan'] == 'period':
-                            for ff in ['fiscalyear','date_from','date_to']:
+                            for ff in ['date_from','date_to']:
                                 if used_context.has_key(ff):
                                     del used_context[ff]
                                 if comparison_context.has_key(ff):
