@@ -33,6 +33,7 @@ class account_report_filter(osv.osv):
         'name': fields.char('Name', required=True),
         'model': fields.selection([('account.account','Account Model')], string="Model", required=True),
         'domain': fields.text('Domain', required=True),
+        'active': fields.Boolean('Active'),
     }
     _defaults = {
         'model': 'account.account',
