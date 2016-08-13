@@ -38,6 +38,7 @@ class account_report_filter(osv.osv):
     _defaults = {
         'model': 'account.account',
         'domain': "[]",
+        'active': True,
     }
 
 class account_common_report(osv.osv_memory):
