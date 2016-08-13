@@ -699,13 +699,16 @@ class mail_message(osv.Model):
         not_obj = self.pool.get('mail.notification')
         fol_obj = self.pool.get('mail.followers')
         partner_id = self.pool['res.users'].browse(cr, SUPERUSER_ID, uid, context=None).partner_id.id
+        other_ids = set([])
 
         # Read mail_message.ids to have their values
         message_values = dict((res_id, {}) for res_id in ids)
         cr.execute('SELECT DISTINCT id, model, res_id, author_id, parent_id FROM "%s" WHERE id = ANY (%%s)' % self._table, (ids,))
         for id, rmod, rid, author_id, parent_id in cr.fetchall():
             message_values[id] = {'model': rmod, 'res_id': rid, 'author_id': author_id, 'parent_id': parent_id}
-
+            other_ids.add(id)
+        if not other_ids:
+            return
         # Author condition (READ, WRITE, CREATE (private)) -> could become an ir.rule ?
         author_ids = []
         if operation == 'read' or operation == 'write':
@@ -726,7 +729,7 @@ class mail_message(osv.Model):
                              if message.get('parent_id') in not_parent_ids]
 
         # Notification condition, for read (check for received notifications and create (in message_follower_ids)) -> could become an ir.rule, but not till we do not have a many2one variable field
-        other_ids = set(ids).difference(set(author_ids), set(notified_ids))
+        other_ids = other_ids.difference(set(author_ids), set(notified_ids))
         model_record_ids = _generate_model_record_ids(message_values, other_ids)
         if operation == 'read':
             not_ids = not_obj.search(cr, SUPERUSER_ID, [
