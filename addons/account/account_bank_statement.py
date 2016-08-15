@@ -151,6 +151,8 @@ class account_bank_statement(osv.osv):
                                          'Entry lines', states={'confirm':[('readonly',True)]}),
         'state': fields.selection([('draft', 'New'),
                                    ('open','Open'), # used by cash statements
+                                   ('to_approve', 'To Approve'),
+                                   ('approve', 'Approve'),
                                    ('confirm', 'Closed')],
                                    'Status', required=True, readonly="1",
                                    copy=False,
@@ -835,6 +837,8 @@ class account_bank_statement_line(osv.osv):
             mv_line_dict['journal_id'] = st_line.journal_id.id
             mv_line_dict['company_id'] = st_line.company_id.id
             mv_line_dict['statement_id'] = st_line.statement_id.id
+            if self.pool['account.account'].browse(cr, uid, mv_line_dict['account_id'], context=context).type in ['receivable','payable']:
+                mv_line_dict['partner_id'] = st_line.partner_id.id
             if mv_line_dict.get('counterpart_move_line_id'):
                 mv_line = aml_obj.browse(cr, uid, mv_line_dict['counterpart_move_line_id'], context=context)
                 mv_line_dict['partner_id'] = mv_line.partner_id.id or st_line.partner_id.id
