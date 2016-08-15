@@ -439,7 +439,7 @@ class account_bank_statement_line(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         for item in self.browse(cr, uid, ids, context=context):
-            if item.journal_entry_id:
+            if item.journal_entry_id and not context.get('bank_voucher_not_raise',False):
                 raise osv.except_osv(
                     _('Invalid Action!'),
                     _('In order to delete a bank statement line, you must first cancel it to delete related journal items.')
@@ -837,12 +837,12 @@ class account_bank_statement_line(osv.osv):
             mv_line_dict['journal_id'] = st_line.journal_id.id
             mv_line_dict['company_id'] = st_line.company_id.id
             mv_line_dict['statement_id'] = st_line.statement_id.id
-            if self.pool['account.account'].browse(cr, uid, mv_line_dict['account_id'], context=context).type in ['receivable','payable']:
-                mv_line_dict['partner_id'] = st_line.partner_id.id
             if mv_line_dict.get('counterpart_move_line_id'):
                 mv_line = aml_obj.browse(cr, uid, mv_line_dict['counterpart_move_line_id'], context=context)
                 mv_line_dict['partner_id'] = mv_line.partner_id.id or st_line.partner_id.id
                 mv_line_dict['account_id'] = mv_line.account_id.id
+            elif self.pool['account.account'].browse(cr, uid, mv_line_dict['account_id'], context=context).type in ['receivable','payable']:
+                mv_line_dict['partner_id'] = st_line.partner_id.id
             if st_line_currency.id != company_currency.id:
                 ctx = context.copy()
                 ctx['date'] = st_line.date
