@@ -61,9 +61,10 @@ class stock_history(osv.osv):
             pph = {}
             for ph in pphs:
                 pph["%s-%s" % (ph['company_id'], ph['product_template_id'])] = ph['cost']
+            domain_product = [('product_id','in',self.pool['product.product'].search(cr,uid,[],context=context))]
 
             for line in res:
-                lines = self.search(cr, uid, line.get('__domain', []), context=context)
+                lines = self.search(cr, uid, line.get('__domain', []) + domain_product, context=context)
                 inv_value = 0.0
                 product_tmpl_obj = self.pool.get("product.template")
                 lines_rec = self.browse(cr, uid, lines, context=context)
