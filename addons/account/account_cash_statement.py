@@ -298,7 +298,7 @@ class account_cash_statement(osv.osv):
     def check_status_condition(self, cr, uid, state, journal_type='bank'):
         if journal_type == 'bank':
             return super(account_cash_statement, self).check_status_condition(cr, uid, state, journal_type)
-        return state=='open'
+        return state in ('open', 'approve')
 
     def button_confirm_cash(self, cr, uid, ids, context=None):
         absl_proxy = self.pool.get('account.bank.statement.line')

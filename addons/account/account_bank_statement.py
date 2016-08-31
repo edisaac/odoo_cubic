@@ -318,7 +318,7 @@ class account_bank_statement(osv.osv):
         return self.write(cr, uid, ids, {'state':'confirm'}, context=context)
 
     def check_status_condition(self, cr, uid, state, journal_type='bank'):
-        return state in ('draft','open')
+        return state in ('draft','open', 'approve')
 
     def button_confirm_bank(self, cr, uid, ids, context=None):
         if context is None:
