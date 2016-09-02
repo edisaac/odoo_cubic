@@ -23,10 +23,11 @@ from datetime import datetime, date
 from lxml import etree
 import time
 
-from openerp import SUPERUSER_ID
+from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.addons.resource.faces import task as Task
 from openerp.osv import fields, osv
+from openerp.tools import float_is_zero
 from openerp.tools.translate import _
 
 
@@ -658,7 +659,7 @@ class task(osv.osv):
             res[task.id] = {'effective_hours': hours.get(task.id, 0.0), 'total_hours': (task.remaining_hours or 0.0) + hours.get(task.id, 0.0)}
             res[task.id]['delay_hours'] = res[task.id]['total_hours'] - task.planned_hours
             res[task.id]['progress'] = 0.0
-            if (task.remaining_hours + hours.get(task.id, 0.0)):
+            if not float_is_zero(res[task.id]['total_hours'], precision_digits=2):
                 res[task.id]['progress'] = round(min(100.0 * hours.get(task.id, 0.0) / res[task.id]['total_hours'], 99.99),2)
             if task.stage_id and task.stage_id.fold:
                 res[task.id]['progress'] = 100.0
@@ -672,6 +673,7 @@ class task(osv.osv):
     def onchange_planned(self, cr, uid, ids, planned=0.0, effective=0.0):
         return {'value': {'remaining_hours': planned - effective}}
 
+    @api.cr_uid_ids_context
     def onchange_project(self, cr, uid, id, project_id, context=None):
         if project_id:
             project = self.pool.get('project.project').browse(cr, uid, project_id, context=context)
@@ -697,9 +699,12 @@ class task(osv.osv):
     def copy_data(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
+        current = self.browse(cr, uid, id, context=context)
         if not default.get('name'):
-            current = self.browse(cr, uid, id, context=context)
             default['name'] = _("%s (copy)") % current.name
+        if 'remaining_hours' not in default:
+            default['remaining_hours'] = current.planned_hours
+
         return super(task, self).copy_data(cr, uid, id, default, context)
 
     def _is_template(self, cr, uid, ids, field_name, arg, context=None):
@@ -843,7 +848,7 @@ class task(osv.osv):
         users_obj = self.pool.get('res.users')
         if context is None: context = {}
 
-        res = super(task, self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu=submenu)
+        res = super(task, self).fields_view_get(cr, uid, view_id, view_type, context=context, toolbar=toolbar, submenu=submenu)
 
         # read uom as admin to avoid access rights issues, e.g. for portal/share users,
         # this should be safe (no context passed to avoid side-effects)
@@ -970,7 +975,7 @@ class task(osv.osv):
     def set_remaining_time(self, cr, uid, ids, remaining_time=1.0, context=None):
         for task in self.browse(cr, uid, ids, context=context):
             if (task.stage_id and task.stage_id.sequence <= 1) or (task.planned_hours == 0.0):
-                self.write(cr, uid, [task.id], {'planned_hours': remaining_time}, context=context)
+                self.write(cr, uid, [task.id], {'planned_hours': remaining_time + task.effective_hours}, context=context)
         self.write(cr, uid, ids, {'remaining_hours': remaining_time}, context=context)
         return True
 
@@ -1057,13 +1062,20 @@ class task(osv.osv):
         context = context or {}
         result = ""
         ident = ' '*ident
+        company = self.pool["res.users"].browse(cr, uid, uid, context=context).company_id
+        duration_uom = {
+            'day(s)': 'd', 'days': 'd', 'day': 'd', 'd': 'd',
+            'month(s)': 'm', 'months': 'm', 'month': 'month', 'm': 'm',
+            'week(s)': 'w', 'weeks': 'w', 'week': 'w', 'w': 'w',
+            'hour(s)': 'H', 'hours': 'H', 'hour': 'H', 'h': 'H',
+        }.get(company.project_time_mode_id.name.lower(), "hour(s)")
         for task in tasks:
             if task.stage_id and task.stage_id.fold:
                 continue
             result += '''
 %sdef Task_%s():
-%s  todo = \"%.2fH\"
-%s  effort = \"%.2fH\"''' % (ident,task.id, ident,task.remaining_hours, ident,task.total_hours)
+%s  todo = \"%.2f%s\"
+%s  effort = \"%.2f%s\"''' % (ident, task.id, ident, task.remaining_hours, duration_uom, ident, task.total_hours, duration_uom)
             start = []
             for t2 in task.parent_ids:
                 start.append("up.Task_%s.end" % (t2.id,))

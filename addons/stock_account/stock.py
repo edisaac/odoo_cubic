@@ -129,20 +129,24 @@ class stock_move(osv.osv):
                             })[pricelist]
                 if price:
                     return price
-        return move_line.product_id.list_price
+        return move_line.product_id.lst_price
 
     def _get_invoice_line_vals(self, cr, uid, move, partner, inv_type, context=None):
         fp_obj = self.pool.get('account.fiscal.position')
         # Get account_id
+        fp = fp_obj.browse(cr, uid, context.get('fp_id')) if context.get('fp_id') else False
+        name = False
         if inv_type in ('out_invoice', 'out_refund'):
             account_id = move.product_id.property_account_income.id
             if not account_id:
                 account_id = move.product_id.categ_id.property_account_income_categ.id
+            if move.procurement_id and move.procurement_id.sale_line_id:
+                name = move.procurement_id.sale_line_id.name
         else:
             account_id = move.product_id.property_account_expense.id
             if not account_id:
                 account_id = move.product_id.categ_id.property_account_expense_categ.id
-        fiscal_position = partner.property_account_position
+        fiscal_position = fp or partner.property_account_position
         account_id = fp_obj.map_account(cr, uid, fiscal_position, account_id)
 
         # set UoS if it's a sale and the picking doesn't have one
@@ -151,18 +155,22 @@ class stock_move(osv.osv):
         if move.product_uos:
             uos_id = move.product_uos.id
             quantity = move.product_uos_qty
+
+        taxes_ids = self._get_taxes(cr, uid, move, context=context)
+
         return {
-            'name': move.name,
+            'name': name or move.name,
             'account_id': account_id,
             'product_id': move.product_id.id,
             'uos_id': uos_id,
             'quantity': quantity,
             'price_unit': self._get_price_unit_invoice(cr, uid, move, inv_type),
+            'invoice_line_tax_id': [(6, 0, taxes_ids)],
             'discount': 0.0,
             'account_analytic_id': False,
         }
 
-    def _get_moves_taxes(self, cr, uid, moves, context=None):
+    def _get_moves_taxes(self, cr, uid, moves, inv_type, context=None):
         #extra moves with the same picking_id and product_id of a move have the same taxes
         extra_move_tax = {}
         is_extra_move = {}
@@ -174,6 +182,11 @@ class stock_move(osv.osv):
             else:
                 is_extra_move[move.id] = False
         return (is_extra_move, extra_move_tax)
+
+    def action_cancel(self, cr, uid, ids, context=None):
+        res = super(stock_move, self).action_cancel(cr, uid, ids, context=context)
+        self.write(cr, uid, ids, {'invoice_state': 'none'}, context=context)
+        return res
 
 #----------------------------------------------------------
 # Picking
@@ -196,7 +209,7 @@ class stock_picking(osv.osv):
     def __get_picking_move(self, cr, uid, ids, context={}):
         res = []
         for move in self.pool.get('stock.move').browse(cr, uid, ids, context=context):
-            if move.picking_id:
+            if move.picking_id and move.invoice_state != move.picking_id.invoice_state:
                 res.append(move.picking_id.id)
         return res
 
@@ -236,7 +249,7 @@ class stock_picking(osv.osv):
             @return: object of the partner to invoice
         """
         return picking.partner_id and picking.partner_id.id
-        
+
     def action_invoice_create(self, cr, uid, ids, journal_id, group=False, type='out_invoice', context=None):
         """ Creates invoice based on the invoice state selected for picking.
         @param journal_id: Id of journal
@@ -247,7 +260,7 @@ class stock_picking(osv.osv):
         context = context or {}
         todo = {}
         for picking in self.browse(cr, uid, ids, context=context):
-            partner = self._get_partner_to_invoice(cr, uid, picking, context)
+            partner = self._get_partner_to_invoice(cr, uid, picking, dict(context, type=type))
             #grouping is based on the invoiced partner
             if group:
                 key = partner
@@ -291,7 +304,8 @@ class stock_picking(osv.osv):
         invoice_obj = self.pool.get('account.invoice')
         move_obj = self.pool.get('stock.move')
         invoices = {}
-        is_extra_move, extra_move_tax = move_obj._get_moves_taxes(cr, uid, moves, context=context)
+        is_extra_move, extra_move_tax = move_obj._get_moves_taxes(cr, uid, moves, inv_type, context=context)
+        product_price_unit = {}
         for move in moves:
             company = move.company_id
             origin = move.picking_id.name
@@ -306,15 +320,31 @@ class stock_picking(osv.osv):
                 invoices[key] = invoice_id
             else:
                 invoice = invoice_obj.browse(cr, uid, invoices[key], context=context)
+                merge_vals = {}
                 if not invoice.origin or invoice_vals['origin'] not in invoice.origin.split(', '):
                     invoice_origin = filter(None, [invoice.origin, invoice_vals['origin']])
-                    invoice.write({'origin': ', '.join(invoice_origin)})
-
-            invoice_line_vals = move_obj._get_invoice_line_vals(cr, uid, move, partner, inv_type, context=context)
+                    merge_vals['origin'] = ', '.join(invoice_origin)
+                if invoice_vals.get('name', False) and (not invoice.name or invoice_vals['name'] not in invoice.name.split(', ')):
+                    invoice_name = filter(None, [invoice.name, invoice_vals['name']])
+                    merge_vals['name'] = ', '.join(invoice_name)
+                if merge_vals:
+                    invoice.write(merge_vals)
+            invoice_line_vals = move_obj._get_invoice_line_vals(cr, uid, move, partner, inv_type, context=dict(context, fp_id=invoice_vals.get('fiscal_position', False)))
             invoice_line_vals['invoice_id'] = invoices[key]
             invoice_line_vals['origin'] = origin
-            if is_extra_move[move.id] and extra_move_tax[move.picking_id, move.product_id]:
-                invoice_line_vals['invoice_line_tax_id'] = extra_move_tax[move.picking_id, move.product_id]
+            if not is_extra_move[move.id]:
+                product_price_unit[invoice_line_vals['product_id'], invoice_line_vals['uos_id']] = invoice_line_vals['price_unit']
+            if is_extra_move[move.id] and (invoice_line_vals['product_id'], invoice_line_vals['uos_id']) in product_price_unit:
+                invoice_line_vals['price_unit'] = product_price_unit[invoice_line_vals['product_id'], invoice_line_vals['uos_id']]
+            if is_extra_move[move.id]:
+                desc = (inv_type in ('out_invoice', 'out_refund') and move.product_id.product_tmpl_id.description_sale) or \
+                    (inv_type in ('in_invoice','in_refund') and move.product_id.product_tmpl_id.description_purchase)
+                invoice_line_vals['name'] += ' ' + desc if desc else ''
+                if extra_move_tax[move.picking_id, move.product_id]:
+                    invoice_line_vals['invoice_line_tax_id'] = extra_move_tax[move.picking_id, move.product_id]
+                #the default product taxes
+                elif (0, move.product_id) in extra_move_tax:
+                    invoice_line_vals['invoice_line_tax_id'] = extra_move_tax[0, move.product_id]
 
             move_obj._create_invoice_line_from_vals(cr, uid, move, invoice_line_vals, context=context)
             move_obj.write(cr, uid, move.id, {'invoice_state': 'invoiced'}, context=context)

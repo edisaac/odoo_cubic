@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+from itertools import chain
 import time
 
 from openerp import tools
@@ -41,7 +42,8 @@ class price_type(osv.osv):
         ids = mf.search(cr, uid, [('model','in', (('product.product'),('product.template'))), ('ttype','=','float')], context=context)
         res = []
         for field in mf.browse(cr, uid, ids, context=context):
-            res.append((field.name, field.field_description))
+            if not (field.name, field.field_description) in res:
+                res.append((field.name, field.field_description))
         return res
 
     def _get_field_currency(self, cr, uid, fname, ctx):
@@ -196,6 +198,7 @@ class product_pricelist(osv.osv):
     def _price_rule_get_multi(self, cr, uid, pricelist, products_by_qty_by_partner, context=None):
         context = context or {}
         date = context.get('date') or time.strftime('%Y-%m-%d')
+        date = date[0:10]
 
         products = map(lambda x: x[0], products_by_qty_by_partner)
         currency_obj = self.pool.get('res.currency')
@@ -224,7 +227,9 @@ class product_pricelist(osv.osv):
         is_product_template = products[0]._name == "product.template"
         if is_product_template:
             prod_tmpl_ids = [tmpl.id for tmpl in products]
-            prod_ids = [product.id for product in tmpl.product_variant_ids for tmpl in products]
+            # all variants of all products
+            prod_ids = [p.id for p in
+                        list(chain.from_iterable([t.product_variant_ids for t in products]))]
         else:
             prod_ids = [product.id for product in products]
             prod_tmpl_ids = [product.product_tmpl_id.id for product in products]
@@ -272,7 +277,8 @@ class product_pricelist(osv.osv):
                 if is_product_template:
                     if rule.product_tmpl_id and product.id != rule.product_tmpl_id.id:
                         continue
-                    if rule.product_id:
+                    if rule.product_id and not (product.product_variant_count == 1 and product.product_variant_ids[0].id == rule.product_id.id):
+                        # product rule acceptable on template if has only one variant
                         continue
                 else:
                     if rule.product_tmpl_id and product.product_tmpl_id.id != rule.product_tmpl_id.id:
@@ -363,6 +369,10 @@ class product_pricelist(osv.osv):
 
     def price_get(self, cr, uid, ids, prod_id, qty, partner=None, context=None):
         return dict((key, price[0]) for key, price in self.price_rule_get(cr, uid, ids, prod_id, qty, partner=partner, context=context).items())
+    
+    def discount_get(self, cr, uid, ids, prod_id, qty, partner=None, context=None):
+        rule_obj = self.pool.get('product.pricelist.item')
+        return dict((key, price[1] and rule_obj.browse(cr, uid, price[1], context=context).discount or 0.0) for key, price in self.price_rule_get(cr, uid, ids, prod_id, qty, partner=partner, context=context).items())
 
     def price_rule_get(self, cr, uid, ids, prod_id, qty, partner=None, context=None):
         product = self.pool.get('product.product').browse(cr, uid, prod_id, context=context)
@@ -497,7 +507,7 @@ class product_pricelist_item(osv.osv):
 
         'price_surcharge': fields.float('Price Surcharge',
             digits_compute= dp.get_precision('Product Price'), help='Specify the fixed amount to add or substract(if negative) to the amount calculated with the discount.'),
-        'price_discount': fields.float('Price Discount', digits=(16,4)),
+        'price_discount': fields.float('Price Discount', digits=(16,8)),
         'price_round': fields.float('Price Rounding',
             digits_compute= dp.get_precision('Product Price'),
             help="Sets the price so that it is a multiple of this value.\n" \
@@ -508,6 +518,7 @@ class product_pricelist_item(osv.osv):
             digits_compute= dp.get_precision('Product Price'), help='Specify the minimum amount of margin over the base price.'),
         'price_max_margin': fields.float('Max. Price Margin',
             digits_compute= dp.get_precision('Product Price'), help='Specify the maximum amount of margin over the base price.'),
+        'discount': fields.float('Discount (%)', digits_compute= dp.get_precision('Discount')),
         'company_id': fields.related('price_version_id','company_id',type='many2one',
             readonly=True, relation='res.company', string='Company', store=True)
     }

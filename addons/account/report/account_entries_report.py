@@ -33,6 +33,7 @@ class account_entries_report(osv.osv):
         'date_created': fields.date('Date Created', readonly=True),
         'date_maturity': fields.date('Date Maturity', readonly=True),
         'ref': fields.char('Reference', readonly=True),
+        'note': fields.char('Note', readonly=True),
         'nbr': fields.integer('# of Items', readonly=True),
         'debit': fields.float('Debit', readonly=True),
         'credit': fields.float('Credit', readonly=True),
@@ -50,8 +51,11 @@ class account_entries_report(osv.osv):
         'reconcile_id': fields.many2one('account.move.reconcile', 'Reconciliation number', readonly=True),
         'partner_id': fields.many2one('res.partner','Partner', readonly=True),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account', readonly=True),
+        'analytic_parent_id': fields.many2one('account.analytic.account', 'Analytic Parent Account', readonly=True),
         'quantity': fields.float('Products Quantity', digits=(16,2), readonly=True),  # TDE FIXME master: rename into product_quantity
         'user_type': fields.many2one('account.account.type', 'Account Type', readonly=True),
+        'report_type': fields.many2one('account.financial.report', 'Financial Report', readonly=True),
+        'chart_account': fields.many2one('account.account', 'Chart Account', readonly=True),
         'type': fields.selection([
             ('receivable', 'Receivable'),
             ('payable', 'Payable'),
@@ -104,6 +108,15 @@ class account_entries_report(osv.osv):
             domain = domain
         return super(account_entries_report, self).read_group(cr, uid, domain, fields, groupby, offset, limit, context, orderby,lazy)
 
+    def _get_select(self):
+        return ''
+
+    def _get_from(self):
+        return ''
+
+    def _get_where(self):
+        return ''
+
     def init(self, cr):
         tools.drop_view_if_exists(cr, 'account_entries_report')
         cr.execute("""
@@ -114,6 +127,7 @@ class account_entries_report(osv.osv):
                 l.date_maturity as date_maturity,
                 l.date_created as date_created,
                 am.ref as ref,
+                l.name as note,
                 am.state as move_state,
                 l.state as move_line_state,
                 l.reconcile_id as reconcile_id,
@@ -126,22 +140,30 @@ class account_entries_report(osv.osv):
                 am.period_id as period_id,
                 l.account_id as account_id,
                 l.analytic_account_id as analytic_account_id,
+                aaa.parent_id as analytic_parent_id,
                 a.type as type,
                 a.user_type as user_type,
+                at.financial_report_id as report_type,
+                a.chart_account_id as chart_account,
                 1 as nbr,
                 l.quantity as quantity,
                 l.currency_id as currency_id,
                 l.amount_currency as amount_currency,
                 l.debit as debit,
                 l.credit as credit,
-                l.debit-l.credit as balance
+                coalesce(l.debit, 0.0) - coalesce(l.credit, 0.0) as balance
+                %s
             from
                 account_move_line l
                 left join account_account a on (l.account_id = a.id)
+                left join account_account_type at on (a.user_type = at.id)
                 left join account_move am on (am.id=l.move_id)
                 left join account_period p on (am.period_id=p.id)
+                left join account_analytic_account aaa on (l.analytic_account_id = aaa.id)
+                %s
                 where l.state != 'draft'
+                %s
             )
-        """)
+        """%(self._get_select(),self._get_from(),self._get_where()))
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -280,7 +280,7 @@ class hr_payslip(osv.osv):
             \n* When user cancel payslip the status is \'Rejected\'.'),
         'line_ids': one2many_mod2('hr.payslip.line', 'slip_id', 'Payslip Lines', readonly=True, states={'draft':[('readonly',False)]}),
         'company_id': fields.many2one('res.company', 'Company', required=False, readonly=True, states={'draft': [('readonly', False)]}, copy=False),
-        'worked_days_line_ids': fields.one2many('hr.payslip.worked_days', 'payslip_id', 'Payslip Worked Days', required=False, readonly=True, states={'draft': [('readonly', False)]}),
+        'worked_days_line_ids': fields.one2many('hr.payslip.worked_days', 'payslip_id', 'Payslip Worked Days', copy=True, required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'input_line_ids': fields.one2many('hr.payslip.input', 'payslip_id', 'Payslip Inputs', required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'paid': fields.boolean('Made Payment Order ? ', required=False, readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'note': fields.text('Internal Note', readonly=True, states={'draft':[('readonly',False)]}),
@@ -322,7 +322,6 @@ class hr_payslip(osv.osv):
         mod_obj = self.pool.get('ir.model.data')
         for payslip in self.browse(cr, uid, ids, context=context):
             id_copy = self.copy(cr, uid, payslip.id, {'credit_note': True, 'name': _('Refund: ')+payslip.name}, context=context)
-            self.compute_sheet(cr, uid, [id_copy], context=context)
             self.signal_workflow(cr, uid, [id_copy], 'hr_verify_sheet')
             self.signal_workflow(cr, uid, [id_copy], 'process_sheet')
             
@@ -634,21 +633,23 @@ class hr_payslip(osv.osv):
         if context is None:
             context = {}
         #delete old worked days lines
+        worked_days_ids_to_remove=[]
         old_worked_days_ids = ids and worked_days_obj.search(cr, uid, [('payslip_id', '=', ids[0])], context=context) or False
         if old_worked_days_ids:
-            worked_days_obj.unlink(cr, uid, old_worked_days_ids, context=context)
+            worked_days_ids_to_remove = map(lambda x: (2, x,),old_worked_days_ids)
 
         #delete old input lines
+        input_line_ids_to_remove=[]
         old_input_ids = ids and input_obj.search(cr, uid, [('payslip_id', '=', ids[0])], context=context) or False
         if old_input_ids:
-            input_obj.unlink(cr, uid, old_input_ids, context=context)
+            input_line_ids_to_remove = map(lambda x: (2,x,), old_input_ids)
 
 
         #defaults
         res = {'value':{
                       'line_ids':[],
-                      'input_line_ids': [],
-                      'worked_days_line_ids': [],
+                      'input_line_ids': input_line_ids_to_remove,
+                      'worked_days_line_ids': worked_days_ids_to_remove,
                       #'details_by_salary_head':[], TODO put me back
                       'name':'',
                       'contract_id': False,
@@ -959,7 +960,7 @@ class hr_employee(osv.osv):
         current_date = datetime.now().strftime('%Y-%m-%d')
         for employee in self.browse(cr, uid, ids, context=context):
             if not employee.contract_ids:
-                res[employee.id] = {'basic': 0.0}
+                res[employee.id] = 0.0
                 continue
             cr.execute( 'SELECT SUM(wage) '\
                         'FROM hr_contract '\
@@ -968,7 +969,7 @@ class hr_employee(osv.osv):
                         'AND (date_end > %s OR date_end is NULL)',
                          (employee.id, current_date, current_date))
             result = dict(cr.dictfetchone())
-            res[employee.id] = {'basic': result['sum']}
+            res[employee.id] = result['sum']
         return res
 
     def _payslip_count(self, cr, uid, ids, field_name, arg, context=None):

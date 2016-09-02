@@ -640,9 +640,9 @@
                         <a class="oe_sidebar_action_a" t-att-title="item.title or ''" t-att-data-section="section.name" t-att-data-index="item_index" t-att-href="item.url" target="_blank">
                             <t t-raw="item.label"/>
                         </a>
-                         <a t-if="section.name == 'files' and !item.callback" class="oe_sidebar_delete_item" t-att-data-id="item.id" title="Delete this attachment">x</a>
+                         <a t-if="widget.view.is_action_enabled('edit') &amp;&amp; section.name == 'files' and !item.callback" class="oe_sidebar_delete_item" t-att-data-id="item.id" title="Delete this attachment">x</a>
                     </li>
-                    <li t-if="section.name == 'files'" class="oe_sidebar_add_attachment">
+                    <li t-if="widget.view.is_action_enabled('edit') &amp;&amp; section.name == 'files'" class="oe_sidebar_add_attachment">
                         <t t-call="HiddenInputFile">
                             <t t-set="fileupload_id" t-value="widget.fileupload_id"/>
                             <t t-set="fileupload_action" t-translation="off">/web/binary/upload_attachment</t>
@@ -1529,12 +1529,6 @@
         </t>
     </a>
 </t>
-
-<t t-name="One2Many.viewmanager" t-extend="ViewManager">
-    <t t-jquery=".oe-view-manager-header">
-        this.attr('t-if', 'views.length != 1');
-    </t>
-</t>
 <t t-name="One2Many.formview" t-extend="FormView">
     <t t-jquery=".oe_form_buttons" t-operation="inner">
         <button type="button" class="oe_button oe_form_button_create">Add</button>
@@ -1781,7 +1775,11 @@
     <input type="number" class="field_integer" value = "0" step="1"/>
 </t>
 <t t-name="SearchView.extended_search.proposition.float">
-    <input type="number" class="field_float" value = "0.0" step="0.01"/>
+    <input class="field_float"
+        t-att-type="widget.decimal_point === '.' ? 'number' : 'text'"
+        t-attf-title="Number using #{widget.decimal_point  || '.' } as decimal separator."
+        t-attf-pattern="[0-9]+([\\#{widget.decimal_point || '.' }][0-9]+)?"
+        t-attf-value="0#{widget.decimal_point || '.' }0" step="0.01"/>
 </t>
 <t t-name="SearchView.extended_search.proposition.selection">
     <select>
@@ -2017,13 +2015,11 @@
 <t t-name="FieldMany2ManyCheckBoxes">
     <t t-foreach="widget.get('records')" t-as="record">
         <div>
-            <t t-if="selected[record[0]]">
-                <input type="checkbox" t-att-data-record-id="JSON.stringify(record[0])" checked="true"/>
-            </t>
-            <t t-if="! selected[record[0]]">
-                <input type="checkbox" t-att-data-record-id="JSON.stringify(record[0])"/>
-            </t>
-            <t t-esc="record[1]"/>
+            <label style="font-weight: normal">
+                <input type="checkbox" t-att-data-record-id="JSON.stringify(record[0])"
+                       t-att-checked="selected[record[0]] or null"/>
+                <t t-esc="record[1]"/>
+            </label>
         </div>
     </t>
 </t>

@@ -61,7 +61,7 @@ class account_analytic_account(osv.osv):
         res = {}
         if context is None:
             context = {}
-        child_ids = tuple(self.search(cr, uid, [('parent_id', 'child_of', ids)]))
+        child_ids = tuple(self.search(cr, uid, [('parent_id', 'child_of', ids)], context=context))
         for i in child_ids:
             res[i] =  {}
             for n in fields:
@@ -139,7 +139,16 @@ class account_analytic_account(osv.osv):
             context = {}
 
         for account in self.browse(cr, uid, ids, context=context):
-            result[account.id] = map(lambda x: x.id, [child for child in account.child_ids if child.state != 'template'])
+            child_ids = []
+            account_child_ids = [c for c in account.child_ids]
+            while account_child_ids and context.get('analytic_child_bottom',False):
+                child_child_ids = []
+                child_ids += account_child_ids
+                for child in account_child_ids:
+                    child_child_ids += [c for c in child.child_ids]
+                account_child_ids = child_child_ids
+
+            result[account.id] = map(lambda x: x.id, [child for child in (child_ids or account_child_ids) if child.state != 'template'])
 
         return result
 
@@ -183,9 +192,9 @@ class account_analytic_account(osv.osv):
         'template_id': fields.many2one('account.analytic.account', 'Template of Contract'),
         'description': fields.text('Description'),
         'parent_id': fields.many2one('account.analytic.account', 'Parent Analytic Account', select=2),
-        'child_ids': fields.one2many('account.analytic.account', 'parent_id', 'Child Accounts'),
+        'child_ids': fields.one2many('account.analytic.account', 'parent_id', 'Child Accounts', copy=True),
         'child_complete_ids': fields.function(_child_compute, relation='account.analytic.account', string="Account Hierarchy", type='many2many'),
-        'line_ids': fields.one2many('account.analytic.line', 'account_id', 'Analytic Entries'),
+        'line_ids': fields.one2many('account.analytic.line', 'account_id', 'Analytic Entries', copy=False),
         'balance': fields.function(_debit_credit_bal_qtty, type='float', string='Balance', multi='debit_credit_bal_qtty', digits_compute=dp.get_precision('Account')),
         'debit': fields.function(_debit_credit_bal_qtty, type='float', string='Debit', multi='debit_credit_bal_qtty', digits_compute=dp.get_precision('Account')),
         'credit': fields.function(_debit_credit_bal_qtty, type='float', string='Credit', multi='debit_credit_bal_qtty', digits_compute=dp.get_precision('Account')),
@@ -251,7 +260,7 @@ class account_analytic_account(osv.osv):
     _defaults = {
         'type': 'normal',
         'company_id': _default_company,
-        'code' : lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'account.analytic.account'),
+        'code' : lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'account.analytic.account', context=context),
         'state': 'open',
         'user_id': lambda self, cr, uid, ctx: uid,
         'partner_id': lambda self, cr, uid, ctx: ctx.get('partner_id', False),
@@ -272,6 +281,8 @@ class account_analytic_account(osv.osv):
         raise osv.except_osv(_('Warning'), _("Quick account creation disallowed."))
 
     def copy(self, cr, uid, id, default=None, context=None):
+        """ executed only on the toplevel copied object of the hierarchy.
+        Subobject are actually copied with copy_data"""
         if not default:
             default = {}
         analytic = self.browse(cr, uid, id, context=context)
@@ -302,17 +313,22 @@ class account_analytic_account(osv.osv):
             args=[]
         if context is None:
             context={}
+        account_ids = []
         if name:
             account_ids = self.search(cr, uid, [('code', '=', name)] + args, limit=limit, context=context)
             if not account_ids:
                 dom = []
-                for name2 in name.split('/'):
-                    name = name2.strip()
-                    account_ids = self.search(cr, uid, dom + [('name', operator, name)] + args, limit=limit, context=context)
-                    if not account_ids: break
-                    dom = [('parent_id','in',account_ids)]
-        else:
-            account_ids = self.search(cr, uid, args, limit=limit, context=context)
+                if '/' in name:
+                    for name2 in name.split('/'):
+                        # intermediate search without limit and args - could be expensive for large tables if `name` is not selective
+                        account_ids = self.search(cr, uid, dom + [('name', operator, name2.strip())], limit=None, context=context)
+                        if not account_ids: break
+                        dom = [('parent_id','in',account_ids)]
+                    if account_ids and args:
+                        # final filtering according to domain (args)4
+                        account_ids = self.search(cr, uid, [('id', 'in', account_ids)] + args, limit=limit, context=context)
+        if not account_ids:
+            return super(account_analytic_account, self).name_search(cr, uid, name, args, operator=operator, context=context, limit=limit)
         return self.name_get(cr, uid, account_ids, context=context)
 
 class account_analytic_line(osv.osv):

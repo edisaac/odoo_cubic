@@ -80,7 +80,7 @@ class procurement_rule(osv.osv):
         return []
 
     _columns = {
-        'name': fields.char('Name', required=True,
+        'name': fields.char('Name', required=True, translate=True,
             help="This field will fill the packing origin and the name of its moves"),
         'active': fields.boolean('Active', help="If unchecked, it will allow you to hide the rule without removing it."),
         'group_propagation_option': fields.selection([('none', 'Leave Empty'), ('propagate', 'Propagate'), ('fixed', 'Fixed')], string="Propagation of Procurement Group"),
@@ -157,7 +157,7 @@ class procurement_order(osv.osv):
             else:
                 raise osv.except_osv(_('Invalid Action!'),
                         _('Cannot delete Procurement Order(s) which are in %s state.') % s['state'])
-        return osv.osv.unlink(self, cr, uid, unlink_ids, context=context)
+        return super(procurement_order, self).unlink(cr, uid, unlink_ids, context=context)
 
     def do_view_procurements(self, cr, uid, ids, context=None):
         '''

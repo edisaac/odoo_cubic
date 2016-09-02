@@ -102,7 +102,7 @@
                     <group>
                         <group>
                             <field name="location_id" domain="[('usage','not in', ['supplier','production'])]"/>
-                            <field name="filter" string="Inventory of" widget='radio' attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                            <field name="filter" string="Inventory of" widget='radio' attrs="{'readonly': [('state', '!=', 'draft')]}" on_change="onchange_filter(filter)"/>
                         </group>
                         <group>
                             <field name="date"/>
@@ -263,12 +263,7 @@
                 Click to add a serial number.
               </p><p>
                 This is the list of all the production lots you recorded. When
-                you select a lot, you can get the 
-                traceability of the products contained in lot. By default, the
-                list is filtered on the serial numbers that are available in
-                your warehouse but you can uncheck the 'Available' button to
-                get all the lots you produced, received or delivered to
-                customers.
+                you select a lot, you can get the traceability of the products contained in lot.
               </p>
             </field>
         </record>
@@ -647,7 +642,7 @@
                 <header>
                     <button name="action_confirm" states="draft" string="Mark as Todo" type="object" class="oe_highlight" groups="base.group_user"/>
                     <button name="action_assign" states="confirmed" string="Check Availability" type="object" class="oe_highlight" groups="base.group_user"/>
-                    <button name="rereserve_pick" states="partially_available" string="Recheck Availability" type="object" class="oe_highlight" groups="base.group_user"/>
+                    <button name="rereserve_pick" string="Recheck Availability" type="object" class="oe_highlight" groups="base.group_user" attrs="{'invisible': ['|', ('state', 'not in', ('waiting', 'partially_available')), ('pack_operation_exist','=',True)]}"/>
                     <button name="force_assign" states="confirmed,waiting,partially_available" string="Force Availability" type="object" groups="base.group_user"/>
                     <button name="do_enter_transfer_details" states="assigned,partially_available" string="Transfer" groups="stock.group_stock_user" type="object" class="oe_highlight"/>
                     <button name="do_print_picking" string="Print Picking List" groups="stock.group_stock_user" type="object" attrs="{'invisible': ['|', ('picking_type_code', '=', 'outgoing'), ('state', '!=', 'assigned')]}"/>
@@ -1045,7 +1040,10 @@
                             <field name="partner_id" context="{'contact_display':'partner'}" />
                         </group>
                         <group name="quants_grp" string="Reserved Quants" colspan="4" groups="base.group_no_one">
-                            <field name="reserved_quant_ids"/>
+                            <field name="reserved_quant_ids" nolabel="1"/>
+                        </group>
+                        <group name="moved_quants_grp" string="Moved Quants" colspan="4" groups="base.group_no_one" attrs="{'invisible': [('state', '!=', 'done')]}">
+                            <field name="quant_ids" readonly="1" nolabel="1"/>
                         </group>
                     </group>
                 </sheet>
@@ -1070,6 +1068,7 @@
                         <field name="product_id" on_change="onchange_product_id(product_id,location_id,location_dest_id, parent.partner_id)"/>
                         <field name="procure_method" attrs="{'readonly': [('state', '!=', 'draft')]}" groups="stock.group_adv_location"/>
                         <field name="picking_type_id" invisible="1"/>
+                        <field name="group_id" invisible="1"/>
                         <label for="product_uom_qty"/>
                         <div>
                             <field name="product_uom_qty" on_change="onchange_quantity(product_id, product_uom_qty, product_uom, product_uos)" class="oe_inline"/>
@@ -1099,7 +1098,10 @@
                         <field name="location_dest_id" domain="[('usage','&lt;&gt;','view')]"/>
                     </group>
                     <group name="quants_grp" string="Reserved Quants" colspan="4" groups="base.group_no_one">
-                        <field name="reserved_quant_ids"/>
+                        <field name="reserved_quant_ids" nolabel="1"/>
+                    </group>
+                    <group name="moved_quants_grp" string="Moved Quants" colspan="4" groups="base.group_no_one" attrs="{'invisible': [('state', '!=', 'done')]}">
+                        <field name="quant_ids" readonly="1" nolabel="1"/>
                     </group>
                 </group>
                 </form>
@@ -1120,7 +1122,7 @@
                     <filter icon="terp-dialog-close" string="Done" name="done" domain="[('state','=','done')]" help="Stock moves that have been processed"/>
                     <filter icon="terp-stock" string="Not Canceled" name="no_cancel" domain="[('state','!=','cancel')]" help="Stock movements not canceled"/>
                     <separator/>
-                    <filter icon="terp-go-today" string="Today" domain="[('date','&lt;=',time.strftime('%%Y-%%m-%%d 23:59:59')),('date','&gt;=',time.strftime('%%Y-%%m-%%d 00:00:00'))]" help="Orders processed Today or planned for Today"/>
+                    <filter icon="terp-go-today" string="Today" domain="[('date','&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59))), ('date','&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]" help="Orders processed Today or planned for Today"/>
                     <field name="product_id"/>
                     <field name="group_id"/>
                     <field name="name" string="Location" filter_domain="['|',('location_id','ilike',self),('location_dest_id','ilike',self)]"/>
@@ -1194,7 +1196,6 @@
                     <field name="date" widget="date"/>
                     <field name="picking_id" string="Reference" invisible="1"/>
                     <field name="origin"/>
-                    <field name="partner_id" string="Supplier"/>
                     <field name="product_id"/>
                     <field name="product_uom_qty"/>
                     <field name="product_uom" string="Unit of Measure" groups="product.group_uom"/>
@@ -1662,6 +1663,7 @@
             <field name="res_model">stock.quant</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form,graph</field>
+            <field name="context">{'search_default_internal_loc': 1}</field>
             <field name="help">This analysis gives you a fast overview on the current stock level of your products and their today's inventory value.</field>
         </record>
 
@@ -1670,7 +1672,7 @@
             <field name="model">stock.quant</field>
             <field eval="10" name="priority"/>
             <field name="arch" type="xml">
-                <form string="Quants" create="false" edit="false">
+                <form string="Quants" create="false" edit="false" delete="false">
                     <div class="oe_right oe_button_box">
                         <button name="action_view_quant_history" type="object" string="Quant History"/>                            
                     </div>
@@ -1696,7 +1698,7 @@
             <field name="model">stock.quant</field>
             <field eval="10" name="priority"/>
             <field name="arch" type="xml">
-                <tree string="Quants" create="0">
+                <tree string="Quants" create="0" delete="0">
                     <field name="product_id"/>
                     <field name="qty"/>
                     <field name="location_id"/>

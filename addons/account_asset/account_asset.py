@@ -25,28 +25,53 @@ from dateutil.relativedelta import relativedelta
 
 from openerp.osv import fields, osv
 import openerp.addons.decimal_precision as dp
+from openerp.tools import float_compare
 from openerp.tools.translate import _
 
 class account_asset_category(osv.osv):
     _name = 'account.asset.category'
     _description = 'Asset category'
 
+    def _get_full_name(self, cr, uid, ids, name=None, args=None, context=None):
+        if context == None:
+            context = {}
+        res = {}
+        for elmt in self.browse(cr, uid, ids, context=context):
+            res[elmt.id] = self._get_one_full_name(elmt)
+        return res
+
+    def _get_one_full_name(self, elmt, level=6):
+        if level <= 0:
+            return '...'
+        if elmt.parent_id:
+            parent_path = self._get_one_full_name(elmt.parent_id, level - 1) + " / "
+        else:
+            parent_path = ''
+        return parent_path + elmt.name
+
     _columns = {
         'name': fields.char('Name', required=True, select=1),
+        'parent_id': fields.many2one('account.asset.category', "Parent Category", domain=[('type','=','view')]),
+        'children_ids': fields.one2many('account.asset.category', 'parent_id', 'Account Report'),
+        'complete_name': fields.function(_get_full_name, type='char', string='Full Name'),
+        'type': fields.selection([('view',"View"),
+                                  ('normal',"Normal")], string="Type", required=True),
         'note': fields.text('Note'),
         'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic account'),
-        'account_asset_id': fields.many2one('account.account', 'Asset Account', required=True, domain=[('type','=','other')]),
-        'account_depreciation_id': fields.many2one('account.account', 'Depreciation Account', required=True, domain=[('type','=','other')]),
-        'account_expense_depreciation_id': fields.many2one('account.account', 'Depr. Expense Account', required=True, domain=[('type','=','other')]),
-        'journal_id': fields.many2one('account.journal', 'Journal', required=True),
+        'account_asset_id': fields.many2one('account.account', 'Asset Account', domain=[('type','=','other')]),
+        'account_depreciation_id': fields.many2one('account.account', 'Depreciation Account', domain=[('type','=','other')]),
+        'account_expense_depreciation_id': fields.many2one('account.account', 'Depr. Expense Account', domain=[('type','=','other')]),
+        'journal_id': fields.many2one('account.journal', 'Journal'),
         'company_id': fields.many2one('res.company', 'Company', required=True),
-        'method': fields.selection([('linear','Linear'),('degressive','Degressive')], 'Computation Method', required=True, help="Choose the method to use to compute the amount of depreciation lines.\n"\
+        'method': fields.selection([('linear','Linear'),
+                                    ('degressive','Degressive')], 'Computation Method', required=True,
+                                   help="Choose the method to use to compute the amount of depreciation lines.\n"\
             "  * Linear: Calculated on basis of: Gross Value / Number of Depreciations\n" \
             "  * Degressive: Calculated on basis of: Residual Value * Degressive Factor"),
         'method_number': fields.integer('Number of Depreciations', help="The number of depreciations needed to depreciate your asset"),
         'method_period': fields.integer('Period Length', help="State here the time between 2 depreciations, in months", required=True),
         'method_progress_factor': fields.float('Degressive Factor'),
-        'method_time': fields.selection([('number','Number of Depreciations'),('end','Ending Date')], 'Time Method', required=True,
+        'method_time': fields.selection([('number','Number of Depreciations'),('end','Ending Date')], 'Time Method',
                                   help="Choose the method to use to compute the dates and number of depreciation lines.\n"\
                                        "  * Number of Depreciations: Fix the number of depreciation lines and the time between 2 depreciations.\n" \
                                        "  * Ending Date: Choose the time between 2 depreciations and the date the depreciations won't go beyond."),
@@ -57,6 +82,7 @@ class account_asset_category(osv.osv):
 
     _defaults = {
         'company_id': lambda self, cr, uid, context: self.pool.get('res.company')._company_default_get(cr, uid, 'account.asset.category', context=context),
+        'type': 'normal',
         'method': 'linear',
         'method_number': 5,
         'method_time': 'number',
@@ -280,7 +306,6 @@ class account_asset_asset(osv.osv):
         'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic account', readonly=True, states={'draft':[('readonly',False)]}),
     }
     _defaults = {
-        'code': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'account.asset.code'),
         'purchase_date': lambda obj, cr, uid, context: time.strftime('%Y-%m-%d'),
         'active': True,
         'state': 'draft',
@@ -306,6 +331,20 @@ class account_asset_asset(osv.osv):
         (_check_recursion, 'Error ! You cannot create recursive assets.', ['parent_id']),
         (_check_prorata, 'Prorata temporis can be applied only for time method "number of depreciations".', ['prorata']),
     ]
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        reads = self.read(cr, uid, ids, ['name', 'code'], context=context)
+        res = []
+        for record in reads:
+            name = record['name']
+            if record['code']:
+                name = record['code'] + ' ' + name
+            res.append((record['id'], name))
+        return res
 
     def onchange_category_id(self, cr, uid, ids, category_id, context=None):
         res = {'value':{}}
@@ -340,6 +379,8 @@ class account_asset_asset(osv.osv):
         return depreciation_obj.create_move(cr, uid, depreciation_ids, context=context)
 
     def create(self, cr, uid, vals, context=None):
+        if not vals.get('code', False):
+            vals['code'] = self.pool.get('ir.sequence').get(cr, uid, 'account.asset.code')
         asset_id = super(account_asset_asset, self).create(cr, uid, vals, context=context)
         self.compute_depreciation_board(cr, uid, [asset_id], context=context)
         return asset_id
@@ -397,8 +438,9 @@ class account_asset_depreciation_line(osv.osv):
             current_currency = line.asset_id.currency_id.id
             context.update({'date': depreciation_date})
             amount = currency_obj.compute(cr, uid, current_currency, company_currency, line.amount, context=context)
-            asset_name = line.asset_id.name
-            reference = line.name
+            sign = (line.asset_id.category_id.journal_id.type == 'purchase' and 1) or -1
+            asset_name = "/"
+            reference = line.asset_id.name
             move_vals = {
                 'name': asset_name,
                 'date': depreciation_date,
@@ -409,13 +451,14 @@ class account_asset_depreciation_line(osv.osv):
             move_id = move_obj.create(cr, uid, move_vals, context=context)
             journal_id = line.asset_id.category_id.journal_id.id
             partner_id = line.asset_id.partner_id.id
+            prec = self.pool['decimal.precision'].precision_get(cr, uid, 'Account')
             move_line_obj.create(cr, uid, {
                 'name': asset_name,
                 'ref': reference,
                 'move_id': move_id,
                 'account_id': line.asset_id.category_id.account_depreciation_id.id,
-                'debit': 0.0,
-                'credit': amount,
+                'debit': 0.0 if float_compare(amount, 0.0, precision_digits=prec) > 0 else -amount,
+                'credit': amount if float_compare(amount, 0.0, precision_digits=prec) > 0 else 0.0,
                 'period_id': period_ids and period_ids[0] or False,
                 'journal_id': journal_id,
                 'partner_id': partner_id,
@@ -428,8 +471,8 @@ class account_asset_depreciation_line(osv.osv):
                 'ref': reference,
                 'move_id': move_id,
                 'account_id': line.asset_id.category_id.account_expense_depreciation_id.id,
-                'credit': 0.0,
-                'debit': amount,
+                'credit': 0.0 if float_compare(amount, 0.0, precision_digits=prec) > 0 else -amount,
+                'debit': amount if float_compare(amount, 0.0, precision_digits=prec) > 0 else 0.0,
                 'period_id': period_ids and period_ids[0] or False,
                 'journal_id': journal_id,
                 'partner_id': partner_id,
@@ -461,9 +504,9 @@ class account_asset_history(osv.osv):
     _columns = {
         'name': fields.char('History name', select=1),
         'user_id': fields.many2one('res.users', 'User', required=True),
-        'date': fields.date('Date', required=True),
+        'date': fields.date('Date', required=True, select=1),
         'asset_id': fields.many2one('account.asset.asset', 'Asset', required=True),
-        'method_time': fields.selection([('number','Number of Depreciations'),('end','Ending Date')], 'Time Method', required=True,
+        'method_time': fields.selection([('number','Number of Depreciations'),('end','Ending Date')], 'Time Method',
                                   help="The method to use to compute the dates and number of depreciation lines.\n"\
                                        "Number of Depreciations: Fix the number of depreciation lines and the time between 2 depreciations.\n" \
                                        "Ending Date: Choose the time between 2 depreciations and the date the depreciations won't go beyond."),

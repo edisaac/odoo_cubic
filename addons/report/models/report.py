@@ -22,7 +22,7 @@
 from openerp import api
 from openerp import SUPERUSER_ID
 from openerp.exceptions import AccessError
-from openerp.osv import osv
+from openerp.osv import osv, fields
 from openerp.tools import config
 from openerp.tools.misc import find_in_path
 from openerp.tools.translate import _
@@ -41,6 +41,7 @@ from contextlib import closing
 from distutils.version import LooseVersion
 from functools import partial
 from pyPdf import PdfFileWriter, PdfFileReader
+from reportlab.graphics.barcode import createBarcodeDrawing
 
 
 #--------------------------------------------------------------------------
@@ -99,7 +100,7 @@ class Report(osv.Model):
 
         :param doc_id: id of the record to translate
         :param model: model of the record to translate
-        :param lang_field': field of the record containing the lang
+        :param lang_field': field of the record containing the lang or None to user's language
         :param template: name of the template to translate into the lang_field
         """
         ctx = context.copy()
@@ -110,7 +111,7 @@ class Report(osv.Model):
             qcontext['o'] = doc
         else:
             # Reach the lang we want to translate the doc into
-            ctx['lang'] = eval('doc.%s' % lang_field, {'doc': doc})
+            ctx['lang'] = lang_field and eval('doc.%s' % lang_field, {'doc': doc}) or self.pool['res.users'].browse(cr, uid, uid).lang
             qcontext['o'] = self.pool[model].browse(cr, uid, doc_id, context=ctx)
         return self.pool['ir.ui.view'].render(cr, uid, template, qcontext, context=ctx)
 
@@ -142,6 +143,7 @@ class Report(osv.Model):
                 context = dict(context, translatable=context.get('lang') != request.website.default_lang_code)
         values.update(
             time=time,
+            context_timestamp=lambda t: fields.datetime.context_timestamp(cr, uid, t, context),
             translate_doc=translate_doc,
             editable=True,
             user=user,
@@ -202,8 +204,8 @@ class Report(osv.Model):
 
     @api.v8
     def get_html(self, records, report_name, data=None):
-        return self._model.get_html(self._cr, self._uid, records.ids, report_name,
-                                    data=data, context=self._context)
+        return Report.get_html(self._model, self._cr, self._uid, records.ids,
+                               report_name, data=data, context=self._context)
 
     @api.v7
     def get_pdf(self, cr, uid, ids, report_name, html=None, data=None, context=None):
@@ -301,8 +303,8 @@ class Report(osv.Model):
 
     @api.v8
     def get_pdf(self, records, report_name, html=None, data=None):
-        return self._model.get_pdf(self._cr, self._uid, records.ids, report_name,
-                                   html=html, data=data, context=self._context)
+        return Report.get_pdf(self._model, self._cr, self._uid, records.ids,
+                              report_name, html=html, data=data, context=self._context)
 
     @api.v7
     def get_action(self, cr, uid, ids, report_name, data=None, context=None):
@@ -338,8 +340,8 @@ class Report(osv.Model):
 
     @api.v8
     def get_action(self, records, report_name, data=None):
-        return self._model.get_action(self._cr, self._uid, records.ids, report_name,
-                                      data=data, context=self._context)
+        return Report.get_action(self._model, self._cr, self._uid, records.ids,
+                                 report_name, data=data, context=self._context)
 
     #--------------------------------------------------------------------------
     # Report generation helpers
@@ -385,8 +387,8 @@ class Report(osv.Model):
 
     @api.v8
     def _check_attachment_use(self, records, report):
-        return self._model._check_attachment_use(
-            self._cr, self._uid, records.ids, report, context=self._context)
+        return Report._check_attachment_use(
+            self._model, self._cr, self._uid, records.ids, report, context=self._context)
 
     def _check_wkhtmltopdf(self):
         return wkhtmltopdf_state
@@ -599,3 +601,18 @@ class Report(osv.Model):
             stream.close()
 
         return merged_file_path
+
+    def barcode(self, barcode_type, value, width=600, height=100, humanreadable=0):
+        if barcode_type == 'UPCA' and len(value) in (11, 12, 13):
+            barcode_type = 'EAN13'
+            if len(value) in (11, 12):
+                value = '0%s' % value
+        try:
+            width, height, humanreadable = int(width), int(height), bool(humanreadable)
+            barcode = createBarcodeDrawing(
+                barcode_type, value=value, format='png', width=width, height=height,
+                humanReadable=humanreadable
+            )
+            return barcode.asString('png')
+        except (ValueError, AttributeError):
+            raise ValueError("Cannot convert into barcode.")

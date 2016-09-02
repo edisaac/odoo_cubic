@@ -19,7 +19,9 @@
 #
 ##############################################################################
 
-from openerp.addons.mail.tests.common import TestMail
+from email.utils import formataddr
+
+from .common import TestMail
 from openerp.tools import mute_logger
 import socket
 
@@ -298,7 +300,7 @@ class TestMailgateway(TestMail):
                          'message_process: incoming email on Partners alias should send a bounce email')
         self.assertIn('Frogs', sent_emails[0].get('subject'),
                       'message_process: bounce email on Partners alias should contain the original subject')
-        self.assertIn('test.sylvie.lelitre@agrolait.com', sent_emails[0].get('email_to'),
+        self.assertIn(formataddr(('Sylvie Lelitre', 'test.sylvie.lelitre@agrolait.com')), sent_emails[0].get('email_to'),
                       'message_process: bounce email on Partners alias should have original email sender as recipient')
 
         # Do: incoming email from an unknown partner on a Followers only alias -> bounce
@@ -313,7 +315,7 @@ class TestMailgateway(TestMail):
                          'message_process: incoming email on Followers alias should send a bounce email')
         self.assertIn('Frogs', sent_emails[0].get('subject'),
                       'message_process: bounce email on Followers alias should contain the original subject')
-        self.assertIn('test.sylvie.lelitre@agrolait.com', sent_emails[0].get('email_to'),
+        self.assertIn(formataddr(('Sylvie Lelitre', 'test.sylvie.lelitre@agrolait.com')), sent_emails[0].get('email_to'),
                       'message_process: bounce email on Followers alias should have original email sender as recipient')
 
         # Do: incoming email from a known partner on a Partners alias -> ok (+ test on alias.user_id)
@@ -628,7 +630,7 @@ class TestMailgateway(TestMail):
 
         # 1. In-Reply-To header
         reply_msg2 = format(MAIL_TEMPLATE, to='erroneous@example.com',
-                            extra='In-Reply-To: %s' % msg1.message_id,
+                            extra='In-Reply-To:\r\n\t%s' % msg1.message_id,
                             msg_id='<1198923581.41972151344608186760.JavaMail.3@agrolait.com>')
         self.mail_group.message_process(cr, uid, None, reply_msg2)
 
@@ -736,3 +738,31 @@ class TestMailgateway(TestMail):
                          'message_post: private discussion: incorrect recipients when replying')
         self.assertEqual(set(msg_nids), set(test_nids),
                          'message_post: private discussion: incorrect notified recipients when replying')
+
+        # Do bert forward it to an alias
+        mail_group_model_id = self.ir_model.search(cr, uid, [('model', '=', 'mail.group')])[0]
+        self.mail_alias.create(cr, uid, {
+            'alias_name': 'groups',
+            'alias_user_id': False,
+            'alias_model_id': mail_group_model_id,
+            'alias_parent_model_id': mail_group_model_id,
+            'alias_parent_thread_id': self.group_pigs_id,
+            'alias_contact': 'everyone'})
+
+        msg = self.mail_message.browse(cr, uid, msg1_id)
+        # forward it to a new thread AND an existing thread
+        for i, to in enumerate(['groups', 'group+pigs']):
+            fw_msg_id = '<THIS.IS.A.FW.MESSAGE.%d@bert.fr>' % (i,)
+            fw_message = format(MAIL_TEMPLATE, to='%s@whatever.tld' % (to,),
+                                subject='FW: Re: 1',
+                                email_from='bert@bert.fr',
+                                extra='References: %s' % msg.message_id,
+                                msg_id=fw_msg_id)
+            self.mail_thread.message_process(cr, uid, None, fw_message)
+
+            msg_ids = self.mail_message.search(cr, uid, [('message_id', '=', fw_msg_id)])
+            self.assertEqual(len(msg_ids), 1)
+            msg_fw = self.mail_message.browse(cr, uid, msg_ids[0])
+
+            self.assertEqual(msg_fw.model, 'mail.group')
+            self.assertFalse(msg_fw.parent_id)

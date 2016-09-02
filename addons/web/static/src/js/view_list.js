@@ -1119,7 +1119,7 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
                     ids = value;
                 }
                 new instance.web.Model(column.relation)
-                    .call('name_get', [ids, this.dataset.context]).done(function (names) {
+                    .call('name_get', [ids, this.dataset.get_context()]).done(function (names) {
                         // FIXME: nth horrible hack in this poor listview
                         record.set(column.id + '__display',
                                    _(names).pluck(1).join(', '));
@@ -2305,7 +2305,7 @@ instance.web.list.Binary = instance.web.list.Column.extend({
      * @private
      */
     _format: function (row_data, options) {
-        var text = _t("Download");
+        var text = _t("Download"), filename=_t('Binary file');
         var value = row_data[this.id].value;
         if (!value) {
             return options.value_if_empty || '';
@@ -2323,11 +2323,13 @@ instance.web.list.Binary = instance.web.list.Column.extend({
         if (this.filename && row_data[this.filename]) {
             text = _.str.sprintf(_t("Download \"%s\""), instance.web.format_value(
                     row_data[this.filename].value, {type: 'char'}));
+            filename = row_data[this.filename].value;
         }
-        return _.template('<a href="<%-href%>"><%-text%></a> (<%-size%>)', {
+        return _.template('<a download="<%-download%>" href="<%-href%>"><%-text%></a> (<%-size%>)', {
             text: text,
             href: download_url,
             size: instance.web.binary_to_binsize(value),
+            download: filename,
         });
     }
 });

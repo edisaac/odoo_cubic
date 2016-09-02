@@ -24,6 +24,7 @@ import time
 from openerp.osv import fields,osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
+from openerp.tools.safe_eval import safe_eval as eval
 
 _logger = logging.getLogger(__name__)
 
@@ -125,12 +126,11 @@ class delivery_carrier(osv.osv):
 
             # not using advanced pricing per destination: override grid
             grid_id = grid_pool.search(cr, uid, [('carrier_id', '=', record.id)], context=context)
-            if grid_id and not (record.normal_price or record.free_if_more_than):
+            if grid_id and not (record.normal_price is not False or record.free_if_more_than):
                 grid_pool.unlink(cr, uid, grid_id, context=context)
                 grid_id = None
 
-            # Check that float, else 0.0 is False
-            if not (isinstance(record.normal_price,float) or record.free_if_more_than):
+            if not (record.normal_price is not False or record.free_if_more_than):
                 continue
 
             if not grid_id:
@@ -157,7 +157,7 @@ class delivery_carrier(osv.osv):
                     'list_price': 0.0,
                 }
                 grid_line_pool.create(cr, uid, line_data, context=context)
-            if isinstance(record.normal_price,float):
+            if record.normal_price is not False:
                 line_data = {
                     'grid_id': grid_id and grid_id[0],
                     'name': _('Default price'),
@@ -211,6 +211,8 @@ class delivery_grid(osv.osv):
         total_delivery = 0.0
         product_uom_obj = self.pool.get('product.uom')
         for line in order.order_line:
+            if line.state == 'cancel':
+                continue
             if line.is_delivery:
                 total_delivery += line.price_subtotal + self.pool['sale.order']._amount_line_tax(cr, uid, line, context=context)
             if not line.product_id or line.is_delivery:
@@ -221,6 +223,9 @@ class delivery_grid(osv.osv):
             quantity += q
         total = (order.amount_total or 0.0) - total_delivery
 
+        ctx = context.copy()
+        ctx['date'] = order.date_order
+        total = self.pool['res.currency'].compute(cr, uid, order.currency_id.id, order.company_id.currency_id.id, total, context=ctx)
         return self.get_price_from_picking(cr, uid, id, total,weight, volume, quantity, context=context)
 
     def get_price_from_picking(self, cr, uid, id, total, weight, volume, quantity, context=None):

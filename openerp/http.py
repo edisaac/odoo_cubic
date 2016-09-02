@@ -44,6 +44,7 @@ except ImportError:
 
 import openerp
 from openerp import SUPERUSER_ID
+from openerp.service.server import memory_info
 from openerp.service import security, model as service_model
 from openerp.tools.func import lazy_property
 from openerp.tools import ustr
@@ -95,7 +96,7 @@ def dispatch_rpc(service_name, method, params):
             start_time = time.time()
             start_rss, start_vms = 0, 0
             if psutil:
-                start_rss, start_vms = psutil.Process(os.getpid()).get_memory_info()
+                start_rss, start_vms = memory_info(psutil.Process(os.getpid()))
             if rpc_request and rpc_response_flag:
                 openerp.netsvc.log(rpc_request, logging.DEBUG, '%s.%s' % (service_name, method), replace_request_password(params))
 
@@ -117,7 +118,7 @@ def dispatch_rpc(service_name, method, params):
             end_time = time.time()
             end_rss, end_vms = 0, 0
             if psutil:
-                end_rss, end_vms = psutil.Process(os.getpid()).get_memory_info()
+                end_rss, end_vms = memory_info(psutil.Process(os.getpid()))
             logline = '%s.%s time:%.3fs mem: %sk -> %sk (diff: %sk)' % (service_name, method, end_time - start_time, start_vms / 1024, end_vms / 1024, (end_vms - start_vms)/1024)
             if rpc_response_flag:
                 openerp.netsvc.log(rpc_response, logging.DEBUG, logline, result)
@@ -140,8 +141,11 @@ def local_redirect(path, query=None, keep_hash=False, forward_debug=True, code=3
     url = path
     if not query:
         query = {}
-    if forward_debug and request and request.debug:
-        query['debug'] = None
+    if request and request.debug:
+        if forward_debug:
+            query['debug'] = ''
+        else:
+            query['debug'] = None
     if query:
         url += '?' + werkzeug.url_encode(query)
     if keep_hash:
@@ -156,6 +160,7 @@ def redirect_with_hash(url, code=303):
     # See extensive test page at http://greenbytes.de/tech/tc/httpredirects/
     if request.httprequest.user_agent.browser in ('firefox',):
         return werkzeug.utils.redirect(url, code)
+    url = url.replace("'", "%27").replace("<", "%3C")
     return "<html><head><script>window.location = '%s' + location.hash;</script></head></html>" % url
 
 class WebRequest(object):
@@ -184,6 +189,7 @@ class WebRequest(object):
         self.disable_db = False
         self.uid = None
         self.endpoint = None
+        self.endpoint_arguments = None
         self.auth_method = None
         self._cr = None
 
@@ -201,7 +207,11 @@ class WebRequest(object):
     def env(self):
         """
         The :class:`~openerp.api.Environment` bound to current request.
+        Raises a :class:`RuntimeError` if the current requests is not bound
+        to a database.
         """
+        if not self.db:
+            raise RuntimeError('request not bound to a database')
         return openerp.api.Environment(self.cr, self.uid, self.context)
 
     @lazy_property
@@ -236,6 +246,8 @@ class WebRequest(object):
         """
         # can not be a lazy_property because manual rollback in _call_function
         # if already set (?)
+        if not self.db:
+            raise RuntimeError('request not bound to a database')
         if not self._cr:
             self._cr = self.registry.cursor()
         return self._cr
@@ -260,7 +272,7 @@ class WebRequest(object):
         arguments = dict((k, v) for k, v in arguments.iteritems()
                          if not k.startswith("_ignored_"))
 
-        endpoint.arguments = arguments
+        self.endpoint_arguments = arguments
         self.endpoint = endpoint
         self.auth_method = auth
 
@@ -284,7 +296,8 @@ class WebRequest(object):
             _logger.error(msg, *params)
             raise werkzeug.exceptions.BadRequest(msg % params)
 
-        kwargs.update(self.endpoint.arguments)
+        if self.endpoint_arguments:
+            kwargs.update(self.endpoint_arguments)
 
         # Backward for 7.0
         if self.endpoint.first_arg_is_req:
@@ -297,6 +310,7 @@ class WebRequest(object):
             # case, the request cursor is unusable. Rollback transaction to create a new one.
             if self._cr:
                 self._cr.rollback()
+                self.env.clear()
             return self.endpoint(*a, **kw)
 
         if self.db:
@@ -371,8 +385,8 @@ def route(route=None, **kw):
 
                  * ``user``: The user must be authenticated and the current request
                    will perform using the rights of the user.
-                 * ``admin``: The user may not be authenticated and the current request
-                   will perform using the admin user.
+                 * ``public``: The user may or may not be authenticated. If she isn't,
+                   the current request will perform using the shared Public user.
                  * ``none``: The method is always active, even if there is no
                    database. Mainly used by the framework and authentication
                    modules. There request code will not have any facilities to access
@@ -401,7 +415,7 @@ def route(route=None, **kw):
                 return Response(response)
 
             if isinstance(response, werkzeug.exceptions.HTTPException):
-                response = response.get_response()
+                response = response.get_response(request.httprequest.environ)
             if isinstance(response, werkzeug.wrappers.BaseResponse):
                 response = Response.force_type(response)
                 response.set_default()
@@ -559,7 +573,7 @@ class JsonRequest(WebRequest):
                 start_time = time.time()
                 _, start_vms = 0, 0
                 if psutil:
-                    _, start_vms = psutil.Process(os.getpid()).get_memory_info()
+                    _, start_vms = memory_info(psutil.Process(os.getpid()))
                 if rpc_request and rpc_response_flag:
                     rpc_request.debug('%s: %s %s, %s',
                         endpoint, model, method, pprint.pformat(args))
@@ -570,7 +584,7 @@ class JsonRequest(WebRequest):
                 end_time = time.time()
                 _, end_vms = 0, 0
                 if psutil:
-                    _, end_vms = psutil.Process(os.getpid()).get_memory_info()
+                    _, end_vms = memory_info(psutil.Process(os.getpid()))
                 logline = '%s: %s %s: time:%.3fs mem: %sk -> %sk (diff: %sk)' % (
                     endpoint, model, method, end_time - start_time, start_vms / 1024, end_vms / 1024, (end_vms - start_vms)/1024)
                 if rpc_response_flag:
@@ -896,7 +910,8 @@ class Model(object):
                 raise Exception("Access denied")
             mod = request.registry[self.model]
             meth = getattr(mod, method)
-            cr = request.cr
+            # make sure to instantiate an environment
+            cr = request.env.cr
             result = meth(cr, request.uid, *args, **kw)
             # reorder read
             if method == "read":
@@ -912,6 +927,7 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
     def __init__(self, *args, **kwargs):
         self.inited = False
         self.modified = False
+        self.rotate = False
         super(OpenERPSession, self).__init__(*args, **kwargs)
         self.inited = True
         self._default_values()
@@ -972,6 +988,7 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
             if not (keep_db and k == 'db'):
                 del self[k]
         self._default_values()
+        self.rotate = True
 
     def _default_values(self):
         self.setdefault("db", None)
@@ -1292,6 +1309,8 @@ class Root(object):
                     path_static = os.path.join(addons_path, module, 'static')
                     if os.path.isfile(manifest_path) and os.path.isdir(path_static):
                         manifest = ast.literal_eval(open(manifest_path).read())
+                        if not manifest.get('installable', True):
+                            continue
                         manifest['addons_path'] = addons_path
                         _logger.debug("Loading %s", module)
                         if 'openerp.addons' in sys.modules:
@@ -1368,6 +1387,10 @@ class Root(object):
             response = result
 
         if httprequest.session.should_save:
+            if httprequest.session.rotate:
+                self.session_store.delete(httprequest.session)
+                httprequest.session.sid = self.session_store.generate_key()
+                httprequest.session.modified = True
             self.session_store.save(httprequest.session)
         # We must not set the cookie if the session id was specified using a http header or a GET parameter.
         # There are two reasons to this:

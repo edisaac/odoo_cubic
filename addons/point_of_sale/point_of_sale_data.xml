@@ -32,6 +32,10 @@
             <field name="name">Main</field>
             <field name="picking_type_id" ref="picking_type_posout"/>
         </record>
+        <record id="config_pos_max_order_lines" model="ir.config_parameter">
+            <field name="key">point_of_sale.max_order_lines</field>
+            <field name="value">30</field>
+        </record>
 
         <!-- notify all employees of module installation -->
         <record model="mail.message" id="module_install_notification">

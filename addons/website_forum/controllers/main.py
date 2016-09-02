@@ -323,7 +323,7 @@ class WebsiteForum(http.Controller):
     # Post
     # --------------------------------------------------
 
-    @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/new', type='http', auth="public", methods=['POST'], website=True)
+    @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/new', type='http', auth="public", website=True)
     def post_new(self, forum, post, **kwargs):
         if not request.session.uid:
             return login_redirect()
@@ -339,7 +339,7 @@ class WebsiteForum(http.Controller):
             }, context=request.context)
         return werkzeug.utils.redirect("/forum/%s/question/%s" % (slug(forum), slug(post)))
 
-    @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/comment', type='http', auth="public", methods=['POST'], website=True)
+    @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/comment', type='http', auth="public", website=True)
     def post_comment(self, forum, post, **kwargs):
         if not request.session.uid:
             return login_redirect()
@@ -347,9 +347,10 @@ class WebsiteForum(http.Controller):
         cr, uid, context = request.cr, request.uid, request.context
         if kwargs.get('comment') and post.forum_id.id == forum.id:
             # TDE FIXME: check that post_id is the question or one of its answers
+            body = tools.mail.plaintext2html(kwargs['comment'])
             request.registry['forum.post'].message_post(
                 cr, uid, post.id,
-                body=kwargs.get('comment'),
+                body=body,
                 type='comment',
                 subtype='mt_comment',
                 context=dict(context, mail_create_nosubscribe=True))

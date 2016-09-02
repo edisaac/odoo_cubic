@@ -85,6 +85,7 @@ class ir_ui_menu(osv.osv):
                 action_menus = menus.filtered('action')
                 folder_menus = menus - action_menus
                 visible = self.browse()
+                invisible = self.browse()
 
                 # process action menus, check whether their action is allowed
                 access = self.env['ir.model.access']
@@ -94,6 +95,20 @@ class ir_ui_menu(osv.osv):
                     'ir.actions.wizard': 'model',
                     'ir.actions.server': 'model_id',
                 }
+                for menu in menus:
+                    if menu.hidden_groups_id:
+                        hidden_to_groups = [g.id for g in menu.hidden_groups_id]
+                        if key.intersection(hidden_to_groups):
+                            invisible += menu
+                            child_menus = [c for c in menu.child_id]
+                            while child_menus:
+                                for child_menu in child_menus:
+                                    invisible += child_menu
+                                child_child_menus = []
+                                for child in child_menus:
+                                    child_child_menus += [c for c in child.child_id]
+                                child_menus = child_child_menus
+                action_menus = action_menus - invisible
                 for menu in action_menus:
                     fname = model_fname.get(menu.action._name)
                     if not fname or not menu.action[fname] or \
@@ -429,6 +444,9 @@ class ir_ui_menu(osv.osv):
         'groups_id': fields.many2many('res.groups', 'ir_ui_menu_group_rel',
             'menu_id', 'gid', 'Groups', help="If you have groups, the visibility of this menu will be based on these groups. "\
                 "If this field is empty, Odoo will compute visibility based on the related object's read access."),
+        'hidden_groups_id': fields.many2many('res.groups', 'ir_ui_menu_hide_group_rel',
+                                             'menu_id', 'gid', 'Hidden Groups',
+                                             help="This menu will be hidden on these groups"),
         'complete_name': fields.function(_get_full_name,
             string='Full Path', type='char', size=128),
         'icon': fields.selection(tools.icons, 'Icon', size=64),

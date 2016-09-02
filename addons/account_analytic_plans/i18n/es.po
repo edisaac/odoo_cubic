@@ -1,21 +1,19 @@
-# Spanish translation for openobject-addons
-# Copyright (c) 2014 Rosetta Contributors and Canonical Ltd 2014
-# This file is distributed under the same license as the openobject-addons package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+# Translation of Server.
+# This file contains the translation of the following modules:
+#	* account_analytic_plans
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: openobject-addons\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-01-21 14:07+0000\n"
-"PO-Revision-Date: 2014-08-14 18:59+0000\n"
-"Last-Translator: Pedro Manuel Baeza <pedro.baeza@gmail.com>\n"
-"Language-Team: Spanish <es@li.org>\n"
+"Project-Id-Version: Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-08-18 22:32+0000\n"
+"PO-Revision-Date: 2016-08-18 22:32+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-01-22 07:21+0000\n"
-"X-Generator: Launchpad (build 17306)\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
 #. module: account_analytic_plans
 #: code:addons/account_analytic_plans/account_analytic_plans.py:218
@@ -175,7 +173,7 @@ msgstr "Extracto bancario"
 #. module: account_analytic_plans
 #: model:ir.model,name:account_analytic_plans.model_account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr "Línea extracto bancario"
+msgstr "Línea de extracto bancario"
 
 #. module: account_analytic_plans
 #: view:account.crossovered.analytic:account_analytic_plans.view_account_crossovered_analytic
@@ -287,7 +285,7 @@ msgstr "Factura"
 #. module: account_analytic_plans
 #: model:ir.model,name:account_analytic_plans.model_account_invoice_line
 msgid "Invoice Line"
-msgstr "Línea factura"
+msgstr "Línea de factura"
 
 #. module: account_analytic_plans
 #: model:ir.model,name:account_analytic_plans.model_account_journal
@@ -297,7 +295,7 @@ msgstr "Diario"
 #. module: account_analytic_plans
 #: model:ir.model,name:account_analytic_plans.model_account_move_line
 msgid "Journal Items"
-msgstr "Elementos diario"
+msgstr "Apuntes contables"
 
 #. module: account_analytic_plans
 #: field:account.analytic.plan,write_uid:0
@@ -442,10 +440,8 @@ msgstr "No hay plan analítico definido."
 
 #. module: account_analytic_plans
 #: view:analytic.plan.create.model:account_analytic_plans.view_analytic_plan_create_model
-msgid ""
-"This distribution model has been saved.You will be able to reuse it later."
-msgstr ""
-"Este modelo de distribución ha sido guardado. Lo podrá reutilizar más tarde."
+msgid "This distribution model has been saved.You will be able to reuse it later."
+msgstr "Este modelo de distribución ha sido guardado. Lo podrá reutilizar más tarde."
 
 #. module: account_analytic_plans
 #: view:website:account_analytic_plans.report_crossoveredanalyticplans

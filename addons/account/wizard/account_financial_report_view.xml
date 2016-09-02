@@ -10,7 +10,16 @@
                 <xpath expr="//field[@name='target_move']" position="after">
                     <field name="account_report_id" domain="[('parent_id','=',False)]"/>
                     <field name="enable_filter"/>
-                    <field name="debit_credit" attrs="{'invisible': [('enable_filter','=',True)]}"/>
+                    <field name="multiplan" attrs="{'invisible': [('enable_filter','=',True)]}"/>
+                    <field name="debit_credit" attrs="{'invisible': ['|',('enable_filter','=',True),('multiplan','!=',False)]}"/>
+                </xpath>
+                <xpath expr="//page[@name='filters']" position="inside">
+                    <separator string="Chart Accounts" attrs="{'invisible':['|',('multiplan','!=','financial'),('enable_filter','=',True)]}"/>
+                    <field name="multiplan_financial_ids" attrs="{'invisible':['|',('multiplan','!=','financial'),('enable_filter','=',True)]}"/>
+                    <separator string="Analytic Accounts" attrs="{'invisible':['|',('multiplan','!=','analytic'),('enable_filter','=',True)]}"/>
+                    <field name="multiplan_analytic_ids" attrs="{'invisible':['|',('multiplan','!=','analytic'),('enable_filter','=',True)]}"/>
+                    <separator string="Periods" attrs="{'invisible':['|',('multiplan','!=','period'),('enable_filter','=',True)]}"/>
+                    <field name="multiplan_period_ids" attrs="{'invisible':['|',('multiplan','!=','period'),('enable_filter','=',True)]}"/>
                 </xpath>
                 <xpath expr="//notebook/page[@string='Filters']" position="after">
                     <page string="Comparison" attrs="{'invisible': [('enable_filter','=',False)]}">
@@ -30,6 +39,10 @@
                    </page>
                 </xpath>
                 <xpath expr="//notebook/page[@string='Journals']" position="replace">
+                </xpath>
+                <xpath expr="//group[@name='others']" position="inside">
+                    <field name="financial_report_type"/>
+                    <field name="label_balance"/>
                 </xpath>
             </field>
         </record>

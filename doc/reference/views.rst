@@ -1,5 +1,6 @@
-.. highlight:: xml
+:banner: banners/views.jpg
 
+.. highlight:: xml
 .. _reference/views:
 
 =====
@@ -12,7 +13,7 @@ Common Structure
 ================
 
 View objects expose a number of fields, they are optional unless specified
-otherwise)
+otherwise.
 
 ``name`` (mandatory)
     only useful as a mnemonic/description of the view when looking for one in
@@ -21,7 +22,7 @@ otherwise)
     the model linked to the view, if applicable (it doesn't for QWeb views)
 ``priority``
     client programs can request views by ``id``, or by ``(model, type)``. For
-    the latter, all the views for the right type and model will be looked for,
+    the latter, all the views for the right type and model will be searched,
     and the one with the lowest ``priority`` number will be returned (it is
     the "default view").
 
@@ -146,7 +147,7 @@ root can have the following attributes:
 
     Defined as a mapping of colors to Python expressions. Values are of the
     form: :samp:`{color}:{expr}[;...]`. For each record, pairs are tested
-    in-order, the expression is evaluated for the record and if ``true`` the
+    in order, the expression is evaluated for the record and if ``true`` the
     corresponding color is applied to the row. If no color matches, uses the
     default text color (black).
 
@@ -230,8 +231,8 @@ Possible children elements of the list view are:
         Possible attributes are ``invisible`` (hides the button) and
         ``readonly`` (disables the button but still shows it)
     ``states``
-        shorthand for ``invisible`` ``attrs``: a list of space, separated
-        states, requires that the model has a ``state`` field and that it is
+        shorthand for ``invisible`` ``attrs``: a list of states, comma separated,
+        requires that the model has a ``state`` field and that it is
         used in the view.
 
         Makes the button ``invisible`` if the record is *not* in one of the
@@ -365,7 +366,7 @@ system. Available semantic components are:
     .. todo:: list of widgets
 
        & options & specific attributes (e.g. widget=statusbar
-       statusbar_visible statusbar_colors clickable)
+       statusbar_visible clickable)
   ``options``
     JSON object specifying configuration option for the field's widget
     (including default widgets)
@@ -504,13 +505,10 @@ The states are shown following the order used in the field (the list in a
 selection field, etc). States that are always visible are specified with the
 attribute ``statusbar_visible``.
 
-``statusbar_colors`` can be used to give a custom color to specific states.
-
 ::
 
     <field name="state" widget="statusbar"
-        statusbar_visible="draft,sent,progress,invoiced,done"
-        statusbar_colors="{'shipping_except':'red','waiting_date':'blue'}"/>
+        statusbar_visible="draft,sent,progress,invoiced,done" />
 
 The Sheet
 '''''''''
@@ -571,7 +569,7 @@ Button Box
 ..........
 
 Many relevant actions or links can be displayed in the form. For example, in
-Opportunity form, the actions "Schedule a Call" and "Schedule a Meeting" take
+Opportunity form, the actions "Schedule a Call" and "Schedule a Meeting" have
 an important place in the use of the CRM. Instead of placing them in the
 "More" menu, put them directly in the sheet as buttons (on the top right) to
 make them more visible and more easily accessible.
@@ -579,8 +577,8 @@ make them more visible and more easily accessible.
 .. image:: forms/header3.png
    :class: img-responsive
 
-Technically, the buttons are placed inside a <div> to group them as a block on
-the right-hand side of the sheet.
+Technically, the buttons are placed inside a ``<div>`` to group them as a
+block on the right-hand side of the sheet.
 
 ::
 
@@ -640,7 +638,7 @@ place inside the field, it *must not* be an example as they are often confused
 with filled data.
 
 One can also group fields together by rendering them "inline" inside an
-explicit block element like `<div>``. This allows grouping semantically
+explicit block element like ``<div>``. This allows grouping semantically
 related fields as if they were a single (composite) fields.
 
 The following example, taken from the *Leads* form, shows both placeholders and
@@ -803,7 +801,7 @@ attributes:
 
 ``default_group_by``
   whether the kanban view should be grouped if no grouping is specified via
-  the action or the current research. Should be the name of the field to group
+  the action or the current search. Should be the name of the field to group
   by when no grouping is otherwise specified
 ``default_order``
   cards sorting order used if the user has not already sorted the records (via
@@ -941,7 +939,7 @@ calendar view are:
     ``date_stop`` is provided records become movable (via drag and drop)
     directly in the calendar
 ``date_delay``
-    alternative to ``date_end``, provides the duration of the event instead of
+    alternative to ``date_stop``, provides the duration of the event instead of
     its end date
 
     .. todo:: what's the unit? Does it allow moving the record?

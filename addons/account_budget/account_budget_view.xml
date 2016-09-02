@@ -3,53 +3,83 @@
     <data>
 
         <menuitem name="Budgets" id="menu_action_account_budget_post_tree" parent="account.menu_finance_generic_reporting" sequence="6"/>
-
+        <menuitem id="next_id_31" name="Budgets" parent="account.menu_finance" sequence="6"/>
+        <menuitem id="next_id_pos" name="Budgets" parent="account.menu_finance_configuration" sequence="50"/>
         <!--
     Budgets
     -->
-        <record id="view_budget_post_search" model="ir.ui.view">
-            <field name="name">account.budget.post.search</field>
-            <field name="model">account.budget.post</field>
+        <record id="view_budget_post_type_tree" model="ir.ui.view">
+            <field name="name">account.budget.post.type.tree</field>
+            <field name="model">account.budget.post.type</field>
             <field name="arch" type="xml">
-                <search string="Budgetary Position">
-                    <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Budgetary Position"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                <tree string="Budgetary Position Type">
+                    <field name="name"/>
+                    <field name="code"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_budget_post_type_form">
+            <field name="name">account.budget.post.type.form</field>
+            <field name="model">account.budget.post.type</field>
+            <field name="arch" type="xml">
+                <form string="Budgetary Position Type">
+                    <group col="4">
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="financial_report_id"/>
+                    </group>
+                    <separator string="Budgetary Positions"/>
+                    <field name="post_ids"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_budget_post_type_search" model="ir.ui.view">
+            <field name="name">account.budget.post.type.search</field>
+            <field name="model">account.budget.post.type</field>
+            <field name="arch" type="xml">
+                <search string="Budgetary Position Type">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Position Type"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Financial Report" context="{'group_by':'financial_report_id'}"/>
+                    </group>
                 </search>
             </field>
         </record>
+
+        <record id="open_budget_post_type" model="ir.actions.act_window">
+            <field name="name">Positions Type</field>
+            <field name="res_model">account.budget.post.type</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Position Type" action="open_budget_post_type" id="menu_budget_post_type" parent="next_id_pos" sequence="10"/>
 
         <record id="view_budget_post_tree" model="ir.ui.view">
             <field name="name">account.budget.post.tree</field>
             <field name="model">account.budget.post</field>
             <field name="arch" type="xml">
                 <tree string="Budgetary Position">
-                    <field name="code"/>
+                    <field name="type_post_id"/>
                     <field name="name"/>
+                    <field name="code"/>
                     <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                 </tree>
             </field>
         </record>
 
-        <record id="open_budget_post_form" model="ir.actions.act_window">
-            <field name="name">Budgetary Positions</field>
-            <field name="res_model">account.budget.post</field>
-            <field name="view_type">form</field>
-            <field name="view_id" ref="view_budget_post_tree"/>
-            <field name="search_view_id" ref="view_budget_post_search"/>
-        </record>
-        <menuitem id="next_id_31" name="Budgets" parent="account.menu_finance" sequence="6"/>
-        <menuitem id="next_id_pos" name="Budgets" parent="account.menu_finance_configuration" sequence="50"/>
-        <menuitem action="open_budget_post_form" id="menu_budget_post_form" parent="next_id_pos" sequence="20"/>
-
-
         <record model="ir.ui.view" id="view_budget_post_form">
-            <field name="name">account.budget.post.form.inherit</field>
+            <field name="name">account.budget.post.form</field>
             <field name="model">account.budget.post</field>
             <field name="arch" type="xml">
                 <form string="Budgetary Position">
                     <group col="4">
                         <field name="name"/>
                         <field name="code"/>
+                        <field name="type_post_id"/>
+                        <field name="value_type"/>
                         <field name="company_id"  groups="base.group_multi_company" widget="selection"/>
                     </group>
                     <notebook>
@@ -89,6 +119,103 @@
             </field>
         </record>
 
+        <record id="view_budget_post_search" model="ir.ui.view">
+            <field name="name">account.budget.post.search</field>
+            <field name="model">account.budget.post</field>
+            <field name="arch" type="xml">
+                <search string="Budgetary Position">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Budgetary Position"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Position Type" context="{'group_by':'type_post_id'}"/>
+                        <filter string="Value Type" context="{'group_by':'value_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="open_budget_post_form" model="ir.actions.act_window">
+            <field name="name">Budgetary Positions</field>
+            <field name="res_model">account.budget.post</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem action="open_budget_post_form" id="menu_budget_post_form" parent="next_id_pos" sequence="20"/>
+
+
+        <record model="ir.ui.view" id="main_budget_view_form">
+            <field name="name">budget.budget.view.form</field>
+            <field name="model">budget.budget</field>
+            <field name="arch" type="xml">
+                <form string="Budget">
+                    <sheet string="Budget">
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="code"/>
+                            </group>
+                            <group>
+                                <field name="type"/>
+                            </group>
+                        </group>
+                        <separator name="Budgets"/>
+                        <field name="budget_ids"/>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="main_budget_view_tree">
+            <field name="name">budget.budget.view.tree</field>
+            <field name="model">budget.budget</field>
+            <field name="arch" type="xml">
+               <tree colors="blue:type=='view'" string="Main Budget">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="type"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_main_budget_search" model="ir.ui.view">
+           <field name="name">main.budget.search</field>
+           <field name="model">budget.budget</field>
+           <field name="arch" type="xml">
+               <search string="Budget">
+                    <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Budget"/>
+                    <filter string="Control" icon="terp-document-new" domain="[('type','=','control')]" help="Control Main Budgets"/>
+                   <group expand="0" string="Group By">
+                        <filter string="Type" context="{'group_by':'type'}"/>
+                   </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="act_main_budget_view">
+            <field name="name">Main Budgets</field>
+            <field name="res_model">budget.budget</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a new main budget.
+              </p>
+            </field>
+        </record>
+        <menuitem parent="next_id_31" name="Main Budget"
+            id="menu_act_main_budget_view"
+            action="act_main_budget_view" sequence="10" />
+
         <record model="ir.ui.view" id="crossovered_budget_view_form">
             <field name="name">crossovered.budget.view.form</field>
             <field name="model">crossovered.budget</field>
@@ -111,6 +238,7 @@
                         </div>
                         <group>
                             <group>
+                                <field name="budget_id"/>
                                 <field name="creating_user_id" attrs="{'readonly':[('state','!=','draft')]}" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'account.group_account_user']}"/>
                                 <field name="validating_user_id" readonly="True" attrs="{'readonly':[('state','!=','draft')]}"/>
                             </group>
@@ -120,31 +248,36 @@
                                 <div>
                                     <field name="date_from" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}"/> - 
                                     <field name="date_to" class="oe_inline" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1"/>
+                                    <button name="line_update_date" type="object" string="(update)" class="oe_link oe_edit_only oe_inline" help="Update the dates of all lines"/>
                                 </div>
                                 <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                             </group>
                         </group>
                         <notebook>
                             <page string="Budget Lines">
-                                <field name="crossovered_budget_line" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}">
+                                <field name="crossovered_budget_line" colspan="4" nolabel="1" attrs="{'readonly':[('state','!=','draft')]}"
+                                context="{'default_date_from':date_from,'default_date_to':date_to}">
                                     <tree string="Budget Lines">
                                         <field name="sequence" invisible="1"/>
                                         <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                                         <field name="general_budget_id"/>
-                                        <field name="date_from"/>
-                                        <field name="date_to"/>
+                                        <field name="name"/>
                                         <field name="paid_date"/>
                                         <field name="planned_amount" sum="Planned Amount"/>
                                         <field name="practical_amount" sum="Practical Amount"/>
                                         <field name="theoritical_amount" sum="Theoretical Amount"/>
                                         <field name="percentage"/>
+                                        <field name="available_amount" sum="Available Amount"/>
                                     </tree>
                                     <form string="Budget Lines">
                                         <group>
                                             <group>
                                                 <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                                                 <field name="general_budget_id"/>
+                                                <field name="name"/>
                                                 <field name="planned_amount"/>
+                                                <field name="position_restrict"/>
+                                                <field name="coefficient"/>
                                             </group>
                                             <group>
                                                 <label for="date_from" string="Duration"/>
@@ -171,8 +304,9 @@
             <field name="model">crossovered.budget</field>
             <field name="arch" type="xml">
                <tree colors="blue:state == 'draft';gray:state in ('done','cancel');black:state in ('confirm','validate')" string="Budget">
-                    <field name="name" colspan="1"/>
-                    <field name="code" colspan="1"/>
+                    <field name="budget_id" invisible="1"/>
+                    <field name="name"/>
+                    <field name="code"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
                     <field name="company_id" widget="selection" groups="base.group_multi_company"/>
@@ -188,11 +322,20 @@
            <field name="arch" type="xml">
                <search string="Budget">
                     <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Budget"/>
-                    <field name="date_from"/>
+                   <field name="budget_id"/>
+                   <field name="date_from"/>
                     <field name="date_to"/>
+                   <filter string="Control" icon="terp-document-new" domain="[('budget_id.type','=','control')]" help="Control Budgets"/>
+                   <filter string="View" icon="terp-document-new" domain="[('budget_id.type','=','view')]" help="View Budgets"/>
+                   <separator/>
                     <filter string="Draft" icon="terp-document-new" domain="[('state','=','draft')]" help="Draft Budgets"/>
                     <filter string="To Approve" icon="terp-camera_test" domain="[('state','=','confirm')]" help="To Approve Budgets" />
-                    <field name="state"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Main Budget" context="{'group_by':'budget_id'}"/>
+                        <filter string="State" context="{'group_by':'state'}"/>
+                        <separator/>
+                        <filter string="Start Month" context="{'group_by':'date_from'}"/>
+                    </group>
                 </search>
             </field>
         </record>
@@ -202,8 +345,6 @@
             <field name="res_model">crossovered.budget</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="crossovered_budget_view_tree"/>
-            <field name="search_view_id" ref="view_crossovered_budget_search"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
                 Click to create a new budget.
@@ -223,18 +364,9 @@
         </record>
         <menuitem parent="next_id_31"
             id="menu_act_crossovered_budget_view"
-            action="act_crossovered_budget_view" sequence="1" />
-        
-       <record id="view_crossovered_budget_line_search" model="ir.ui.view">
-            <field name="name">account.budget.line.search</field>
-            <field name="model">crossovered.budget.lines</field>
-            <field name="arch" type="xml">
-                <search string="Budget Lines">
-                    <field name="analytic_account_id"/>
-                </search>
-            </field>
-        </record>
-        
+            action="act_crossovered_budget_view" sequence="20" />
+
+
         <record model="ir.ui.view" id="view_crossovered_budget_line_tree">
             <field name="name">crossovered.budget.line.tree</field>
             <field name="model">crossovered.budget.lines</field>
@@ -242,7 +374,10 @@
                 <tree string="Budget Lines">
                     <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                     <field name="crossovered_budget_id" invisible="1"/>
+                    <field name="main_budget_id" invisible="1"/>
+                    <field name="main_budget_type" invisible="1"/>
                     <field name="general_budget_id"/>
+                    <field name="name"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
                     <field name="paid_date"/>
@@ -250,6 +385,8 @@
                     <field name="practical_amount"/>
                     <field name="theoritical_amount"/>
                     <field name="percentage"/>
+                    <field name="available_amount"/>
+                    <field name="type_budget_id" invisible="1"/>
                 </tree>
             </field>
         </record>
@@ -260,9 +397,12 @@
                 <form string="Budget Lines">
                     <sheet>
                         <group col="4">
+                            <field name="main_budget_id"/>
                             <field name="crossovered_budget_id"/>
                             <field name="analytic_account_id"/>
                             <field name="general_budget_id"/>
+                            <field name="type_budget_id"/>
+                            <field name="name"/>
                             <field name="date_from"/>
                             <field name="date_to"/>
                             <field name="paid_date"/>
@@ -270,10 +410,64 @@
                             <field name="practical_amount"/>
                             <field name="theoritical_amount"/>
                             <field name="percentage"/>
+                            <field name="available_amount"/>
+                            <field name="state"/>
                             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
                         </group>
                     </sheet>
                 </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_crossovered_budget_line_graph">
+            <field name="name">crossovered.budget.line.graph</field>
+            <field name="model">crossovered.budget.lines</field>
+            <field name="arch" type="xml">
+                <graph string="Budget Lines Graph" type="bar">
+                    <field name="crossovered_budget_id"/>
+                    <field name="planned_amount" operator="+"/>
+                    <field name="practical_amount" operator="+"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="view_crossovered_budget_line_search" model="ir.ui.view">
+            <field name="name">account.budget.line.search</field>
+            <field name="model">crossovered.budget.lines</field>
+            <field name="arch" type="xml">
+                <search string="Budget Lines">
+                    <field name="name" filter_domain="['|','|','|',(name,'ilike',self),('crossovered_budget_id.name','ilike',self),('crossovered_budget_id.code','ilike',self),('main_budget_id.name','ilike',self)]"/>
+                    <separator/>
+                    <filter string="Control" icon="terp-document-new" domain="[('main_budget_type','=','control')]" help="Control Budgets"/>
+                   <filter string="View" icon="terp-document-new" domain="[('main_budget_type','=','view')]" help="View Budgets"/>
+                   <separator/>
+                    <filter string="Amount" icon="terp-document-new" domain="[('post_value_type','=','amount')]" help="Amount Values"/>
+                   <filter string="Quantity" icon="terp-document-new" domain="[('post_value_type','=','quantity')]" help="Quantities Values"/>
+                   <separator/>
+                    <filter name="draft" string="Draft" domain="[('state','=','draft')]" help="Draft"/>
+                    <filter name="confirm" string="Confirm" domain="[('state','=','confirm')]" help="Confirm"/>
+                    <filter name="validate" string="Validate" domain="[('state','=','validate')]" help="Validate"/>
+                    <separator/>
+                    <field name="main_budget_id"/>
+                    <field name="crossovered_budget_id"/>
+                    <field name="analytic_account_id"/>
+                    <field name="general_budget_id"/>
+                    <field name="type_budget_id"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Main Budget" context="{'group_by':'main_budget_id'}"/>
+                        <filter string="Budget" context="{'group_by':'crossovered_budget_id'}"/>
+                        <filter string="Analytic Account" context="{'group_by':'analytic_account_id'}"/>
+                        <filter string="Position Type" context="{'group_by':'type_budget_id'}"/>
+                        <filter string="Position Budget" context="{'group_by':'general_budget_id'}"/>
+                        <separator/>
+                        <filter string="State" context="{'group_by':'state'}"/>
+                        <filter string="Value Type" context="{'group_by':'post_value_type'}"/>
+                        <separator/>
+                        <filter string="Start Month" context="{'group_by':'date_from'}"/>
+                        <filter string="Month Paid" context="{'group_by':'paid_date'}"/>
+                    </group>
+
+
+                </search>
             </field>
         </record>
 
@@ -281,13 +475,13 @@
             <field name="name">Budget Lines</field>
             <field name="res_model">crossovered.budget.lines</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,graph</field>
             <field name="view_id" ref="view_crossovered_budget_line_tree"/>
         </record>
 
-        <menuitem parent="menu_action_account_budget_post_tree"
+        <menuitem name="Budget Lines" parent="next_id_31"
             id="menu_act_crossovered_budget_lines_view"
-            action="act_crossovered_budget_lines_view" />
+            action="act_crossovered_budget_lines_view" sequence="30"/>
 
         <!--  Shortcuts -->
         <act_window name="Budget Lines"
@@ -327,6 +521,43 @@
                             </field>
                     </page>
                 </notebook>
+            </field>
+        </record>
+
+        <record model='ir.ui.view' id='view_move_form'>
+			<field name='name'>account.move.form.inherit.budget</field>
+			<field name='model'>account.move</field>
+			<field name='inherit_id' ref='account.view_move_form'/>
+			<field name='arch' type='xml'>
+                <xpath expr="//group[@string='Accounting Documents']" position="inside">
+                    <field name="budget_post_id" domain="[('account_ids','in',account_id)]"/>
+                </xpath>
+                <xpath expr="//tree/field[@name='analytic_account_id']" position="after">
+                    <field name="budget_post_id" domain="[('account_ids','in',account_id)]"/>
+                </xpath>
+			</field>
+		</record>
+
+        <record model='ir.ui.view' id='view_move_line_form'>
+			<field name='name'>account.move.line.form.inherit.budget</field>
+			<field name='model'>account.move.line</field>
+			<field name='inherit_id' ref='account.view_move_line_form'/>
+			<field name='arch' type='xml'>
+                <field name="analytic_account_id" position="after">
+                    <field name="budget_post_id" domain="[('account_ids','in',account_id)]"/>
+                </field>
+			</field>
+		</record>
+
+
+        <record id="view_account_move_line_filter" model="ir.ui.view">
+            <field name="name">Journal Items (Search) inherit budget</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_account_move_line_filter"/>
+            <field name="arch" type="xml">
+                <field name="account_id" position="after">
+                    <field name="budget_post_id"/>
+                </field>
             </field>
         </record>
 

@@ -39,6 +39,8 @@ class procurement_order(osv.osv):
         'bom_id': fields.many2one('mrp.bom', 'BoM', ondelete='cascade', select=True),
         'property_ids': fields.many2many('mrp.property', 'procurement_property_rel', 'procurement_id','property_id', 'Properties'),
         'production_id': fields.many2one('mrp.production', 'Manufacturing Order'),
+        'location_dest_id': fields.many2one('stock.location', 'Destination Location',
+                                       states={'confirmed': [('readonly', False)]}, readonly=True),
     }
 
     def propagate_cancel(self, cr, uid, procurement, context=None):
@@ -86,7 +88,7 @@ class procurement_order(osv.osv):
         else:
             properties = [x.id for x in procurement.property_ids]
             bom_id = bom_obj._bom_find(cr, uid, product_id=procurement.product_id.id,
-                                       properties=properties, context=context)
+                                       properties=properties, context=dict(context, company_id=procurement.company_id.id))
             bom = bom_obj.browse(cr, uid, bom_id, context=context)
             routing_id = bom.routing_id.id
         return {
@@ -97,7 +99,7 @@ class procurement_order(osv.osv):
             'product_uos_qty': procurement.product_uos and procurement.product_uos_qty or False,
             'product_uos': procurement.product_uos and procurement.product_uos.id or False,
             'location_src_id': procurement.location_id.id,
-            'location_dest_id': procurement.location_id.id,
+            'location_dest_id': procurement.location_dest_id.id or procurement.location_id.id,
             'bom_id': bom_id,
             'routing_id': routing_id,
             'date_planned': newdate.strftime('%Y-%m-%d %H:%M:%S'),
@@ -116,7 +118,7 @@ class procurement_order(osv.osv):
             if self.check_bom_exists(cr, uid, [procurement.id], context=context):
                 #create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
                 vals = self._prepare_mo_vals(cr, uid, procurement, context=context)
-                produce_id = production_obj.create(cr, SUPERUSER_ID, vals, context=context)
+                produce_id = production_obj.create(cr, SUPERUSER_ID, vals, context=dict(context, force_company=procurement.company_id.id))
                 res[procurement.id] = produce_id
                 self.write(cr, uid, [procurement.id], {'production_id': produce_id})
                 self.production_order_create_note(cr, uid, procurement, context=context)

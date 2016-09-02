@@ -49,19 +49,20 @@
                     <table class="table table-condensed">
                         <thead>
                             <tr>
+                                <th>Date</th>
                                 <th>Name</th>
                                 <th>Partner</th>
-                                <th class="text-right">Amount</th>
+                                <th>Reference</th>
+                                <th class="text-right">Amount <span t-esc="res_company.currency_id.symbol"/></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr t-foreach="o.line_ids" t-as="line">
+                                <td><span t-field="line.date"/></td>
                                 <td><span t-field="line.name"/></td>
                                 <td><span t-esc="line.partner_id.name"/></td>
-                                <td class="text-right">
-                                    <span t-field="line.amount" 
-                                        t-field-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
-                                </td>
+                                <td><span t-field="line.ref"/></td>
+                                <td class="text-right"><span t-field="line.amount"/></td>
                             </tr>
                         </tbody>
                     </table>           

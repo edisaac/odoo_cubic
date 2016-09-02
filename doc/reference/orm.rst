@@ -1,3 +1,5 @@
+:banner: banners/orm_api.jpg
+
 .. _reference/orm:
 
 =======
@@ -247,7 +249,7 @@ Common ORM methods
     <reference/orm/oldapi>`::
 
         >>> self.browse([7, 18, 12])
-        res.partner(7, 18, 12])
+        res.partner(7, 18, 12)
 
 :meth:`~openerp.models.Model.exists`
     Returns a new recordset containing only the records which exist in the
@@ -374,9 +376,9 @@ it uses the values of other *fields*, it should specify those fields using
     def _apply_discount(self):
         for record in self:
             # compute actual discount from discount percentage
-            discount = self.value * self.discount
-            self.discount_value = discount
-            self.total = self.value - discount
+            discount = record.value * record.discount
+            record.discount_value = discount
+            record.total = record.value - discount
 
 Related fields
 ''''''''''''''
@@ -638,7 +640,7 @@ Model Reference
 
     .. automethod:: read
 
-    .. rubric:: Research
+    .. rubric:: Searching
 
     .. automethod:: search
     .. automethod:: search_count
@@ -764,8 +766,8 @@ Method decorators
 =================
 
 .. automodule:: openerp.api
-    :members: one, multi, model, depends, constrains, onchange, returns,
-              v7, v8
+    :members: multi, model, depends, constrains, onchange, returns,
+              one, v7, v8
 
 .. _reference/orm/fields:
 

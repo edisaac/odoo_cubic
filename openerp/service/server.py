@@ -44,6 +44,12 @@ _logger = logging.getLogger(__name__)
 
 SLEEP_INTERVAL = 60     # 1 min
 
+def memory_info(process):
+    """ psutil < 2.0 does not have memory_info, >= 3.0 does not have
+    get_memory_info """
+    pmem = (getattr(process, 'memory_info', None) or process.get_memory_info)()
+    return (pmem.rss, pmem.vms)
+
 #----------------------------------------------------------
 # Werkzeug WSGI servers patched
 #----------------------------------------------------------
@@ -212,6 +218,10 @@ class CommonServer(object):
         try:
             sock.shutdown(socket.SHUT_RDWR)
         except socket.error, e:
+            if e.errno == errno.EBADF:
+                # Werkzeug > 0.9.6 closes the socket itself (see commit
+                # https://github.com/mitsuhiko/werkzeug/commit/4d8ca089)
+                return
             # On OSX, socket shutdowns both sides if any side closes it
             # causing an error 57 'Socket is not connected' on shutdown
             # of the other side (or something), see
@@ -418,7 +428,8 @@ class PreforkServer(CommonServer):
     """
     def __init__(self, app):
         # config
-        self.address = (config['xmlrpc_interface'] or '0.0.0.0', config['xmlrpc_port'])
+        self.address = config['xmlrpc'] and \
+            (config['xmlrpc_interface'] or '0.0.0.0', config['xmlrpc_port'])
         self.population = config['workers']
         self.timeout = config['limit_time_real']
         self.limit_request = config['limit_request']
@@ -593,12 +604,13 @@ class PreforkServer(CommonServer):
         signal.signal(signal.SIGQUIT, dumpstacks)
         signal.signal(signal.SIGUSR1, log_ormcache_stats)
 
-        # listen to socket
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket.setblocking(0)
-        self.socket.bind(self.address)
-        self.socket.listen(8 * self.population)
+        if self.address:
+            # listen to socket
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.socket.setblocking(0)
+            self.socket.bind(self.address)
+            self.socket.listen(8 * self.population)
 
     def stop(self, graceful=True):
         if self.long_polling_pid is not None:
@@ -609,15 +621,21 @@ class PreforkServer(CommonServer):
             _logger.info("Stopping gracefully")
             limit = time.time() + self.timeout
             for pid in self.workers.keys():
-                self.worker_kill(pid, signal.SIGTERM)
+                self.worker_kill(pid, signal.SIGINT)
             while self.workers and time.time() < limit:
+                try:
+                    self.process_signals()
+                except KeyboardInterrupt:
+                    _logger.info("Forced shutdown.")
+                    break
                 self.process_zombie()
                 time.sleep(0.1)
         else:
             _logger.info("Stopping forcefully")
         for pid in self.workers.keys():
             self.worker_kill(pid, signal.SIGTERM)
-        self.socket.close()
+        if self.socket:
+            self.socket.close()
 
     def run(self, preload, stop):
         self.start()
@@ -691,7 +709,7 @@ class Worker(object):
             _logger.info("Worker (%d) max request (%s) reached.", self.pid, self.request_count)
             self.alive = False
         # Reset the worker if it consumes too much memory (e.g. caused by a memory leak).
-        rss, vms = psutil.Process(os.getpid()).get_memory_info()
+        rss, vms = memory_info(psutil.Process(os.getpid()))
         if vms > config['limit_memory_soft']:
             _logger.info('Worker (%d) virtual memory limit (%s) reached.', self.pid, vms)
             self.alive = False      # Commit suicide after the request.
@@ -704,7 +722,7 @@ class Worker(object):
         r = resource.getrusage(resource.RUSAGE_SELF)
         cpu_time = r.ru_utime + r.ru_stime
         def time_expired(n, stack):
-            _logger.info('Worker (%d) CPU time limit (%s) reached.', config['limit_time_cpu'])
+            _logger.info('Worker (%d) CPU time limit (%s) reached.', self.pid, config['limit_time_cpu'])
             # We dont suicide in such case
             raise Exception('CPU time limit exceeded.')
         signal.signal(signal.SIGXCPU, time_expired)
@@ -720,11 +738,13 @@ class Worker(object):
         _logger.info("Worker %s (%s) alive", self.__class__.__name__, self.pid)
         # Reseed the random number generator
         random.seed()
-        # Prevent fd inherientence close_on_exec
-        flags = fcntl.fcntl(self.multi.socket, fcntl.F_GETFD) | fcntl.FD_CLOEXEC
-        fcntl.fcntl(self.multi.socket, fcntl.F_SETFD, flags)
-        # reset blocking status
-        self.multi.socket.setblocking(0)
+        if self.multi.socket:
+            # Prevent fd inheritance: close_on_exec
+            flags = fcntl.fcntl(self.multi.socket, fcntl.F_GETFD) | fcntl.FD_CLOEXEC
+            fcntl.fcntl(self.multi.socket, fcntl.F_SETFD, flags)
+            # reset blocking status
+            self.multi.socket.setblocking(0)
+
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
         signal.signal(signal.SIGCHLD, signal.SIG_DFL)
@@ -753,6 +773,7 @@ class WorkerHTTP(Worker):
     """ HTTP Request workers """
     def process_request(self, client, addr):
         client.setblocking(1)
+        client.settimeout(0.5)
         client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         # Prevent fd inherientence close_on_exec
         flags = fcntl.fcntl(client, fcntl.F_GETFD) | fcntl.FD_CLOEXEC
@@ -814,7 +835,7 @@ class WorkerCron(Worker):
             self.setproctitle(db_name)
             if rpc_request_flag:
                 start_time = time.time()
-                start_rss, start_vms = psutil.Process(os.getpid()).get_memory_info()
+                start_rss, start_vms = memory_info(psutil.Process(os.getpid()))
 
             import openerp.addons.base as base
             base.ir.ir_cron.ir_cron._acquire_job(db_name)
@@ -825,7 +846,7 @@ class WorkerCron(Worker):
                 openerp.sql_db.close_db(db_name)
             if rpc_request_flag:
                 run_time = time.time() - start_time
-                end_rss, end_vms = psutil.Process(os.getpid()).get_memory_info()
+                end_rss, end_vms = memory_info(psutil.Process(os.getpid()))
                 vms_diff = (end_vms - start_vms) / 1024
                 logline = '%s time:%.3fs mem: %sk -> %sk (diff: %sk)' % \
                     (db_name, run_time, start_vms / 1024, end_vms / 1024, vms_diff)
@@ -842,7 +863,8 @@ class WorkerCron(Worker):
     def start(self):
         os.nice(10)     # mommy always told me to be nice with others...
         Worker.start(self)
-        self.multi.socket.close()
+        if self.multi.socket:
+            self.multi.socket.close()
 
 #----------------------------------------------------------
 # start/stop public api

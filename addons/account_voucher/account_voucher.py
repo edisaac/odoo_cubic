@@ -226,8 +226,8 @@ class account_voucher(osv.osv):
         if not ids: return {}
         currency_obj = self.pool.get('res.currency')
         res = {}
-        debit = credit = 0.0
         for voucher in self.browse(cr, uid, ids, context=context):
+            debit = credit = 0.0
             sign = voucher.type == 'payment' and -1 or 1
             for l in voucher.line_dr_ids:
                 debit += l.amount
@@ -370,7 +370,7 @@ class account_voucher(osv.osv):
         'state': 'draft',
         'pay_now': 'pay_now',
         'name': '',
-        'date': lambda *a: time.strftime('%Y-%m-%d'),
+        'date': fields.date.context_today,
         'company_id': lambda self,cr,uid,c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.voucher',context=c),
         'tax_id': _get_tax,
         'payment_option': 'without_writeoff',
@@ -400,7 +400,7 @@ class account_voucher(osv.osv):
 
             tax = [tax_pool.browse(cr, uid, voucher.tax_id.id, context=context)]
             partner = partner_pool.browse(cr, uid, voucher.partner_id.id, context=context) or False
-            taxes = position_pool.map_tax(cr, uid, partner and partner.property_account_position or False, tax)
+            taxes = position_pool.map_tax(cr, uid, partner and partner.property_account_position or False, tax, context=context)
             tax = tax_pool.browse(cr, uid, taxes, context=context)
 
             total = voucher_amount
@@ -451,7 +451,7 @@ class account_voucher(osv.osv):
                 tax = [tax_pool.browse(cr, uid, tax_id, context=context)]
                 if partner_id:
                     partner = partner_pool.browse(cr, uid, partner_id, context=context) or False
-                    taxes = position_pool.map_tax(cr, uid, partner and partner.property_account_position or False, tax)
+                    taxes = position_pool.map_tax(cr, uid, partner and partner.property_account_position or False, tax, context=context)
                     tax = tax_pool.browse(cr, uid, taxes, context=context)
 
                 if not tax[0].price_include:
@@ -516,7 +516,12 @@ class account_voucher(osv.osv):
         else:
             if not journal.default_credit_account_id or not journal.default_debit_account_id:
                 raise osv.except_osv(_('Error!'), _('Please define default credit/debit accounts on the journal "%s".') % (journal.name))
-            account_id = journal.default_credit_account_id.id or journal.default_debit_account_id.id
+            if ttype in ('sale', 'receipt'):
+                account_id = journal.default_debit_account_id.id
+            elif ttype in ('purchase', 'payment'):
+                account_id = journal.default_credit_account_id.id
+            else:
+                account_id = journal.default_credit_account_id.id or journal.default_debit_account_id.id
             tr_type = 'receipt'
 
         default['value']['account_id'] = account_id
@@ -610,6 +615,10 @@ class account_voucher(osv.osv):
             account_id = partner.property_account_receivable.id
         elif journal.type in ('purchase', 'purchase_refund','expense'):
             account_id = partner.property_account_payable.id
+        elif ttype in ('sale', 'receipt'):
+            account_id = journal.default_debit_account_id.id
+        elif ttype in ('purchase', 'payment'):
+            account_id = journal.default_credit_account_id.id
         else:
             account_id = journal.default_credit_account_id.id or journal.default_debit_account_id.id
 
@@ -869,7 +878,12 @@ class account_voucher(osv.osv):
             return False
         journal_pool = self.pool.get('account.journal')
         journal = journal_pool.browse(cr, uid, journal_id, context=context)
-        account_id = journal.default_credit_account_id or journal.default_debit_account_id
+        if ttype in ('sale', 'receipt'):
+            account_id = journal.default_debit_account_id
+        elif ttype in ('purchase', 'payment'):
+            account_id = journal.default_credit_account_id
+        else:
+            account_id = journal.default_credit_account_id or journal.default_debit_account_id
         tax_id = False
         if account_id and account_id.tax_ids:
             tax_id = account_id.tax_ids[0].id
@@ -884,7 +898,7 @@ class account_voucher(osv.osv):
         else:
             currency_id = journal.company_id.currency_id.id
 
-        period_ids = self.pool['account.period'].find(cr, uid, context=dict(context, company_id=company_id))
+        period_ids = self.pool['account.period'].find(cr, uid, dt=date, context=dict(context, company_id=company_id))
         vals['value'].update({
             'currency_id': currency_id,
             'payment_rate_currency_id': currency_id,
@@ -973,6 +987,10 @@ class account_voucher(osv.osv):
                 account_id = partner.property_account_receivable.id
             elif journal.type in ('purchase', 'purchase_refund','expense'):
                 account_id = partner.property_account_payable.id
+            elif ttype in ('sale', 'receipt'):
+                account_id = journal.default_debit_account_id.id
+            elif ttype in ('purchase', 'payment'):
+                account_id = journal.default_credit_account_id.id
             else:
                 account_id = journal.default_credit_account_id.id or journal.default_debit_account_id.id
             if account_id:
@@ -1237,11 +1255,6 @@ class account_voucher(osv.osv):
                     'account_tax_id': voucher.tax_id.id,
                 })
 
-            if move_line.get('account_tax_id', False):
-                tax_data = tax_obj.browse(cr, uid, [move_line['account_tax_id']], context=context)[0]
-                if not (tax_data.base_code_id and tax_data.tax_code_id):
-                    raise osv.except_osv(_('No Account Base Code and Account Tax Code!'),_("You have to configure account base code and account tax code on the '%s' tax!") % (tax_data.name))
-
             # compute the amount in foreign currency
             foreign_currency_diff = 0.0
             amount_currency = False
@@ -1281,7 +1294,7 @@ class account_voucher(osv.osv):
                     'move_id': move_id,
                     'partner_id': line.voucher_id.partner_id.id,
                     'currency_id': line.move_line_id.currency_id.id,
-                    'amount_currency': -1 * foreign_currency_diff,
+                    'amount_currency': (-1 if line.type == 'cr' else 1) * foreign_currency_diff,
                     'quantity': 1,
                     'credit': 0.0,
                     'debit': 0.0,
@@ -1485,6 +1498,7 @@ class account_voucher_line(osv.osv):
         'amount_unreconciled': fields.function(_compute_balance, multi='dc', type='float', string='Open Balance', store=True, digits_compute=dp.get_precision('Account')),
         'company_id': fields.related('voucher_id','company_id', relation='res.company', type='many2one', string='Company', store=True, readonly=True),
         'currency_id': fields.function(_currency_id, string='Currency', type='many2one', relation='res.currency', readonly=True),
+        'state': fields.related('voucher_id', 'state', type='char', string='State', readonly=True),
     }
     _defaults = {
         'name': '',
