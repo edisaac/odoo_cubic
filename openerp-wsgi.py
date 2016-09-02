@@ -26,7 +26,7 @@ conf = openerp.tools.config
 # Path to the OpenERP Addons repository (comma-separated for
 # multiple locations)
 
-conf['addons_path'] = './addons,../branch,../trunk'
+conf['addons_path'] = './addons,../branch,../trunk,../../github/vertical-medical'
 
 # Optional database config if not using local socket
 #conf['db_name'] = 'mycompany'
@@ -35,7 +35,7 @@ conf['db_user'] = 'v8'
 conf['db_port'] = 5432
 conf['db_password'] = 't3r4d4t4'
 conf['dbfilter']="^%d.*"
-conf['admin_passwd']="t3r4d4t4"
+conf['admin_passwd']="t3r4d4ta1234"
 
 #----------------------------------------------------------
 # Generic WSGI handlers application
