@@ -1130,7 +1130,7 @@ class mrp_production(osv.osv):
             'production_id': production.id,
             'origin': production.name,
             'group_id': procurement and procurement.group_id.id or production.group_id.id,
-            'property_ids': procurement and [(6,False, [p.id for p in procurement.property_ids or production.property_ids])] or [],
+            #'property_ids': procurement and [(6,False, [p.id for p in procurement.property_ids or production.property_ids])] or [],
         }
         move_id = stock_move.create(cr, uid, data, context=context)
         #a phantom bom cannot be used in mrp order so it's ok to assume the list returned by action_confirm
@@ -1246,9 +1246,10 @@ class mrp_production(osv.osv):
         procs = proc_obj.search(cr, uid, [('production_id', '=', production.id)], context=context)
         procurement = procs and\
             proc_obj.browse(cr, uid, procs[0], context=context) or False
-        for property in procurement and procurement.property_ids or production.property_ids:
-            if property.group_id in product.property_group_ids:
-                res.append(property.id)
+        if procurement:
+            for property in procurement.property_ids or production.property_ids:
+                if property.group_id in product.property_group_ids:
+                    res.append(property.id)
         return res
 
     def _make_production_consume_line(self, cr, uid, line, context=None):
