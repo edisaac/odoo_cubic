@@ -424,8 +424,8 @@ class procurement_order(osv.osv):
                 'line_ids': [(0, 0, {
                     'product_id': procurement.product_id.id,
                     'product_uom_id': procurement.product_uom.id,
-                    'product_qty': procurement.product_qty
-
+                    'product_qty': procurement.product_qty,
+                    'schedule_date': procurement.date_planned,
                 })],
             })
             self.message_post(cr, uid, [procurement.id], body=_("Purchase Requisition created"), context=context)
