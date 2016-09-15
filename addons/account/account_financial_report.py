@@ -113,7 +113,7 @@ class account_financial_report(osv.osv):
                 account_ids = account_obj.search(cr, uid, [('user_type','in', report_types), ('type','!=','view')], context=context)
                 for a in account_obj.browse(cr, uid, account_ids, context=context):
                     for field in field_names:
-                        res[report.id][field] += getattr(a, field) * report.sign
+                        res[report.id][field] += getattr(a, field) #* report.sign
             elif report.type == 'account_report' and report.account_report_id:
                 # it's the amount of the linked report
                 res2 = self._get_balance(cr, uid, [report.account_report_id.id], field_names, False, context=context)
