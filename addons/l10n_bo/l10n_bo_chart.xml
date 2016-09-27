@@ -8,13 +8,13 @@
     
     <record id="account_account_type_BG_ACC_10" model="account.account.type"><field name="close_method">balance</field><field name="code">BG_ACC_10</field><field name="name">Caja y Bancos</field><field name="report_type">asset</field></record>
     <record id="account_account_type_BG_ACC_20" model="account.account.type"><field name="close_method">detail</field><field name="code">BG_ACC_20</field><field name="name">Inversiones al Valor Razonable y Disponible</field><field name="report_type">asset</field></record>
-    <record id="account_account_type_BG_ACC_30" model="account.account.type"><field name="close_method">unreconciled</field><field name="code">BG_ACC_30</field><field name="name">Créditos o Exigibles</field><field name="report_type">asset</field></record>
-    <record id="account_account_type_BG_ACC_50" model="account.account.type"><field name="close_method">unreconciled</field><field name="code">BG_ACC_50</field><field name="name">Otros Créditos</field><field name="report_type">asset</field></record>
-    <record id="account_account_type_BG_ACC_60" model="account.account.type"><field name="close_method">balance</field><field name="code">BG_ACC_60</field><field name="name">Bienes de Cambio o Realizablez</field><field name="report_type">asset</field></record>
+    <record id="account_account_type_BG_ACC_30" model="account.account.type"><field name="close_method">unreconciled</field><field name="code">BG_ACC_30</field><field name="name">Cuentas por Cobrar</field><field name="report_type">asset</field></record>
+    <record id="account_account_type_BG_ACC_50" model="account.account.type"><field name="close_method">unreconciled</field><field name="code">BG_ACC_50</field><field name="name">Otras Cuentas por Cobrar</field><field name="report_type">asset</field></record>
+    <record id="account_account_type_BG_ACC_60" model="account.account.type"><field name="close_method">balance</field><field name="code">BG_ACC_60</field><field name="name">Existencias</field><field name="report_type">asset</field></record>
     
     <record id="account_account_type_BG_ACN_10" model="account.account.type"><field name="close_method">detail</field><field name="code">BG_ACN_10</field><field name="name">Otros Creditos no Corrientes</field><field name="report_type">asset</field></record>
     <record id="account_account_type_BG_ACN_40" model="account.account.type"><field name="close_method">detail</field><field name="code">BG_ACN_40</field><field name="name">Inversiones Permanentes</field><field name="report_type">asset</field></record>
-    <record id="account_account_type_BG_ACN_50" model="account.account.type"><field name="close_method">balance</field><field name="code">BG_ACN_50</field><field name="name">Bienes de Uso</field><field name="report_type">asset</field></record>
+    <record id="account_account_type_BG_ACN_50" model="account.account.type"><field name="close_method">balance</field><field name="code">BG_ACN_50</field><field name="name">Activo Fijo</field><field name="report_type">asset</field></record>
     
     <record id="account_account_type_BG_PAC_10" model="account.account.type"><field name="close_method">unreconciled</field><field name="code">BG_PAC_10</field><field name="name">Deudas Bancarias y Financieras</field><field name="report_type">liability</field></record>
     <record id="account_account_type_BG_PAC_20" model="account.account.type"><field name="close_method">unreconciled</field><field name="code">BG_PAC_20</field><field name="name">Cuentas por Pagar</field><field name="report_type">liability</field></record>
@@ -53,14 +53,14 @@
 	  <field ref="account_account_type_view" name="user_type"/>
 	  <field name="type">view</field>
 	</record>
-		<record model="account.account.template" id="_1_BG">
-		  <field name="name">Cuentas Patrimoniales</field>
-		  <field name="code">.1.BG</field>
-		  <field name="reconcile" eval="False"/>
-		  <field ref="account_account_type_view" name="user_type"/>
-		  <field name="type">view</field>
-		  <field ref="pcge" name="parent_id"/>
-		</record>
+            <record model="account.account.template" id="_1_BG">
+              <field name="name">Cuentas Patrimoniales</field>
+              <field name="code">.1.BG</field>
+              <field name="reconcile" eval="False"/>
+              <field ref="account_account_type_view" name="user_type"/>
+              <field name="type">view</field>
+              <field ref="pcge" name="parent_id"/>
+            </record>
 			<record id="1" model="account.account.template"><field name="name">ACTIVO</field><field name="code">1</field><field name="reconcile" eval="False"/><field ref="account_account_type_view" name="user_type"/><field name="type">view</field><field ref="_1_BG" name="parent_id"/></record>
 			<record id="11" model="account.account.template"><field name="name">Caja y Bancos</field><field name="code">11</field><field name="reconcile" eval="False"/><field ref="account_account_type_view" name="user_type"/><field name="type">view</field><field ref="1" name="parent_id"/></record>
             <record id="111" model="account.account.template"><field name="name">Caja y Bancos - Caja</field><field name="code">111</field><field name="reconcile" eval="False"/><field ref="account_account_type_view" name="user_type"/><field name="type">view</field><field ref="11" name="parent_id"/></record>
