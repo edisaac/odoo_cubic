@@ -53,7 +53,7 @@
 	  <field ref="account_account_type_view" name="user_type"/>
 	  <field name="type">view</field>
 	</record>
- 
+
 	  <record id="A" model="account.account.template"><field name="name">Disponibilidades e inversiones temporales</field><field name="code">A</field><field name="reconcile">0</field><field name="user_type" ref="account_account_type_view"/><field name="type">view</field><field name="parent_id" ref="pcge"/></record>
 	<record id="10" model="account.account.template"><field name="name">Disponibilidades</field><field name="code">10</field><field name="reconcile">0</field><field name="user_type" ref="account_account_type_view"/><field name="type">view</field><field name="parent_id" ref="A"/></record>
 	<record id="101" model="account.account.template"><field name="name">Caja</field><field name="code">101</field><field name="reconcile">0</field><field name="user_type" ref="account_account_type_view"/><field name="type">view</field><field name="parent_id" ref="10"/></record>
