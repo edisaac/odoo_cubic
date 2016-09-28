@@ -9,8 +9,8 @@
       <field name="type">percent</field>
       <field name="type_tax_use">sale</field>
       <field name="price_include">1</field>
-      <field name="account_collected_id" ref="231"/>
-      <field name="account_paid_id" ref="231"/>
+      <field name="account_collected_id" ref="40112"/>
+      <field name="account_paid_id" ref="40112"/>
       <field name="base_code_id" ref="vat_code_base_sale"/>
       <field name="tax_code_id" ref="vat_code_IVA_receive"/>
       <field name="ref_base_code_id" ref="vat_code_base_sale"/>
@@ -23,8 +23,8 @@
       <field name="type">percent</field>
       <field name="type_tax_use">purchase</field>
       <field name="price_include">1</field>
-      <field name="account_collected_id" ref="126"/>
-      <field name="account_paid_id" ref="126"/>
+      <field name="account_collected_id" ref="1712"/>
+      <field name="account_paid_id" ref="1712"/>
       <field name="base_code_id" ref="vat_code_base_purchase"/>
       <field name="tax_code_id" ref="vat_code_IVA_pay"/>
       <field name="ref_base_code_id" ref="vat_code_base_purchase"/>
@@ -38,8 +38,8 @@
       <field name="type">percent</field>
       <field name="type_tax_use">sale</field>
       <field name="price_include">0</field>
-      <field name="account_collected_id" ref="232"/>
-      <field name="account_paid_id" ref="232"/>
+      <field name="account_collected_id" ref="40132"/>
+      <field name="account_paid_id" ref="40132"/>
       <field name="base_code_id" ref="vat_code_base_sale"/>
       <field name="tax_code_id" ref="vat_code_transacciones"/>
       <field name="ref_base_code_id" ref="vat_code_base_sale"/>
