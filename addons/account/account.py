@@ -2029,8 +2029,9 @@ class account_tax(osv.osv):
 
     _defaults = {
         'python_compute': '''# price_unit\n# or False\n# product: product.product object or None\n# partner: res.partner object or None\n\nresult = price_unit * 0.10''',
-        'python_compute_inv': '''# price_unit\n# product: product.product object or False\n\nresult = price_unit * 0.10''',
+        'python_compute_inv': '''# price_unit\n# or False\n# product: product.product object or None\n# partner: res.partner object or None\n\nresult = price_unit * 0.10''',
         'applicable_type': 'true',
+        'python_applicable': '''# price_unit\n# or False\n# product: product.product object or None\n# partner: res.partner object or None\n\nresult = True''',
         'type': 'percent',
         'amount': 0,
         'price_include': 0,
