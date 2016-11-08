@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-18 22:19+0000\n"
-"PO-Revision-Date: 2016-08-18 17:25-0500\n"
+"POT-Creation-Date: 2016-10-13 17:39+0000\n"
+"PO-Revision-Date: 2016-10-13 12:58-0500\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -85,7 +85,7 @@ msgid ""
 "            "
 msgstr ""
 "\n"
-"Estimado(a) ${object.name},\n"
+"HEstimado(a) ${object.name},\n"
 "\n"
 "% macro account_table(values):\n"
 "<table cellspacing=\"1\" border=\"1\" cellpadding=\"4\">\n"
@@ -300,7 +300,7 @@ msgstr ""
 #: field:account_analytic_analysis.summary.user,account_id:0
 #: model:ir.model,name:account_analytic_analysis.model_account_analytic_account
 msgid "Analytic Account"
-msgstr "Cuenta analítica"
+msgstr "Cuenta Analítica"
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,ca_theorical:0
@@ -316,7 +316,7 @@ msgstr ""
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Cancelled"
-msgstr "Cancelada"
+msgstr "Cancelado"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -326,7 +326,7 @@ msgstr "Contratos cancelados"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Closed"
-msgstr "Cerrada"
+msgstr "Cerrado"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -467,6 +467,13 @@ msgid "Description"
 msgstr "Descripción"
 
 #. module: account_analytic_analysis
+#: field:account.analytic.invoice.line,display_name:0
+#: field:account_analytic_analysis.summary.month,display_name:0
+#: field:account_analytic_analysis.summary.user,display_name:0
+msgid "Display Name"
+msgstr "Nombre a Mostrar"
+
+#. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "End Month"
 msgstr "Mes final"
@@ -482,10 +489,10 @@ msgid "End date passed or prepaid unit consumed"
 msgstr "Fecha final pasada o unidad pre-pagada consumida"
 
 #. module: account_analytic_analysis
-#: code:addons/account_analytic_analysis/account_analytic_analysis.py:681
+#: code:addons/account_analytic_analysis/account_analytic_analysis.py:683
 #, python-format
 msgid "Error!"
-msgstr "Error"
+msgstr "Error!"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,hours_qtt_est:0
@@ -521,7 +528,7 @@ msgstr "Expiran pronto"
 #. module: account_analytic_analysis
 #: field:account.analytic.account,fix_price_invoices:0
 msgid "Fixed Price"
-msgstr "Precio fijo"
+msgstr "Precio Fijo"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,recurring_invoices:0
@@ -531,7 +538,7 @@ msgstr "Generar automáticamente facturas recurrentes"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Group By"
-msgstr "Agrupar por"
+msgstr "Agrupado por"
 
 #. module: account_analytic_analysis
 #: model:ir.model,name:account_analytic_analysis.model_account_analytic_analysis_summary_user
@@ -576,7 +583,7 @@ msgstr ""
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "In Progress"
-msgstr "En proceso"
+msgstr "En Progreso"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,recurring_invoice_line_ids:0
@@ -591,7 +598,7 @@ msgstr "Repetición automática de una factura en el intervalo especificado"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 msgid "Invoiced"
-msgstr "Facturado"
+msgstr "Facturada"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,ca_invoiced:0
@@ -606,7 +613,7 @@ msgstr "Tiempo facturado"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 msgid "Invoicing"
-msgstr "Facturación"
+msgstr "Facturacion"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,last_invoice_date:0
@@ -614,14 +621,21 @@ msgid "Last Invoice Date"
 msgstr "Fecha última factura"
 
 #. module: account_analytic_analysis
+#: field:account.analytic.invoice.line,__last_update:0
+#: field:account_analytic_analysis.summary.month,__last_update:0
+#: field:account_analytic_analysis.summary.user,__last_update:0
+msgid "Last Modified on"
+msgstr "Última Modificación"
+
+#. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,write_uid:0
 msgid "Last Updated by"
-msgstr "Última actualización de"
+msgstr "Actualizado última vez por"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Ultima Actualización"
 
 #. module: account_analytic_analysis
 #: model:res.groups,name:account_analytic_analysis.group_template_required
@@ -645,7 +659,7 @@ msgid "Month(s)"
 msgstr "Mes(es)"
 
 #. module: account_analytic_analysis
-#: code:addons/account_analytic_analysis/account_analytic_analysis.py:676
+#: code:addons/account_analytic_analysis/account_analytic_analysis.py:678
 #, python-format
 msgid "No Customer Defined!"
 msgstr "No hay un cliente definido"
@@ -705,7 +719,7 @@ msgstr "Padre"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Partner"
-msgstr "Empresa"
+msgstr "Socio"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -713,7 +727,7 @@ msgid "Pending contracts"
 msgstr "Contratos pendientes"
 
 #. module: account_analytic_analysis
-#: code:addons/account_analytic_analysis/account_analytic_analysis.py:682
+#: code:addons/account_analytic_analysis/account_analytic_analysis.py:684
 #, python-format
 msgid "Please define a sale journal for the company \"%s\"."
 msgstr "Por favor, defina un diario para la compañía \"%s\"."
@@ -721,7 +735,7 @@ msgstr "Por favor, defina un diario para la compañía \"%s\"."
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
 msgid "Pricelist"
-msgstr "Tarifa"
+msgstr "Lista de Precio"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,product_id:0
@@ -774,7 +788,7 @@ msgstr "Tiempo restante"
 #. module: account_analytic_analysis
 #: field:account.analytic.account,recurring_interval:0
 msgid "Repeat Every"
-msgstr "Repetir cada"
+msgstr "Repetir Cada"
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,recurring_interval:0
@@ -796,7 +810,7 @@ msgstr "Líneas de pedido de venta a facturar de %s"
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 #: model:ir.actions.act_window,name:account_analytic_analysis.action_sales_order
 msgid "Sales Orders"
-msgstr "Pedidos de venta"
+msgstr "Pedidos de Ventas"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.view_account_analytic_account_overdue_search
@@ -811,7 +825,7 @@ msgstr "Estado"
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,price_subtotal:0
 msgid "Sub Total"
-msgstr "Subtotal"
+msgstr "Sub Total"
 
 #. module: account_analytic_analysis
 #: help:account.analytic.account,fix_price_to_invoice:0
@@ -848,7 +862,7 @@ msgstr "Tiempo y materiales a facturar"
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
 msgid "Timesheets"
-msgstr "Hojas de servicios"
+msgstr "Hoja de Tiempo"
 
 #. module: account_analytic_analysis
 #: code:addons/account_analytic_analysis/account_analytic_analysis.py:659
@@ -884,7 +898,7 @@ msgstr "Estimación total"
 #. module: account_analytic_analysis
 #: field:account.analytic.account,invoiced_total:0
 msgid "Total Invoiced"
-msgstr "Total facturado"
+msgstr "Total Facturado"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,remaining_total:0
@@ -895,7 +909,7 @@ msgstr "Total restante"
 #: field:account_analytic_analysis.summary.month,unit_amount:0
 #: field:account_analytic_analysis.summary.user,unit_amount:0
 msgid "Total Time"
-msgstr "Tiempo total"
+msgstr "Tiempo Total"
 
 #. module: account_analytic_analysis
 #: field:account.analytic.account,hours_quantity:0
@@ -939,7 +953,7 @@ msgstr "Precio unitario"
 #. module: account_analytic_analysis
 #: field:account.analytic.invoice.line,uom_id:0
 msgid "Unit of Measure"
-msgstr "Unidad de medida"
+msgstr "Unidad de Medida"
 
 #. module: account_analytic_analysis
 #: view:account.analytic.account:account_analytic_analysis.account_analytic_account_form_form
@@ -980,7 +994,7 @@ msgid "Year(s)"
 msgstr "Año(s)"
 
 #. module: account_analytic_analysis
-#: code:addons/account_analytic_analysis/account_analytic_analysis.py:676
+#: code:addons/account_analytic_analysis/account_analytic_analysis.py:678
 #, python-format
 msgid "You must first select a Customer for Contract %s!"
 msgstr "Debe seleccionar primero un cliente para el contrato %s"

@@ -150,7 +150,7 @@ msgstr "campo"
 #. module: anonymization
 #: field:ir.model.fields.anonymization,field_name:0
 msgid "Field Name"
-msgstr "Nombre de campo"
+msgstr "Nombre de Campo"
 
 #. module: anonymization
 #: view:ir.model.fields.anonymization.history:anonymization.view_ir_model_fields_anonymization_history_form

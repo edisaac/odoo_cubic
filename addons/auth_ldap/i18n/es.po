@@ -109,7 +109,7 @@ msgstr "Última actualización en"
 #. module: auth_ldap
 #: view:res.company.ldap:auth_ldap.view_ldap_installer_form
 msgid "Login Information"
-msgstr "Información conexión"
+msgstr "Información Conexión"
 
 #. module: auth_ldap
 #: view:res.company.ldap:auth_ldap.view_ldap_installer_form

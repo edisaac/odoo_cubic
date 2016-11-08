@@ -1,22 +1,20 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * account_check_writing
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* account_check_writing
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:07+0000\n"
-"PO-Revision-Date: 2015-07-17 06:43+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-10-17 20:29+0000\n"
+"PO-Revision-Date: 2016-10-17 15:34-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"X-Generator: Poedit 1.5.4\n"
 
 #. module: account_check_writing
 #: model:ir.actions.act_window,help:account_check_writing.action_write_check
@@ -24,19 +22,30 @@ msgid ""
 "<p class=\"oe_view_nocontent_create\">\n"
 "                Click to create a new check. \n"
 "              </p><p>\n"
-"                The check payment form allows you to track the payment you do\n"
-"                to your suppliers using checks. When you select a supplier, the\n"
+"                The check payment form allows you to track the payment you "
+"do\n"
+"                to your suppliers using checks. When you select a supplier, "
+"the\n"
 "                payment method and an amount for the payment, Odoo will\n"
 "                propose to reconcile your payment with the open supplier\n"
 "                invoices or bills.\n"
 "              </p>\n"
 "            "
-msgstr "<p class=\"oe_view_nocontent_create\">\nPulse para crear un nuevo cheque \n</p><p>\nEl formulario de pago por cheque permite gestionar el pago que hace\na sus proveedores usando cheques. Cuando selecciona un proveedor,\nun método de pago y un importe para el pago, Odoo propondrá \nconciliar el pago con las facturas de proveedor o recibos pendientes.\n</p>\n            "
+msgstr ""
+"<p class=\"oe_view_nocontent_create\">\n"
+"Pulse para crear un nuevo cheque \n"
+"</p><p>\n"
+"El formulario de pago por cheque permite gestionar el pago que hace\n"
+"a sus proveedores usando cheques. Cuando selecciona un proveedor,\n"
+"un método de pago y un importe para el pago, Odoo propondrá \n"
+"conciliar el pago con las facturas de proveedor o recibos pendientes.\n"
+"</p>\n"
+"            "
 
 #. module: account_check_writing
 #: model:ir.model,name:account_check_writing.model_account_voucher
 msgid "Accounting Voucher"
-msgstr "Comprobante contable"
+msgstr "Comprobantes contables"
 
 #. module: account_check_writing
 #: field:account.voucher,allow_check:0
@@ -67,7 +76,7 @@ msgstr "Cheque"
 #. module: account_check_writing
 #: field:res.company,check_layout:0
 msgid "Check Layout"
-msgstr "Disposición del cheque"
+msgstr "Diseño del Cheque"
 
 #. module: account_check_writing
 #: help:account.journal,use_preprint_check:0
@@ -77,7 +86,7 @@ msgstr "Marque esta casilla si usa una plantilla preformateada para el cheque"
 #. module: account_check_writing
 #: selection:res.company,check_layout:0
 msgid "Check in middle"
-msgstr "Cheque en el centro"
+msgstr "Cheque en el medio"
 
 #. module: account_check_writing
 #: selection:res.company,check_layout:0
@@ -87,7 +96,7 @@ msgstr "Cheque en la parte de arriba"
 #. module: account_check_writing
 #: selection:res.company,check_layout:0
 msgid "Check on bottom"
-msgstr "Cheque en la parte de abajo"
+msgstr "Cheque al final"
 
 #. module: account_check_writing
 #: help:res.company,check_layout:0
@@ -95,7 +104,11 @@ msgid ""
 "Check on top is compatible with Quicken, QuickBooks and Microsoft Money. "
 "Check in middle is compatible with Peachtree, ACCPAC and DacEasy. Check on "
 "bottom is compatible with Peachtree, ACCPAC and DacEasy only"
-msgstr "Cheque en la parte de arriba es compatible con Quicken, Quickbooks y Microsoft Money. Cheque en el medio es compatible con PeachTree, ACCPAC y DacEasy. Cheque en la parte de abajo es compatible con Peachtree, ACCPAC y DacEasy exclusivamente"
+msgstr ""
+"Cheque en la parte de arriba es compatible con Quicken, Quickbooks y "
+"Microsoft Money. Cheque en el medio es compatible con PeachTree, ACCPAC y "
+"DacEasy. Cheque en la parte de abajo es compatible con Peachtree, ACCPAC y "
+"DacEasy exclusivamente"
 
 #. module: account_check_writing
 #: help:account.journal,allow_check_writing:0
@@ -105,7 +118,7 @@ msgstr "Revise si el diario es usado para registrar cheques."
 #. module: account_check_writing
 #: model:ir.model,name:account_check_writing.model_res_company
 msgid "Companies"
-msgstr "Compañías"
+msgstr "Compañias"
 
 #. module: account_check_writing
 #: field:account.check.write,create_uid:0
@@ -128,15 +141,21 @@ msgid "Discount"
 msgstr "Descuento"
 
 #. module: account_check_writing
+#: field:account.check.write,display_name:0
+#: field:report.account_check_writing.report_check,display_name:0
+msgid "Display Name"
+msgstr "Nombre a Mostrar"
+
+#. module: account_check_writing
 #: view:website:account_check_writing.report_check
 msgid "Due Date"
-msgstr "Fecha de vencimiento"
+msgstr "Fecha de Vencimiento"
 
 #. module: account_check_writing
 #: code:addons/account_check_writing/wizard/account_check_batch_printing.py:59
 #, python-format
 msgid "Error!"
-msgstr "¡Error!"
+msgstr "Error!"
 
 #. module: account_check_writing
 #: field:account.check.write,id:0
@@ -150,19 +169,25 @@ msgid "Journal"
 msgstr "Diario"
 
 #. module: account_check_writing
+#: field:account.check.write,__last_update:0
+#: field:report.account_check_writing.report_check,__last_update:0
+msgid "Last Modified on"
+msgstr "Última Modificación"
+
+#. module: account_check_writing
 #: field:account.check.write,write_uid:0
 msgid "Last Updated by"
-msgstr "Última actualización de"
+msgstr "Actualizado última vez por"
 
 #. module: account_check_writing
 #: field:account.check.write,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Ultima Actualización"
 
 #. module: account_check_writing
 #: field:account.check.write,check_number:0
 msgid "Next Check Number"
-msgstr "Nº del próximo cheque"
+msgstr "Siguiente Número de Cheque"
 
 #. module: account_check_writing
 #: code:addons/account_check_writing/account_voucher.py:77
@@ -189,7 +214,7 @@ msgstr "Importe original"
 #. module: account_check_writing
 #: view:website:account_check_writing.report_check
 msgid "Payment"
-msgstr "Pagos"
+msgstr "Pago"
 
 #. module: account_check_writing
 #: model:ir.model,name:account_check_writing.model_account_check_write
@@ -200,7 +225,7 @@ msgstr "Imprimir cheques en lote"
 #: view:account.check.write:account_check_writing.view_account_check_write
 #: view:account.voucher:account_check_writing.view_vendor_payment_check_form
 msgid "Print Check"
-msgstr "Imprimir cheque"
+msgstr "Imprimir Cheque"
 
 #. module: account_check_writing
 #: model:ir.actions.act_window,name:account_check_writing.action_account_check_write

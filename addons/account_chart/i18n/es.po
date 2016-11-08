@@ -26,4 +26,4 @@ msgstr "Elimina plan contable mínimo"
 #. module: account_chart
 #: model:ir.module.module,shortdesc:account_chart.module_meta_information
 msgid "Charts of Accounts"
-msgstr "Planes contables"
+msgstr "Planes Contables"
