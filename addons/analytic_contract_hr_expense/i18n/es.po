@@ -21,12 +21,12 @@ msgstr ""
 #. module: analytic_contract_hr_expense
 #: model:ir.model,name:analytic_contract_hr_expense.model_account_analytic_account
 msgid "Analytic Account"
-msgstr "Cuenta analítica"
+msgstr "Cuenta Analítica"
 
 #. module: analytic_contract_hr_expense
 #: field:account.analytic.account,charge_expenses:0
 msgid "Charge Expenses"
-msgstr "Cargar gastos"
+msgstr "Cargar Gastos"
 
 #. module: analytic_contract_hr_expense
 #: field:account.analytic.account,est_expenses:0
