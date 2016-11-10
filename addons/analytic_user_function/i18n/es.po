@@ -68,7 +68,7 @@ msgstr "Precio de facturación por usuario"
 #: view:analytic.user.funct.grid:analytic_user_function.analytic_user_funct_grid_form
 #: view:analytic.user.funct.grid:analytic_user_function.analytic_user_funct_grid_tree
 msgid "Invoicing Data"
-msgstr "Datos de facturación"
+msgstr "Datos de Facturación"
 
 #. module: analytic_user_function
 #: field:analytic.user.funct.grid,write_uid:0
