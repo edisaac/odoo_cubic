@@ -44,6 +44,10 @@ class pos_order_report(osv.osv):
         'journal_id': fields.many2one('account.journal', 'Journal'),
         'delay_validation': fields.integer('Delay Validation'),
         'product_categ_id': fields.many2one('product.category', 'Product Category', readonly=True),
+        'invoice_id': fields.many2one('account.invoice', 'Invoice', readonly=True),
+        'invoice_journal_id': fields.many2one('account.journal', 'Invoice Journal', readonly=True),
+        'session_id': fields.many2one('pos.session', 'Session', readonly=True),
+        'config_id': fields.many2one('pos.config', 'Point of Sale', readonly=True),
     }
     _order = 'date desc'
 
@@ -67,14 +71,20 @@ class pos_order_report(osv.osv):
                     s.company_id as company_id,
                     s.sale_journal as journal_id,
                     l.product_id as product_id,
-                    pt.categ_id as product_categ_id
+                    pt.categ_id as product_categ_id,
+                    s.invoice_id as invoice_id,
+                    ai.journal_id as invoice_journal_id,
+                    s.session_id as session_id,
+                    ps.config_id as config_id
                 from pos_order_line as l
                     left join pos_order s on (s.id=l.order_id)
                     left join product_product p on (p.id=l.product_id)
                     left join product_template pt on (pt.id=p.product_tmpl_id)
                     left join product_uom u on (u.id=pt.uom_id)
+                    left join account_invoice ai on (s.invoice_id=ai.id)
+                    left join pos_session ps on (s.session_id=ps.id)
                 group by
-                    s.date_order, s.partner_id,s.state, pt.categ_id,
+                    ps.config_id, s.session_id, ai.journal_id, s.invoice_id, s.date_order, s.partner_id,s.state, pt.categ_id,
                     s.user_id,s.location_id,s.company_id,s.sale_journal,l.product_id,s.create_date
                 having
                     sum(l.qty * u.factor) != 0)""")
