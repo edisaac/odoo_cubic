@@ -1096,7 +1096,7 @@ td {
     background-color: white;
     margin: 20px;
     padding: 15px;
-    font-size: 14px;
+    font-size: 10px;
     padding-bottom:30px;
     display: inline-block;
     font-family: "Inconsolata";
@@ -1175,8 +1175,12 @@ td {
         margin-left: auto !important;
         margin-right: auto !important;
         border: none !important;
-        font-size: 13px !important;
+        font-size: 9px !important;
         width: 266px !important;
+    }
+    .pos .pos-sale-ticket .emph{
+        font-size: 11px;
+        margin:5px;
     }
 }
 

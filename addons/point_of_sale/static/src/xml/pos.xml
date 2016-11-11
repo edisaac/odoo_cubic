@@ -935,10 +935,14 @@
                 Date.CultureInfo.formatPatterns.longTime)"/> <t t-esc="order.get('name')"/></div>
             <br />
             <t t-esc="widget.pos.company.name"/><br />
-            Phone: <t t-esc="widget.pos.company.phone || ''"/><br />
-            User: <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br />
-            Shop: <t t-esc="widget.pos.shop.name"/><br />
             <br />
+            <t t-if="order.get('client')">
+                Partner: <t t-esc="order.get('client').name"/><br />
+                <t t-if="order.get('client').vat">
+                VAT: <t t-esc="order.get('client').vat"/><br />
+                </t>
+                <br />
+            </t>
             <t t-if="widget.pos.config.receipt_header">
                 <div style='text-align:center'>
                     <t t-esc="widget.pos.config.receipt_header" />
@@ -1020,6 +1024,9 @@
                     <t t-esc="widget.pos.config.receipt_footer" />
                 </div>
             </t>
+            <br />
+            User: <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br />
+            Shop: <t t-esc="widget.pos.shop.name"/><br />
         </div>
     </t>
 

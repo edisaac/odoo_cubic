@@ -30,6 +30,8 @@ class report_transaction_pos(osv.osv):
         'date_create': fields.char('Date', size=16, readonly=True),
         'journal_id': fields.many2one('account.journal', 'Sales Journal', readonly=True),
         'jl_id': fields.many2one('account.journal', 'Cash Journals', readonly=True),
+        'session_id': fields.many2one('pos.session', 'Session', readonly=True),
+        'config_id': fields.many2one('pos.config', 'Point of Sale', readonly=True),
         'user_id': fields.many2one('res.users', 'User', readonly=True),
         'no_trans': fields.float('Number of Transaction', readonly=True),
         'amount': fields.float('Amount', readonly=True),
@@ -52,6 +54,8 @@ class report_transaction_pos(osv.osv):
                     po.user_id as user_id,
                     po.sale_journal as journal_id,
                     abs.journal_id as jl_id,
+                    po.session_id as session_id,
+                    ps.config_id as config_id,
                     count(po.invoice_id) as invoice_id,
                     count(p.id) as product_nb
                 from
@@ -59,15 +63,16 @@ class report_transaction_pos(osv.osv):
                     account_bank_statement as abs,
                     product_product as p,
                     pos_order_line as line,
-                    pos_order as po
+                    pos_order as po,
+                    pos_session as ps
                 where
                     absl.pos_statement_id = po.id and
                     line.order_id=po.id and
                     line.product_id=p.id and
-                    absl.statement_id=abs.id
-
+                    absl.statement_id=abs.id and
+                    po.session_id=ps.id
                 group by
-                    po.user_id,po.sale_journal, abs.journal_id,
+                    ps.config_id,po.session_id,po.user_id,po.sale_journal, abs.journal_id,
                     to_char(date_trunc('day',absl.create_date),'YYYY-MM-DD')::text
                 )
         """)

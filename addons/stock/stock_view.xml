@@ -1129,6 +1129,7 @@
                     <field name="partner_id" string="Partner"  filter_domain="[('picking_id.partner_id','child_of',self)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Product" name="by_product" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'product_id'}"/>
+                        <filter string="Picking Type" name="groupby_picking_type_id" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'picking_type_id'}"/>
                         <filter string="Picking" name="groupby_picking_id" icon="terp-accessories-archiver" domain="[]"  context="{'group_by':'picking_id'}"/>
                         <filter string="Procurement Group" name="groupby_group_id" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'group_id'}"/>
                         <filter string="Source" name="groupby_location_id" icon="terp-gtk-jump-to-rtl" domain="[]" context="{'group_by':'location_id'}" groups="stock.group_locations"/>
