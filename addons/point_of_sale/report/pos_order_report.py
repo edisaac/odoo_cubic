@@ -48,6 +48,8 @@ class pos_order_report(osv.osv):
         'invoice_journal_id': fields.many2one('account.journal', 'Invoice Journal', readonly=True),
         'session_id': fields.many2one('pos.session', 'Session', readonly=True),
         'config_id': fields.many2one('pos.config', 'Point of Sale', readonly=True),
+        'picking_id': fields.many2one('stock.picking', 'Picking', readonly=True),
+        'picking_type_id': fields.many2one('stock.picking.type', 'Picking Type', readonly=True),
     }
     _order = 'date desc'
 
@@ -75,7 +77,9 @@ class pos_order_report(osv.osv):
                     s.invoice_id as invoice_id,
                     ai.journal_id as invoice_journal_id,
                     s.session_id as session_id,
-                    ps.config_id as config_id
+                    ps.config_id as config_id,
+                    s.picking_id as picking_id,
+                    sp.picking_type_id as picking_type_id
                 from pos_order_line as l
                     left join pos_order s on (s.id=l.order_id)
                     left join product_product p on (p.id=l.product_id)
@@ -83,9 +87,10 @@ class pos_order_report(osv.osv):
                     left join product_uom u on (u.id=pt.uom_id)
                     left join account_invoice ai on (s.invoice_id=ai.id)
                     left join pos_session ps on (s.session_id=ps.id)
+                    left join stock_picking sp on (s.picking_id=sp.id)
                 group by
                     ps.config_id, s.session_id, ai.journal_id, s.invoice_id, s.date_order, s.partner_id,s.state, pt.categ_id,
-                    s.user_id,s.location_id,s.company_id,s.sale_journal,l.product_id,s.create_date
+                    s.picking_id, sp.picking_type_id, s.user_id,s.location_id,s.company_id,s.sale_journal,l.product_id,s.create_date
                 having
                     sum(l.qty * u.factor) != 0)""")
 
