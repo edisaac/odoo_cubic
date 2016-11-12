@@ -191,7 +191,8 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
         barcode_client_action: function(code){
             var partner = this.pos.db.get_partner_by_ean13(code.code);
             if(partner){
-                this.pos.get('selectedOrder').set_client(partner);
+                this.pos_widget.clientlist_screen.new_client = partner
+                this.pos_widget.clientlist_screen.save_changes();
                 this.pos_widget.username.refresh();
                 return true;
             }
@@ -616,7 +617,10 @@ function openerp_pos_screens(instance, module){ //module is instance.point_of_sa
             if (this.editing_client) {
                 this.$('.detail.barcode').val(code.code);
             } else if (this.pos.db.get_partner_by_ean13(code.code)) {
-                this.display_client_details('show',this.pos.db.get_partner_by_ean13(code.code));
+                var _partner = this.pos.db.get_partner_by_ean13(code.code);
+                this.display_client_details('show',_partner);
+                this.new_client = _partner;
+                this.toggle_save_button();
             }
         },
         perform_search: function(query, associate_result){

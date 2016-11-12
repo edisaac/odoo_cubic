@@ -136,6 +136,7 @@ function openerp_pos_db(instance, module){
             if (product.default_code) {
                 str += '|' + product.default_code;
             }
+            str += '|' + product.display_name.split(" ").reverse().join(" ")
             if (product.description) {
                 str += '|' + product.description;
             }
@@ -210,6 +211,9 @@ function openerp_pos_db(instance, module){
             var str =  partner.name;
             if(partner.ean13){
                 str += '|' + partner.ean13;
+            }
+            if(partner.vat){
+                str += '|' + partner.vat;
             }
             if(partner.address){
                 str += '|' + partner.address;
