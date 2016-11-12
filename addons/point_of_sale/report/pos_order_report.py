@@ -40,7 +40,8 @@ class pos_order_report(osv.osv):
         'location_id':fields.many2one('stock.location', 'Location', readonly=True),
         'company_id':fields.many2one('res.company', 'Company', readonly=True),
         'nbr':fields.integer('# of Lines', readonly=True),  # TDE FIXME master: rename into nbr_lines
-        'product_qty':fields.integer('Product Quantity', readonly=True),
+        'product_qty':fields.float('Product Quantity', readonly=True),
+        'price_subtotal': fields.float('Total Without Taxes', readonly=True),
         'journal_id': fields.many2one('account.journal', 'Journal'),
         'delay_validation': fields.integer('Delay Validation'),
         'product_categ_id': fields.many2one('product.category', 'Product Category', readonly=True),
@@ -52,6 +53,7 @@ class pos_order_report(osv.osv):
         'picking_type_id': fields.many2one('stock.picking.type', 'Picking Type', readonly=True),
         'parent_product_categ_id': fields.many2one('product.category', 'Parent Product Category', readonly=True),
         'pos_categ_id': fields.many2one('pos.category', 'POS Category', readonly=True),
+        'order_id': fields.many2one('pos.order', 'POS Order', readonly=True),
     }
     _order = 'date desc'
 
@@ -64,6 +66,7 @@ class pos_order_report(osv.osv):
                     count(*) as nbr,
                     s.date_order as date,
                     sum(l.qty * u.factor) as product_qty,
+                    sum(l.price_subtotal) as price_subtotal,
                     sum(l.qty * l.price_unit) as price_total,
                     sum((l.qty * l.price_unit) * (l.discount / 100)) as total_discount,
                     (sum(l.qty*l.price_unit)/sum(l.qty * u.factor))::decimal as average_price,
@@ -83,7 +86,8 @@ class pos_order_report(osv.osv):
                     s.picking_id as picking_id,
                     sp.picking_type_id as picking_type_id,
                     pc.parent_id as parent_product_categ_id,
-                    pt.pos_categ_id as pos_categ_id
+                    pt.pos_categ_id as pos_categ_id,
+                    l.order_id as order_id
                 from pos_order_line as l
                     left join pos_order s on (s.id=l.order_id)
                     left join product_product p on (p.id=l.product_id)
@@ -96,7 +100,7 @@ class pos_order_report(osv.osv):
                 group by
                     ps.config_id, s.session_id, ai.journal_id, s.invoice_id, s.date_order, s.partner_id,s.state, pt.categ_id,
                     s.picking_id, sp.picking_type_id, s.user_id,s.location_id,s.company_id,s.sale_journal,l.product_id,s.create_date,
-                    pc.parent_id, pt.pos_categ_id
+                    pc.parent_id, pt.pos_categ_id, l.order_id
                 having
                     sum(l.qty * u.factor) != 0)""")
 
