@@ -41,7 +41,7 @@ msgstr "Respuestas disponibles"
 #. module: crm_profiling
 #: view:crm_profiling.question:crm_profiling.view_question_form
 msgid "Avalaible Answers"
-msgstr "Respuestas disponibles"
+msgstr "Respuestas Disponibles"
 
 #. module: crm_profiling
 #: view:open.questionnaire:crm_profiling.open_questionnaire_form
@@ -94,7 +94,7 @@ msgstr "¡Error! No puede crear perfiles recursivos."
 #. module: crm_profiling
 #: field:crm.segmentation,answer_no:0
 msgid "Excluded Answers"
-msgstr "Respuestas excluidas"
+msgstr "Respuestas Excluidas"
 
 #. module: crm_profiling
 #: field:crm_profiling.answer,id:0 field:crm_profiling.question,id:0
