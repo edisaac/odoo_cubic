@@ -1,22 +1,20 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * event_sale
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* event_sale
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2015-07-17 07:08+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-15 22:44+0000\n"
+"PO-Revision-Date: 2016-11-15 17:50-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"X-Generator: Poedit 1.5.4\n"
 
 #. module: event_sale
 #: field:event.event.ticket,seats_available:0
@@ -71,12 +69,9 @@ msgstr "Escoja un evento y cree automáticamente un registro para este evento."
 msgid ""
 "Choose an event ticket and it will automatically create a registration for "
 "this event ticket."
-msgstr "Escoja un ticket de evento y se creará automáticamente un registro para el mismo."
-
-#. module: event_sale
-#: model:product.template,name:event_sale.event_2_product_product_template
-msgid "Conference on Business Applications"
-msgstr "Conferencia sobre aplicaciones de negocio"
+msgstr ""
+"Escoja un ticket de evento y se creará automáticamente un registro para el "
+"mismo."
 
 #. module: event_sale
 #: field:event.event.ticket,create_uid:0
@@ -89,11 +84,18 @@ msgid "Created on"
 msgstr "Creado en"
 
 #. module: event_sale
-#: help:product.template,event_ok:0
+#: help:product.product,event_ok:0 help:product.template,event_ok:0
 msgid ""
 "Determine if a product needs to create automatically an event registration "
 "at the confirmation of a sales order line."
-msgstr "Determina si un producto crea automáticamente una inscripción a un evento en la confirmación de la línea del pedido de venta."
+msgstr ""
+"Determina si un producto crea automáticamente una inscripción a un evento en "
+"la confirmación de la línea del pedido de venta."
+
+#. module: event_sale
+#: field:event.event.ticket,display_name:0
+msgid "Display Name"
+msgstr "Nombre a Mostrar"
 
 #. module: event_sale
 #: field:event.event.ticket,event_id:0
@@ -105,10 +107,10 @@ msgstr "Evento"
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_event_registration
 msgid "Event Registration"
-msgstr "Registro del evento"
+msgstr "Registro evento"
 
 #. module: event_sale
-#: field:product.template,event_ok:0
+#: field:product.product,event_ok:0 field:product.template,event_ok:0
 #: model:product.template,name:event_sale.product_product_event_product_template
 msgid "Event Subscription"
 msgstr "Suscripción a eventos"
@@ -146,11 +148,6 @@ msgid "Event badge_innerright..."
 msgstr "Evento badge_innerright..."
 
 #. module: event_sale
-#: model:product.template,name:event_sale.event_1_product_product_template
-msgid "Functional Webinar"
-msgstr "Seminario funcional en línea"
-
-#. module: event_sale
 #: field:event.event.ticket,id:0
 msgid "ID"
 msgstr "ID"
@@ -166,14 +163,19 @@ msgid "June 4th - 6th , 2014"
 msgstr "4 al 6 de junio , 2014"
 
 #. module: event_sale
+#: field:event.event.ticket,__last_update:0
+msgid "Last Modified on"
+msgstr "Última Actualización"
+
+#. module: event_sale
 #: field:event.event.ticket,write_uid:0
 msgid "Last Updated by"
-msgstr "Última actualización de"
+msgstr "Actualizado última vez por"
 
 #. module: event_sale
 #: field:event.event.ticket,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Ultima Actualización"
 
 #. module: event_sale
 #: field:event.event.ticket,seats_max:0
@@ -194,11 +196,6 @@ msgstr "No hay más tickets disponibles."
 #: field:event.event.ticket,seats_used:0
 msgid "Number of Participations"
 msgstr "Número de participantes"
-
-#. module: event_sale
-#: model:product.template,name:event_sale.event_0_product_product_template
-msgid "Open Days in Los Angeles"
-msgstr "Open Days en Los Ángeles"
 
 #. module: event_sale
 #: view:event.event:event_sale.view_event_form
@@ -224,7 +221,7 @@ msgstr "Producto"
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_product_template
 msgid "Product Template"
-msgstr "Plantilla de producto"
+msgstr "Plantilla de Producto"
 
 #. module: event_sale
 #: field:event.event.ticket,registration_ids:0
@@ -244,22 +241,17 @@ msgstr "Final de las ventas"
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Línea pedido de venta"
+msgstr "Línea de Pedido de Venta"
 
 #. module: event_sale
-#: help:product.template,event_type_id:0
+#: help:product.product,event_type_id:0 help:product.template,event_type_id:0
 msgid ""
-"Select event types so when we use this product in sales order lines, it will"
-" filter events of this type only."
-msgstr "Seleccione los tipos de evento para que cuando se utilice este producto en las líneas de los pedidos de venta, se filtren eventos de este tipo únicamente."
-
-#. module: event_sale
-#: model:event.event.ticket,name:event_sale.event_0_ticket_1
-#: model:event.event.ticket,name:event_sale.event_1_ticket_1
-#: model:event.event.ticket,name:event_sale.event_2_ticket_1
-#: model:event.event.ticket,name:event_sale.event_3_ticket_1
-msgid "Standard"
-msgstr "Estándar"
+"Select event types so when we use this product in sales order lines, it will "
+"filter events of this type only."
+msgstr ""
+"Seleccione los tipos de evento para que cuando se utilice este producto en "
+"las líneas de los pedidos de venta, se filtren eventos de este tipo "
+"únicamente."
 
 #. module: event_sale
 #: view:website:event_sale.report_registrationbadge
@@ -267,31 +259,29 @@ msgid "Status"
 msgstr "Estado"
 
 #. module: event_sale
-#: code:addons/event_sale/event_sale.py:154
+#: code:addons/event_sale/event_sale.py:156
 #, python-format
 msgid "Subscription"
 msgstr "Suscripción"
 
 #. module: event_sale
-#: model:product.template,name:event_sale.event_3_product_product_template
-msgid "Technical Training"
-msgstr "Formación técnica"
+#: code:addons/event_sale/event_sale.py:125
+#, python-format
+msgid ""
+"The registration has been created for event <i>%s</i> from the Sale Order "
+"%s. "
+msgstr ""
+"Se ha creado el registro para el evento <i>%s</i> del pedido de venta %s. "
 
 #. module: event_sale
 #: code:addons/event_sale/event_sale.py:123
 #, python-format
 msgid ""
-"The registration has been created for event <i>%s</i> from the Sale Order "
-"%s. "
-msgstr "Se ha creado el registro para el evento <i>%s</i> del pedido de venta %s. "
-
-#. module: event_sale
-#: code:addons/event_sale/event_sale.py:121
-#, python-format
-msgid ""
-"The registration has been created for event <i>%s</i> with the ticket "
-"<i>%s</i> from the Sale Order %s. "
-msgstr "Se ha creado el registro para el evento <i>%s</i> con el ticket <i>%s</i> del pedido de venta %s. "
+"The registration has been created for event <i>%s</i> with the ticket <i>%s</"
+"i> from the Sale Order %s. "
+msgstr ""
+"Se ha creado el registro para el evento <i>%s</i> con el ticket <i>%s</i> "
+"del pedido de venta %s. "
 
 #. module: event_sale
 #: view:event.registration:event_sale.view_event_registration_ticket_search
@@ -304,6 +294,7 @@ msgid "Ticket Types"
 msgstr "Tipos de tickets"
 
 #. module: event_sale
+#: field:product.product,event_type_id:0
 #: field:product.template,event_type_id:0
 msgid "Type of Event"
 msgstr "Tipo de Evento"
@@ -314,19 +305,14 @@ msgid "Unconfirmed Seat Reservations"
 msgstr "Reservas de plazas no confirmadas"
 
 #. module: event_sale
-#: model:event.event.ticket,name:event_sale.event_0_ticket_2
-#: model:event.event.ticket,name:event_sale.event_2_ticket_2
-#: model:event.event.ticket,name:event_sale.event_3_ticket_2
-msgid "VIP"
-msgstr "VIP"
-
-#. module: event_sale
 #: help:event.event.ticket,seats_max:0
 msgid ""
 "You can for each event define a maximum registration level. If you have too "
 "much registrations you are not able to confirm your event. (put 0 to ignore "
 "this rule )"
-msgstr "Puede definir para cada evento un nivel máximo de registro. Si tiene muchos registro, no podrá confirmar su evento. (Ponga 0 para ignorar esta regla)"
+msgstr ""
+"Puede definir para cada evento un nivel máximo de registro. Si tiene muchos "
+"registro, no podrá confirmar su evento. (Ponga 0 para ignorar esta regla)"
 
 #. module: event_sale
 #: field:sale.order.line,event_ok:0
