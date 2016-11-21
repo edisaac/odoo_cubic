@@ -1,22 +1,20 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * website_partner
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* website_partner
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:09+0000\n"
-"PO-Revision-Date: 2015-07-17 08:20+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-21 15:42+0000\n"
+"PO-Revision-Date: 2016-11-21 10:47-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"X-Generator: Poedit 1.5.4\n"
 
 #. module: website_partner
 #: model:ir.model,name:website_partner.model_res_partner
@@ -36,32 +34,32 @@ msgstr "Publicar en el sitio web"
 #. module: website_partner
 #: view:website:website_partner.partner_detail
 msgid "Short Description for List View"
-msgstr "Descripción corta para la vista de listado"
+msgstr "Descripción Corta para Vista de Lista"
 
 #. module: website_partner
 #: field:res.partner,website_description:0
 msgid "Website Partner Full Description"
-msgstr "Descripción completa de la empresa para el sitio web"
+msgstr "Descripción Completa de Partner del Sitio Web"
 
 #. module: website_partner
 #: field:res.partner,website_short_description:0
 msgid "Website Partner Short Description"
-msgstr "Descripción corta de la empresa para el sitio web"
+msgstr "Descripción Corta de Partner del Sitio Web"
 
 #. module: website_partner
 #: field:res.partner,website_meta_description:0
 msgid "Website meta description"
-msgstr "Meta descripción del sitio web"
+msgstr "Descripción meta del sitio web"
 
 #. module: website_partner
 #: field:res.partner,website_meta_keywords:0
 msgid "Website meta keywords"
-msgstr "Meta palabras clave del sitio web"
+msgstr "Palabras clave meta del sitio web"
 
 #. module: website_partner
 #: field:res.partner,website_meta_title:0
 msgid "Website meta title"
-msgstr "Meta título del sitio web"
+msgstr "Título meta del sitio web"
 
 #. module: website_partner
 #: field:res.partner,self:0
