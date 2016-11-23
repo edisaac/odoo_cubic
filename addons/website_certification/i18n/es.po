@@ -1,22 +1,21 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * website_certification
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* website_certification
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2015-07-17 08:16+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-23 17:39+0000\n"
+"PO-Revision-Date: 2016-11-23 12:40-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_PE\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #. module: website_certification
 #: view:website:website_certification.certified_partners
@@ -75,6 +74,12 @@ msgid "Date"
 msgstr "Fecha"
 
 #. module: website_certification
+#: field:certification.certification,display_name:0
+#: field:certification.type,display_name:0
+msgid "Display Name"
+msgstr "Mostrar nombre"
+
+#. module: website_certification
 #: view:website:website_certification.certified_partners
 msgid "Filter by Certification:"
 msgstr "Filtro por certificación:"
@@ -97,7 +102,7 @@ msgstr "Certificaciones concedidas"
 #. module: website_certification
 #: view:certification.certification:website_certification.certification_certification_search
 msgid "Group By"
-msgstr "Agrupar por"
+msgstr "Agrupado por"
 
 #. module: website_certification
 #: field:certification.certification,certification_hidden_score:0
@@ -110,16 +115,22 @@ msgid "ID"
 msgstr "ID"
 
 #. module: website_certification
+#: field:certification.certification,__last_update:0
+#: field:certification.type,__last_update:0
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: website_certification
 #: field:certification.certification,write_uid:0
 #: field:certification.type,write_uid:0
 msgid "Last Updated by"
-msgstr "Última actualización de"
+msgstr "Actualizado última vez por"
 
 #. module: website_certification
 #: field:certification.certification,write_date:0
 #: field:certification.type,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Ultima Actualización"
 
 #. module: website_certification
 #: view:website:website_certification.certified_partners
@@ -140,7 +151,7 @@ msgstr "Expertos Odoo certificados"
 #: view:certification.certification:website_certification.certification_certification_search
 #: field:certification.certification,partner_id:0
 msgid "Partner"
-msgstr "Empresa"
+msgstr "Partner"
 
 #. module: website_certification
 #: view:website:website_certification.certified_partners
