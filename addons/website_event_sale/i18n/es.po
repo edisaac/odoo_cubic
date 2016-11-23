@@ -1,22 +1,21 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * website_event_sale
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* website_event_sale
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2015-07-17 08:16+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-23 15:41+0000\n"
+"PO-Revision-Date: 2016-11-23 10:54-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_PE\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #. module: website_event_sale
 #: view:website:website_event.event_description_full
@@ -24,10 +23,25 @@ msgid "&nbsp;"
 msgstr "&nbsp;"
 
 #. module: website_event_sale
-#: code:addons/website_event_sale/models/sale_order.py:39
+#: help:product.product,membership:0
+msgid "Check if the product is eligible for membership."
+msgstr "Compruebe si el producto es elegible para la membresía."
+
+#. module: website_event_sale
+#: help:product.product,membership_date_from:0
+msgid "Date from which membership becomes active."
+msgstr "Fecha desde la cual la membresía se activa."
+
+#. module: website_event_sale
+#: help:product.product,membership_date_to:0
+msgid "Date until which membership remains active."
+msgstr "Fecha hasta que permanece activa la membresía."
+
+#. module: website_event_sale
+#: code:addons/website_event_sale/models/sale_order.py:40
 #, python-format
 msgid "Error!"
-msgstr "Error"
+msgstr "Error!"
 
 #. module: website_event_sale
 #: view:website:website_event.event_description_full
@@ -35,14 +49,29 @@ msgid "Free"
 msgstr "Gratis"
 
 #. module: website_event_sale
+#: field:product.product,membership:0
+msgid "Membership"
+msgstr "Membresía"
+
+#. module: website_event_sale
+#: field:product.product,membership_date_to:0
+msgid "Membership End Date"
+msgstr "Fecha de finalización de la membresía"
+
+#. module: website_event_sale
+#: field:product.product,membership_date_from:0
+msgid "Membership Start Date"
+msgstr "Fecha de inicio de la membresía"
+
+#. module: website_event_sale
 #: view:website:website_event.index
 msgid "Only"
-msgstr "Sólo"
+msgstr "Solamente"
 
 #. module: website_event_sale
 #: view:website:website_event.event_description_full
 msgid "Order Now"
-msgstr "Pídala ahora"
+msgstr "Pedir Ahora"
 
 #. module: website_event_sale
 #: view:website:website_event.event_description_full
@@ -53,6 +82,16 @@ msgstr "Precio"
 #: model:ir.model,name:website_event_sale.model_product_product
 msgid "Product"
 msgstr "Producto"
+
+#. module: website_event_sale
+#: field:product.product,stock_property_ids:0
+msgid "Properties"
+msgstr "Propiedades"
+
+#. module: website_event_sale
+#: field:product.product,purchase_price:0
+msgid "Purchase Price UdV"
+msgstr "Precio de Compra UdV"
 
 #. module: website_event_sale
 #: view:website:website_event.event_description_full
@@ -72,7 +111,7 @@ msgstr "Final de las ventas"
 #. module: website_event_sale
 #: model:ir.model,name:website_event_sale.model_sale_order
 msgid "Sales Order"
-msgstr "Pedido de venta"
+msgstr "Órdenes de venta"
 
 #. module: website_event_sale
 #: view:website:website_event.event_description_full
@@ -87,10 +126,10 @@ msgid "Subscription"
 msgstr "Suscripción"
 
 #. module: website_event_sale
-#: code:addons/website_event_sale/models/sale_order.py:39
+#: code:addons/website_event_sale/models/sale_order.py:40
 #, python-format
 msgid "The ticket doesn't match with this product."
-msgstr "El vale no casa con este producto."
+msgstr "El ticket no coincide con este producto"
 
 #. module: website_event_sale
 #: view:website:website_event.event_description_full
@@ -100,7 +139,12 @@ msgstr "Tipo de vale"
 #. module: website_event_sale
 #: model:ir.model,name:website_event_sale.model_website
 msgid "Website"
-msgstr "Sitio web"
+msgstr "Sitio Web"
+
+#. module: website_event_sale
+#: field:product.product,is_returnable:0
+msgid "is returnable"
+msgstr "es retornable"
 
 #. module: website_event_sale
 #: view:website:website_event.event_description_full
