@@ -1,27 +1,24 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * sale_stock
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
-# Pedro M. Baeza <pedro.baeza@gmail.com>, 2016
-# RGB Consulting <odoo@rgbconsulting.com>, 2016
+# 	* sale_stock
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2016-08-02 06:19+0000\n"
-"Last-Translator: RGB Consulting <odoo@rgbconsulting.com>\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-24 17:49+0000\n"
+"PO-Revision-Date: 2016-11-24 12:50-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_PE\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #. module: sale_stock
-#: code:addons/sale_stock/sale_stock.py:266
+#: code:addons/sale_stock/sale_stock.py:259
 #, python-format
 msgid "(n/a)"
 msgstr "(n/a)"
@@ -29,7 +26,7 @@ msgstr "(n/a)"
 #. module: sale_stock
 #: field:sale.config.settings,module_delivery:0
 msgid "Allow adding shipping costs"
-msgstr "Permitir añadir gastos de envío"
+msgstr "Permitir añadir costos de envío"
 
 #. module: sale_stock
 #: help:sale.config.settings,module_delivery:0
@@ -37,7 +34,10 @@ msgid ""
 "Allows you to add delivery methods in sales orders and delivery orders.\n"
 "You can define your own carrier and delivery grids for prices.\n"
 "-This installs the module delivery."
-msgstr "Permite añadir métodos de envío en los pedidos de venta y albaranes de envío.\nPuede definir sus propios transportistas y tablas de envío para los precios.\n- Esto instala el módulo delivery."
+msgstr ""
+"Permite añadir métodos de envío en los pedidos de venta y albaranes de envío.\n"
+"Puede definir sus propios transportistas y tablas de envío para los precios.\n"
+"- Esto instala el módulo delivery."
 
 #. module: sale_stock
 #: help:sale.config.settings,group_route_so_lines:0
@@ -55,12 +55,6 @@ msgid "Cancel Order"
 msgstr "Cancelar pedido"
 
 #. module: sale_stock
-#: code:addons/sale_stock/sale_stock.py:160
-#, python-format
-msgid "Cannot cancel sales order!"
-msgstr "¡No se puede cancelar el pedido de venta!"
-
-#. module: sale_stock
 #: field:sale.config.settings,group_route_so_lines:0
 msgid "Choose MTO, drop shipping,... on sales order lines"
 msgstr "Escoger entrega bajo pedido, drop shipping... en las líneas de los pedidos de venta"
@@ -68,11 +62,11 @@ msgstr "Escoger entrega bajo pedido, drop shipping... en las líneas de los pedi
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_res_company
 msgid "Companies"
-msgstr "Compañías"
+msgstr "Compañias"
 
 #. module: sale_stock
-#: code:addons/sale_stock/sale_stock.py:277
-#: code:addons/sale_stock/sale_stock.py:352
+#: code:addons/sale_stock/sale_stock.py:271
+#: code:addons/sale_stock/sale_stock.py:366
 #, python-format
 msgid "Configuration Error!"
 msgstr "¡Error de configuración!"
@@ -80,7 +74,7 @@ msgstr "¡Error de configuración!"
 #. module: sale_stock
 #: model:ir.actions.act_window,name:sale_stock.res_partner_rule_children
 msgid "Contact Details"
-msgstr "Detalles del contacto"
+msgstr "Detalles de Contacto"
 
 #. module: sale_stock
 #: view:sale.config.settings:sale_stock.view_sales_config_sale_stock
@@ -111,7 +105,7 @@ msgstr "Entregado"
 #: model:ir.actions.act_window,name:sale_stock.outgoing_picking_list_to_invoice
 #: model:ir.ui.menu,name:sale_stock.menu_action_picking_list_to_invoice
 msgid "Deliveries to Invoice"
-msgstr "Albaranes a facturar"
+msgstr "Entregas a facturar"
 
 #. module: sale_stock
 #: model:res.groups,name:sale_stock.group_invoice_deli_orders
@@ -140,10 +134,14 @@ msgstr "Incoterm"
 
 #. module: sale_stock
 #: help:sale.order,incoterm:0
-msgid ""
-"International Commercial Terms are a series of predefined commercial terms "
-"used in international transactions."
+msgid "International Commercial Terms are a series of predefined commercial terms used in international transactions."
 msgstr "Los términos de comercio internacional son una serie de condiciones comerciales usadas en las transacciones internacionales."
+
+#. module: sale_stock
+#: code:addons/sale_stock/sale_stock.py:377
+#, python-format
+msgid "Invalid Action!"
+msgstr "Invalid Action!"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_location_route
@@ -153,7 +151,7 @@ msgstr "Rutas de inventario"
 #. module: sale_stock
 #: selection:sale.config.settings,default_order_policy:0
 msgid "Invoice based on deliveries"
-msgstr "Facturar desde albaranes"
+msgstr "Facturar desde entregas"
 
 #. module: sale_stock
 #: selection:sale.config.settings,default_order_policy:0
@@ -165,18 +163,17 @@ msgstr "Facturación basada en pedidos de venta"
 msgid ""
 "Lets you transfer the entries under tasks defined for Project Management to the Timesheet line entries for particular date and particular user  with the effect of creating, editing and deleting either ways and to automatically creates project tasks from procurement lines.\n"
 "-This installs the modules project_timesheet and sale_service."
-msgstr "Le permite transferir las entradas de tiempos de las tareas definidas en la gestión de proyectos a entradas del parte de horas para una fecha y usuario concretos con el efecto de crear, editar y borrar en ambos sentidos, y permite añadir automáticamente tareas de proyecto desde las líneas de abastecimiento.\n- Esto instala los módulos project_timesheet y sale_service."
+msgstr ""
+"Le permite transferir las entradas de tiempos de las tareas definidas en la gestión de proyectos a entradas del parte de horas para una fecha y usuario concretos con el efecto de crear, editar y borrar en ambos sentidos, y permite añadir automáticamente tareas de proyecto desde las líneas de abastecimiento.\n"
+"- Esto instala los módulos project_timesheet y sale_service."
 
 #. module: sale_stock
 #: help:res.company,security_lead:0
-msgid ""
-"Margin of error for dates promised to customers. Products will be scheduled "
-"for procurement and delivery that many days earlier than the actual promised"
-" date, to cope with unexpected delays in the supply chain."
+msgid "Margin of error for dates promised to customers. Products will be scheduled for procurement and delivery that many days earlier than the actual promised date, to cope with unexpected delays in the supply chain."
 msgstr "Margen de error para las fechas prometidas a los clientes. Los productos serán planificados para el abastecimiento y entrega días antes de la fecha prometida actual, para lidiar con posibles retrasos inesperados en la cadena de suministro."
 
 #. module: sale_stock
-#: code:addons/sale_stock/sale_stock.py:347
+#: code:addons/sale_stock/sale_stock.py:361
 #, python-format
 msgid "Not enough stock ! : "
 msgstr "¡No hay suficiente stock! "
@@ -199,20 +196,19 @@ msgstr "Empaquetado"
 
 #. module: sale_stock
 #: help:sale.order,picking_policy:0
-msgid ""
-"Pick 'Deliver each product when available' if you allow partial delivery."
+msgid "Pick 'Deliver each product when available' if you allow partial delivery."
 msgstr "Escoja 'Entregar cada producto cuando esté disponible' si permite envíos parciales."
 
 #. module: sale_stock
-#: code:addons/sale_stock/sale_stock.py:275
+#: code:addons/sale_stock/sale_stock.py:269
 #, python-format
 msgid "Picking Information ! : "
-msgstr "¡Información del alabarán! "
+msgstr "Información de la Guía! "
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_picking
 msgid "Picking List"
-msgstr "Albarán"
+msgstr "Guía"
 
 #. module: sale_stock
 #: field:sale.order,picking_ids:0
@@ -232,7 +228,7 @@ msgstr "Producto"
 #. module: sale_stock
 #: field:sale.order.line,product_tmpl_id:0
 msgid "Product Template"
-msgstr "Plantilla de producto"
+msgstr "Plantilla de Producto"
 
 #. module: sale_stock
 #: field:sale.config.settings,group_mrp_properties:0
@@ -257,7 +253,7 @@ msgstr "Ruta"
 #. module: sale_stock
 #: field:stock.picking,sale_id:0
 msgid "Sale Order"
-msgstr "Pedido de venta"
+msgstr "Pedido de Venta"
 
 #. module: sale_stock
 #: view:stock.location.route:sale_stock.stock_location_route_form_view_inherit
@@ -272,24 +268,21 @@ msgstr "Servicio de venta"
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_sale_order
 msgid "Sales Order"
-msgstr "Pedido de venta"
+msgstr "Órdenes de venta"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_sale_order_line
 msgid "Sales Order Line"
-msgstr "Línea pedido de venta"
+msgstr "Línea de Pedido de Venta"
 
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_sale_report
 msgid "Sales Orders Statistics"
-msgstr "Estadísticas pedidos de venta"
+msgstr "Estadísticas de Pedidos de Venta"
 
 #. module: sale_stock
 #: help:sale.config.settings,default_picking_policy:0
-msgid ""
-"Sales order by default will be configured to deliver all products at once "
-"instead of delivering each product when it is available. This may have an "
-"impact on the shipping price."
+msgid "Sales order by default will be configured to deliver all products at once instead of delivering each product when it is available. This may have an impact on the shipping price."
 msgstr "Los pedidos de venta por defecto serán configurados para entregar todos los productos de uno en lugar de entregar cada producto cuando esté disponible. Esto puede tener impacto en el precio de envío."
 
 #. module: sale_stock
@@ -315,7 +308,7 @@ msgstr "Política de entrega"
 #. module: sale_stock
 #: model:ir.model,name:sale_stock.model_stock_move
 msgid "Stock Move"
-msgstr "Movimiento stock"
+msgstr "Movimiento de Stock"
 
 #. module: sale_stock
 #: field:sale.config.settings,default_order_policy:0
@@ -329,9 +322,7 @@ msgstr "A facturar"
 
 #. module: sale_stock
 #: help:sale.config.settings,group_invoice_deli_orders:0
-msgid ""
-"To allow your salesman to make invoices for Delivery Orders using the menu "
-"'Deliveries to Invoice'."
+msgid "To allow your salesman to make invoices for Delivery Orders using the menu 'Deliveries to Invoice'."
 msgstr "Para permitir a su comercial realizar facturas desde las órdenes de entrega usando el menú 'Entregas a facturar'."
 
 #. module: sale_stock
@@ -342,7 +333,7 @@ msgstr "Ver orden de entrega"
 #. module: sale_stock
 #: field:sale.order,warehouse_id:0 field:sale.report,warehouse_id:0
 msgid "Warehouse"
-msgstr "Almacén"
+msgstr "Almacen"
 
 #. module: sale_stock
 #: help:sale.config.settings,default_order_policy:0
@@ -350,31 +341,41 @@ msgid "You can generate invoices based on sales orders or based on shippings."
 msgstr "Puede generar facturas basadas en pedidos de venta o basadas en envíos."
 
 #. module: sale_stock
-#: code:addons/sale_stock/sale_stock.py:161
+#: code:addons/sale_stock/sale_stock.py:377
 #, python-format
-msgid ""
-"You must first cancel all delivery order(s) attached to this sales order."
-msgstr "Primero debe cancelar todas las órdenes de entrega de este pedido de venta."
+msgid "You cannot cancel a sale order line which is linked to a stock move already done."
+msgstr "You cannot cancel a sale order line which is linked to a stock move already done."
 
 #. module: sale_stock
-#: code:addons/sale_stock/sale_stock.py:343
+#: code:addons/sale_stock/sale_stock.py:357
 #, python-format
 msgid ""
 "You plan to sell %.2f %s but you only have %.2f %s available !\n"
 "The real stock is %.2f %s. (without reservations)"
-msgstr "¡Prevé vender %.2f %s pero sólo %.2f %s están disponibles!\nEl stock real es %.2f %s. (sin reservas)"
+msgstr ""
+"¡Prevé vender %.2f %s pero sólo %.2f %s están disponibles!\n"
+"El stock real es %.2f %s. (sin reservas)"
 
 #. module: sale_stock
-#: code:addons/sale_stock/sale_stock.py:270
+#: code:addons/sale_stock/sale_stock.py:264
 #, python-format
 msgid ""
 "You selected a quantity of %s %s.\n"
 "But it's not compatible with the selected packaging.\n"
 "Here is a proposition of quantities according to the packaging:\n"
 "EAN: %s Quantity: %s Type of ul: %s"
-msgstr "Ha seleccionado una cantidad de %s %s.\nPero no es compatible con el empaquetado seleccionado.\nAquí tiene una proposición de cantidades acorde al empaquetado:\nEAN: %s Cantidad: %s Unidad: %s"
+msgstr ""
+"Ha seleccionado una cantidad de %s %s.\n"
+"Pero no es compatible con el empaquetado seleccionado.\n"
+"Aquí tiene una proposición de cantidades acorde al empaquetado:\n"
+"EAN: %s Cantidad: %s Unidad: %s"
 
 #. module: sale_stock
 #: view:sale.order:sale_stock.view_order_form_inherit
 msgid "days"
 msgstr "días"
+
+#. module: sale_stock
+#: view:sale.order:sale_stock.view_order_form_inherit
+msgid "{\"shipping_except\":\"red\",\"invoice_except\":\"red\",\"waiting_date\":\"blue\"}"
+msgstr "{\"shipping_except\":\"red\",\"invoice_except\":\"red\",\"waiting_date\":\"blue\"}"
