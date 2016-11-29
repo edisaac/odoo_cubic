@@ -1,22 +1,21 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * product_margin
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* product_margin
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2015-07-17 07:51+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-28 19:49+0000\n"
+"PO-Revision-Date: 2016-11-28 14:51-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_PE\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #. module: product_margin
 #: field:product.product,purchase_num_invoiced:0
@@ -52,7 +51,7 @@ msgstr "Precio promedio en facturas de proveedor "
 #: field:product.product,purchase_avg_price:0
 #: field:product.product,sale_avg_price:0
 msgid "Avg. Unit Price"
-msgstr "Precio unidad promedio"
+msgstr "Precio Unitario Promedio"
 
 #. module: product_margin
 #: view:product.margin:product_margin.product_margin_form_view
@@ -73,6 +72,11 @@ msgstr "Creado por"
 #: field:product.margin,create_date:0
 msgid "Created on"
 msgstr "Creado en"
+
+#. module: product_margin
+#: field:product.margin,display_name:0
+msgid "Display Name"
+msgstr "Mostrar nombre"
 
 #. module: product_margin
 #: selection:product.margin,invoice_state:0
@@ -113,12 +117,12 @@ msgstr "Margen previsto * 100 / Venta prevista"
 #. module: product_margin
 #: field:product.margin,from_date:0
 msgid "From"
-msgstr "Desde"
+msgstr "De"
 
 #. module: product_margin
 #: view:product.margin:product_margin.product_margin_form_view
 msgid "General Information"
-msgstr "Información general"
+msgstr "Informacion General"
 
 #. module: product_margin
 #: field:product.margin,id:0
@@ -131,14 +135,19 @@ msgid "Invoice State"
 msgstr "Estado factura"
 
 #. module: product_margin
+#: field:product.margin,__last_update:0
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: product_margin
 #: field:product.margin,write_uid:0
 msgid "Last Updated by"
-msgstr "Última actualización de"
+msgstr "Actualizado última vez por"
 
 #. module: product_margin
 #: field:product.margin,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Ultima Actualización"
 
 #. module: product_margin
 #: field:product.product,date_from:0
@@ -163,7 +172,7 @@ msgstr "Coste normal"
 #. module: product_margin
 #: help:product.product,purchase_gap:0
 msgid "Normal Cost - Total Cost"
-msgstr "Coste normal - Coste total"
+msgstr "Cost Normal - Costo Total"
 
 #. module: product_margin
 #: view:product.margin:product_margin.product_margin_form_view
@@ -232,7 +241,7 @@ msgstr "Diferencia ventas"
 #. module: product_margin
 #: view:product.product:product_margin.view_product_margin_form
 msgid "Standard Price"
-msgstr "Precio estándar"
+msgstr "Precio Estándar"
 
 #. module: product_margin
 #: help:product.product,normal_cost:0
@@ -241,21 +250,17 @@ msgstr "Suma de la multiplicación del precio de coste y la cantidad de las fact
 
 #. module: product_margin
 #: help:product.product,turnover:0
-msgid ""
-"Sum of Multiplication of Invoice price and quantity of Customer Invoices"
+msgid "Sum of Multiplication of Invoice price and quantity of Customer Invoices"
 msgstr "Suma de la multiplicación del precio de factura y la cantidad de las facturas de cliente."
 
 #. module: product_margin
 #: help:product.product,total_cost:0
-msgid ""
-"Sum of Multiplication of Invoice price and quantity of Supplier Invoices "
+msgid "Sum of Multiplication of Invoice price and quantity of Supplier Invoices "
 msgstr "Suma de la multiplicación del precio de factura y la cantidad de las facturas de proveedor. "
 
 #. module: product_margin
 #: help:product.product,sale_expected:0
-msgid ""
-"Sum of Multiplication of Sale Catalog price and quantity of Customer "
-"Invoices"
+msgid "Sum of Multiplication of Sale Catalog price and quantity of Customer Invoices"
 msgstr "Suma de la multiplicación del PVP y la cantidad de las facturas de cliente."
 
 #. module: product_margin
@@ -271,18 +276,18 @@ msgstr "Suma de cantidad en facturas proveedor"
 #. module: product_margin
 #: field:product.margin,to_date:0
 msgid "To"
-msgstr "Hasta"
+msgstr "Para"
 
 #. module: product_margin
 #: view:product.product:product_margin.view_product_margin_tree
 #: field:product.product,total_cost:0
 msgid "Total Cost"
-msgstr "Total coste"
+msgstr "Costo Total"
 
 #. module: product_margin
 #: field:product.product,total_margin:0
 msgid "Total Margin"
-msgstr "Margen total"
+msgstr "Margen Total"
 
 #. module: product_margin
 #: field:product.product,total_margin_rate:0

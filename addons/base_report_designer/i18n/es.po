@@ -1,22 +1,20 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * base_report_designer
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* base_report_designer
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:07+0000\n"
-"PO-Revision-Date: 2015-07-17 06:53+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-14 19:44+0000\n"
+"PO-Revision-Date: 2016-11-14 15:23-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"X-Generator: Poedit 1.5.4\n"
 
 #. module: base_report_designer
 #: model:ir.actions.act_window,name:base_report_designer.action_view_base_report_sxw
@@ -59,6 +57,14 @@ msgid "Description"
 msgstr "Descripción"
 
 #. module: base_report_designer
+#: field:base.report.file.sxw,display_name:0
+#: field:base.report.rml.save,display_name:0
+#: field:base.report.sxw,display_name:0
+#: field:base_report_designer.installer,display_name:0
+msgid "Display Name"
+msgstr "Nombre a Mostrar "
+
+#. module: base_report_designer
 #: field:base_report_designer.installer,name:0
 msgid "File name"
 msgstr "Nombre fichero"
@@ -81,18 +87,26 @@ msgid "Installation and Configuration Steps"
 msgstr "Pasos de instalación y configuración"
 
 #. module: base_report_designer
+#: field:base.report.file.sxw,__last_update:0
+#: field:base.report.rml.save,__last_update:0
+#: field:base.report.sxw,__last_update:0
+#: field:base_report_designer.installer,__last_update:0
+msgid "Last Modified on"
+msgstr "Última Modificación"
+
+#. module: base_report_designer
 #: field:base.report.file.sxw,write_uid:0
 #: field:base.report.rml.save,write_uid:0 field:base.report.sxw,write_uid:0
 #: field:base_report_designer.installer,write_uid:0
 msgid "Last Updated by"
-msgstr "Última actualización de"
+msgstr "Actualizado última vez por"
 
 #. module: base_report_designer
 #: field:base.report.file.sxw,write_date:0
 #: field:base.report.rml.save,write_date:0 field:base.report.sxw,write_date:0
 #: field:base_report_designer.installer,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Ultima Actualización"
 
 #. module: base_report_designer
 #: view:base_report_designer.installer:base_report_designer.view_report_designer_installer
@@ -120,12 +134,14 @@ msgstr "Plug-in diseñador informe OpenObject"
 msgid ""
 "OpenObject Report Designer plug-in file. Save as this file and install this "
 "plug-in in OpenOffice."
-msgstr "Fichero del plug-in diseñador de informes OpenObject. Guarde este fichero y instale este plug-in en OpenOffice."
+msgstr ""
+"Fichero del plug-in diseñador de informes OpenObject. Guarde este fichero y "
+"instale este plug-in en OpenOffice."
 
 #. module: base_report_designer
 #: field:base.report.file.sxw,report_id:0 field:base.report.sxw,report_id:0
 msgid "Report"
-msgstr "Informe"
+msgstr "Reporte"
 
 #. module: base_report_designer
 #: model:ir.ui.menu,name:base_report_designer.menu_action_report_designer_wizard
@@ -169,14 +185,19 @@ msgid ""
 "Save it as a .SXW file and open it with OpenOffice.\n"
 "Don't forget to install the Odoo SA OpenOffice package to modify it.\n"
 "Once it is modified, re-upload it in Odoo using this wizard."
-msgstr "Ésta es la plantilla del informe solicitado.\nGuárdela como un archivo  .SXW y ábralo en OpenOffice.\nNo olvide instalar el complemento de Odoo para modificarlo.\nUna vez modificado, vuelva a subirlo en Odoo usando este asistente."
+msgstr ""
+"Ésta es la plantilla del informe solicitado.\n"
+"Guárdela como un archivo  .SXW y ábralo en OpenOffice.\n"
+"No olvide instalar el complemento de Odoo para modificarlo.\n"
+"Una vez modificado, vuelva a subirlo en Odoo usando este asistente."
 
 #. module: base_report_designer
 #: view:base_report_designer.installer:base_report_designer.view_report_designer_installer
 msgid ""
-"This plug-in allows you to create/modify Odoo Reports into OpenOffice "
-"Writer."
-msgstr "Este complemento le permite crear/modificar los informes de Odoo en OpenOffice Writer."
+"This plug-in allows you to create/modify Odoo Reports into OpenOffice Writer."
+msgstr ""
+"Este complemento le permite crear/modificar los informes de Odoo en "
+"OpenOffice Writer."
 
 #. module: base_report_designer
 #: view:base.report.sxw:base_report_designer.view_base_report_sxw

@@ -1,22 +1,21 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * portal
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* portal
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:08+0000\n"
-"PO-Revision-Date: 2015-07-17 07:47+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-28 22:31+0000\n"
+"PO-Revision-Date: 2016-11-28 17:34-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_PE\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #. module: portal
 #: model:ir.actions.client,help:portal.action_mail_inbox_feeds_portal
@@ -29,7 +28,13 @@ msgid ""
 "                    follow.\n"
 "                </p>\n"
 "            "
-msgstr "<p>\n<b>¡Buen trabajo!</b> Su bandeja de entrada está vacía.\n</p><p>\nSu bandeja de entrada contiene los mensajes privados o correos electrónicos enviados a usted, así como información relativa a los documentos o personas a los que sigue.\n</p>\n            "
+msgstr ""
+"<p>\n"
+"<b>¡Buen trabajo!</b> Su bandeja de entrada está vacía.\n"
+"</p><p>\n"
+"Su bandeja de entrada contiene los mensajes privados o correos electrónicos enviados a usted, así como información relativa a los documentos o personas a los que sigue.\n"
+"</p>\n"
+"            "
 
 #. module: portal
 #: model:ir.actions.client,help:portal.action_mail_star_feeds_portal
@@ -41,7 +46,13 @@ msgid ""
 "                    as <i>todo</i>. From this menu, you can process all your todo.\n"
 "                </p>\n"
 "            "
-msgstr "<p>\n<b>No realizados.</b>\n</p><p>\nCuando procesa mensajes en su bandeja de entrada, puede marcar varios como <i>por realizar</i>. Desde este menú, puede procesar todo los pendientes de realizar.\n</p>\n            "
+msgstr ""
+"<p>\n"
+"<b>No realizados.</b>\n"
+"</p><p>\n"
+"Cuando procesa mensajes en su bandeja de entrada, puede marcar varios como <i>por realizar</i>. Desde este menú, puede procesar todo los pendientes de realizar.\n"
+"</p>\n"
+"            "
 
 #. module: portal
 #: model:ir.actions.client,help:portal.action_mail_archives_feeds_portal
@@ -53,23 +64,30 @@ msgid ""
 "                    message will be sent by email if it's an internal contact.\n"
 "                </p>\n"
 "            "
-msgstr "<p>\nNingún mensaje encontrado ni enviado aún.\n</p>\n<p>\nPulse en el icono de arriba a la derecha para crear un mensaje. Este mensaje se enviará por correo electrónico si el destinatario no es un contacto interno.\n</p>\n            "
+msgstr ""
+"<p>\n"
+"Ningún mensaje encontrado ni enviado aún.\n"
+"</p>\n"
+"<p>\n"
+"Pulse en el icono de arriba a la derecha para crear un mensaje. Este mensaje se enviará por correo electrónico si el destinatario no es un contacto interno.\n"
+"</p>\n"
+"            "
 
 #. module: portal
 #: code:addons/portal/mail_message.py:59
 #, python-format
 msgid "Access Denied"
-msgstr "Acceso denegado"
+msgstr "Acceso Denegado"
 
 #. module: portal
 #: model:ir.model,name:portal.model_res_groups
 msgid "Access Groups"
-msgstr "Grupos de acceso"
+msgstr "Grupos de Acceso"
 
 #. module: portal
 #: model:ir.ui.menu,name:portal.portal_after_sales
 msgid "After Sale Services"
-msgstr "Servicios post-venta"
+msgstr "Servicios Post Venta"
 
 #. module: portal
 #: view:portal.wizard:portal.wizard_view
@@ -80,7 +98,7 @@ msgstr "Aplicar"
 #: model:ir.actions.client,name:portal.action_mail_archives_feeds_portal
 #: model:ir.ui.menu,name:portal.portal_mail_archivesfeeds
 msgid "Archives"
-msgstr "Archivados"
+msgstr "Archivos"
 
 #. module: portal
 #: model:ir.ui.menu,name:portal.portal_orders
@@ -103,7 +121,7 @@ msgid "Contacts"
 msgstr "Contactos"
 
 #. module: portal
-#: code:addons/portal/wizard/portal_wizard.py:163
+#: code:addons/portal/wizard/portal_wizard.py:164
 #, python-format
 msgid "Contacts Error"
 msgstr "Error de contactos"
@@ -139,7 +157,20 @@ msgid ""
 "--\n"
 "Odoo - Open Source Business Applications\n"
 "http://www.openerp.com\n"
-msgstr "Estimado %(name)s,\n\nSe le ha dado acceso a %(portal)s de %(company)s .\n\nLas credenciales de su cuenta son:\n  Usuario: %(login)s\n  Portal: %(portal_url)s\n  Base de datos: %(db)s \n\nPuede establecer o cambiar su contraseña vía el siguiente enlace:\n   %(signup_url)s\n\n%(welcome_message)s\n"
+msgstr ""
+"Estimado %(name)s,\n"
+"\n"
+"Se le ha dado acceso a %(portal)s de %(company)s .\n"
+"\n"
+"Las credenciales de su cuenta son:\n"
+"  Usuario: %(login)s\n"
+"  Portal: %(portal_url)s\n"
+"  Base de datos: %(db)s \n"
+"\n"
+"Puede establecer o cambiar su contraseña vía el siguiente enlace:\n"
+"   %(signup_url)s\n"
+"\n"
+"%(welcome_message)s\n"
 
 #. module: portal
 #: view:share.wizard:portal.share_step2_form_portal
@@ -147,12 +178,17 @@ msgid "Details"
 msgstr "Detalles"
 
 #. module: portal
-#: field:portal.wizard.user,email:0
-msgid "Email"
-msgstr "Correo electrónico"
+#: field:portal.wizard,display_name:0 field:portal.wizard.user,display_name:0
+msgid "Display Name"
+msgstr "Mostrar nombre"
 
 #. module: portal
-#: code:addons/portal/wizard/portal_wizard.py:225
+#: field:portal.wizard.user,email:0
+msgid "Email"
+msgstr "Email"
+
+#. module: portal
+#: code:addons/portal/wizard/portal_wizard.py:228
 #, python-format
 msgid "Email Required"
 msgstr "Correo electrónico requerido"
@@ -160,10 +196,10 @@ msgstr "Correo electrónico requerido"
 #. module: portal
 #: model:ir.model,name:portal.model_mail_thread
 msgid "Email Thread"
-msgstr "Hilo de mensajes"
+msgstr "Hilo de Email"
 
 #. module: portal
-#: code:addons/portal/wizard/share_wizard.py:39
+#: code:addons/portal/wizard/share_wizard.py:40
 #, python-format
 msgid "Existing Groups (e.g Portal Groups)"
 msgstr "Grupos existentes (por ejemplo, los grupos del portal)"
@@ -188,12 +224,12 @@ msgstr "ID"
 #. module: portal
 #: help:res.groups,is_portal:0
 msgid "If checked, this group is usable as a portal."
-msgstr "Si está marcado, este grupo e"
+msgstr "Si está marcado, este grupo es usable como un portal."
 
 #. module: portal
 #: field:portal.wizard.user,in_portal:0
 msgid "In Portal"
-msgstr "En el portal"
+msgstr "En Portal"
 
 #. module: portal
 #: model:ir.actions.client,name:portal.action_mail_inbox_feeds_portal
@@ -204,17 +240,22 @@ msgstr "Bandeja de entrada"
 #. module: portal
 #: field:portal.wizard,welcome_message:0
 msgid "Invitation Message"
-msgstr "Mensaje de invitación"
+msgstr "Mensaje de Invitación"
+
+#. module: portal
+#: field:portal.wizard,__last_update:0 field:portal.wizard.user,__last_update:0
+msgid "Last Modified on"
+msgstr "Última modificación en"
 
 #. module: portal
 #: field:portal.wizard,write_uid:0 field:portal.wizard.user,write_uid:0
 msgid "Last Updated by"
-msgstr "Última actualización de"
+msgstr "Actualizado última vez por"
 
 #. module: portal
 #: field:portal.wizard,write_date:0 field:portal.wizard.user,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Ultima Actualización"
 
 #. module: portal
 #: model:ir.model,name:portal.model_mail_message
@@ -229,21 +270,21 @@ msgstr "Mensajería"
 #. module: portal
 #: view:res.groups:portal.group_search_view
 msgid "Non-Portal Groups"
-msgstr "Grupos sin acceso al portal"
+msgstr "Grupos No Portal"
 
 #. module: portal
 #: model:ir.model,name:portal.model_mail_mail
 msgid "Outgoing Mails"
-msgstr "Correos salientes"
+msgstr "Correos Salientes"
 
 #. module: portal
-#: code:addons/portal/wizard/share_wizard.py:54
+#: code:addons/portal/wizard/share_wizard.py:55
 #, python-format
 msgid "Please select at least one group to share with"
 msgstr "Por favor seleccione al menos un grupo con quien compartir"
 
 #. module: portal
-#: code:addons/portal/wizard/share_wizard.py:50
+#: code:addons/portal/wizard/share_wizard.py:51
 #, python-format
 msgid "Please select at least one user to share with"
 msgstr "Por favor seleccione al menos un usuario con quien compartir"
@@ -259,17 +300,17 @@ msgstr "Portal"
 #: model:ir.model,name:portal.model_portal_wizard
 #: view:portal.wizard:portal.wizard_view
 msgid "Portal Access Management"
-msgstr "Administración de acceso al portal"
+msgstr "Administración de Acceso al Portal"
 
 #. module: portal
 #: view:res.groups:portal.group_search_view
 msgid "Portal Groups"
-msgstr "Grupos con acceso al portal"
+msgstr "Grupos del Portal"
 
 #. module: portal
 #: model:ir.model,name:portal.model_portal_wizard_user
 msgid "Portal User Config"
-msgstr "Configuración usuario portal"
+msgstr "Configuracion de Usuario de Portal"
 
 #. module: portal
 #: model:ir.ui.menu,name:portal.portal_projects
@@ -282,13 +323,16 @@ msgid ""
 "Select which contacts should belong to the portal in the list below.\n"
 "                        The email address of each selected contact must be valid and unique.\n"
 "                        If necessary, you can fix any contact's email address directly in the list."
-msgstr "Seleccione que contactos deben pertenecer al portal en la siguiente lista.\nLa dirección de correo electrónico de cada contacto seleccionado debe ser válida y única.\nSi es necesario, puede corregir una dirección de correo de un contacto directamente en la lista."
+msgstr ""
+"Seleccione qué contactos deberían pertenecer a la siguiente lista del portal.\n"
+"La dirección email para cada contacto seleccionado debe ser válida y única.\n"
+"Si fuera necesario, puede fijar cualquier dirección email de cualquier contacto directamente en la lista."
 
 #. module: portal
 #: code:addons/portal/wizard/portal_wizard.py:149
 #, python-format
 msgid "Several contacts have the same email: "
-msgstr "Varios usuarios tienen el mismo correo electrónico: "
+msgstr "Varios contactos tienen el mismo email:"
 
 #. module: portal
 #: model:ir.model,name:portal.model_share_wizard
@@ -299,18 +343,18 @@ msgstr "Asistente de compartición"
 #: code:addons/portal/wizard/portal_wizard.py:146
 #, python-format
 msgid "Some contacts don't have a valid email: "
-msgstr "Algunos contactos no tienen un correo electrónico válido: "
+msgstr "Algunos contactos no tienen un email válido:"
 
 #. module: portal
 #: code:addons/portal/wizard/portal_wizard.py:152
 #, python-format
 msgid "Some contacts have the same email as an existing portal user:"
-msgstr "Varios usuarios tienen el mismo correo electrónico que el de un usuario de portal:"
+msgstr "Algunos contactos tienen el mismo email que un usuario existente del portal:"
 
 #. module: portal
 #: help:portal.wizard,portal_id:0
 msgid "The portal that users can be added in or removed from."
-msgstr "El portal al que los usuarios puede añadir o quitar."
+msgstr "El portal del que los usuarios se pueden agregar o remover."
 
 #. module: portal
 #: code:addons/portal/mail_message.py:60
@@ -319,17 +363,20 @@ msgid ""
 "The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n"
 "\n"
 "(Document type: %s, Operation: %s)"
-msgstr "La operación no ha podido ser completada por restricciones de seguridad. Por favor contacte con su administrador de sistema.\n\n(Tipo de documento: %s, Operación: %s)"
+msgstr ""
+"La operación solicitada no pudo ser completada por restricciones de seguridad. Por favor contacte su administrador del sistema.\n"
+"\n"
+"(Tipo de Documento: %s, Operación: %s)"
 
 #. module: portal
 #: view:portal.wizard:portal.wizard_view
 msgid "This text is included in the email sent to new portal users."
-msgstr "Este texto se incluye en el correo enviado a los nuevos usuarios del portal."
+msgstr "Este texto se incluye en el correo enviado a los usuarios del portal nuevo."
 
 #. module: portal
 #: help:portal.wizard,welcome_message:0
 msgid "This text is included in the email sent to new users of the portal."
-msgstr "Este texto se incluye en el correo electrónico enviado a los nuevos usuarios del portal."
+msgstr "Este texto se incluye en el correo enviado a los usuarios nuevos del portal."
 
 #. module: portal
 #: code:addons/portal/wizard/portal_wizard.py:155
@@ -338,7 +385,10 @@ msgid ""
 "To resolve this error, you can: \n"
 "- Correct the emails of the relevant contacts\n"
 "- Grant access only to contacts with unique emails"
-msgstr "Para resolver este error, puede:\n- Corregir los correos electrónicos de los contactos relevantes\n- Conceder acceso solamente a los contactos con correo electrónico único"
+msgstr ""
+"Para resolver este error, usted puede: \n"
+"- Corregir los email de los contactos relevantes\n"
+"- Dar acceso a solamente a contactos con correos únicos"
 
 #. module: portal
 #: model:ir.actions.client,name:portal.action_mail_star_feeds_portal
@@ -352,7 +402,7 @@ msgid "Users"
 msgstr "Usuarios"
 
 #. module: portal
-#: code:addons/portal/wizard/share_wizard.py:38
+#: code:addons/portal/wizard/share_wizard.py:39
 #, python-format
 msgid "Users you already shared with"
 msgstr "Usuarios con los que ya ha compartido"
@@ -363,11 +413,10 @@ msgid "Wizard"
 msgstr "Asistente"
 
 #. module: portal
-#: code:addons/portal/wizard/portal_wizard.py:226
+#: code:addons/portal/wizard/portal_wizard.py:229
 #, python-format
-msgid ""
-"You must have an email address in your User Preferences to send emails."
-msgstr "Debe tener una dirección email en sus preferencias de usuario para enviar emails"
+msgid "You must have an email address in your User Preferences to send emails."
+msgstr "Debe tener un dirección email en sus Preferencias de Usuario para enviar emails."
 
 #. module: portal
 #: code:addons/portal/wizard/portal_wizard.py:33

@@ -1169,7 +1169,7 @@ msgstr "Ofrecer un mecanismo de doble validación para compras"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_mail_mail_website_published
 msgid "Published"
-msgstr ""
+msgstr "Publicado"
 
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_procurement_management

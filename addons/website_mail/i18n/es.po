@@ -1,22 +1,20 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * website_mail
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* website_mail
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:09+0000\n"
-"PO-Revision-Date: 2015-07-17 08:20+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-21 17:03+0000\n"
+"PO-Revision-Date: 2016-11-21 12:15-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"X-Generator: Poedit 1.5.4\n"
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -47,14 +45,17 @@ msgstr "Un buen subtítulo"
 #: view:website:website_mail.email_designer_snippets
 msgid ""
 "A great way to catch your reader's attention is to tell a story.\n"
-"                                    Everything you consider writing can be told as a story."
-msgstr "Una gran forma de captar la atención de su lector es contar una historia.\nTodo lo que considere escribir puede ser contado como una historia."
+"                                    Everything you consider writing can be "
+"told as a story."
+msgstr ""
+"Una gran forma de captar la atención de su lector es contar una historia.\n"
+"Todo lo que considere escribir puede ser contado como una historia."
 
 #. module: website_mail
 #: code:addons/website_mail/models/mail_message.py:87
 #, python-format
 msgid "Access Denied"
-msgstr "Acceso denegado"
+msgstr "Acceso Denegado"
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -64,7 +65,9 @@ msgstr "Características de correo electrónico avanzado"
 #. module: website_mail
 #: model:res.groups,comment:website_mail.group_comment
 msgid "Allows website visitors to post comments on blogs, etc."
-msgstr "Permitir a los visitantes del sitio web escribir comentarios en los blogs, etc."
+msgstr ""
+"Permitir a los visitantes del sitio web escribir comentarios en los blogs, "
+"etc."
 
 #. module: website_mail
 #: view:website:website_mail.email_designer
@@ -115,9 +118,12 @@ msgstr "Botón"
 #: view:website:website_mail.email_designer_snippets
 msgid ""
 "Choose a vibrant image and write an inspiring paragraph\n"
-"                                about it. It does not have to be long, but it should\n"
+"                                about it. It does not have to be long, but "
+"it should\n"
 "                                reinforce your image."
-msgstr "Escoja una imagen vibrante y escriba un párrafo inspirador sobre ella. No tiene que ser largo, pero debe reforzar a la imagen."
+msgstr ""
+"Escoja una imagen vibrante y escriba un párrafo inspirador sobre ella. No "
+"tiene que ser largo, pero debe reforzar a la imagen."
 
 #. module: website_mail
 #: view:website:website_mail.email_designer
@@ -133,12 +139,22 @@ msgstr "Comparaciones"
 #: view:website:website_mail.email_designer_snippets
 msgid ""
 "Consider telling\n"
-"                                    a great story that provides personality. Writing a story \n"
-"                                    with personality for potential clients will asist with \n"
-"                                    making a relationship connection. This shows up in small\n"
-"                                    quirks like word choices or phrases. Write from your point \n"
-"                                    of view, not from someone else's experience."
-msgstr "Considere contar una gran historia que tenga personalidad. Escribiendo una historia con personalidad para los clientes potenciales le ayudará a establecer una conexión. Esto se muestra en pequeños detalles como la elección de palabras o frases. Escríbalo desde su punto de vista, no del de otro."
+"                                    a great story that provides personality. "
+"Writing a story \n"
+"                                    with personality for potential clients "
+"will asist with \n"
+"                                    making a relationship connection. This "
+"shows up in small\n"
+"                                    quirks like word choices or phrases. "
+"Write from your point \n"
+"                                    of view, not from someone else's "
+"experience."
+msgstr ""
+"Considere contar una gran historia que tenga personalidad. Escribiendo una "
+"historia con personalidad para los clientes potenciales le ayudará a "
+"establecer una conexión. Esto se muestra en pequeños detalles como la "
+"elección de palabras o frases. Escríbalo desde su punto de vista, no del de "
+"otro."
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -153,14 +169,14 @@ msgstr "Diseñe su correo electrónico"
 #. module: website_mail
 #: model:mail.group,name:website_mail.group_all_employees
 msgid "Discussion Group"
-msgstr "Grupo de discusión"
+msgstr "Grupo de Discusión"
 
 #. module: website_mail
-#: code:addons/website_mail/models/email_template.py:15
+#: code:addons/website_mail/models/email_template.py:20
 #: view:email.template:website_mail.email_template_form_inherit_website_link
 #, python-format
 msgid "Edit Template"
-msgstr "Editar plantilla"
+msgstr "Editar Plantilla"
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -170,12 +186,12 @@ msgstr "Diseño de correo electrónico"
 #. module: website_mail
 #: model:ir.model,name:website_mail.model_email_template
 msgid "Email Templates"
-msgstr "Plantillas de correo electrónico"
+msgstr "Plantillas email"
 
 #. module: website_mail
 #: model:ir.model,name:website_mail.model_mail_thread
 msgid "Email Thread"
-msgstr "Hilo de mensajes"
+msgstr "Hilo de Email"
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -217,7 +233,9 @@ msgstr "De:"
 msgid ""
 "Great stories are for everyone even when only written for\n"
 "                                    just one person."
-msgstr "Las grandes historias son para todos incluso cuando están escritas por una sola persona."
+msgstr ""
+"Las grandes historias son para todos incluso cuando están escritas por una "
+"sola persona."
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -228,10 +246,15 @@ msgstr "Las grandes historias tienen personalidad."
 #: view:website:website_mail.email_designer_snippets
 msgid ""
 "If you try to write with a wide general\n"
-"                                    audience in mind, your story will ring false and be bland. \n"
-"                                    No one will be interested. Write for one person. If it’s genuine\n"
+"                                    audience in mind, your story will ring "
+"false and be bland. \n"
+"                                    No one will be interested. Write for one "
+"person. If it’s genuine\n"
 "                                    for the one, it’s genuine for the rest."
-msgstr "Si intenta escribir con una audiencia general en mente, su historia sonará falsa y será sosa. Nadie estará interesado. Escriba para una persona. Si es genuina para uno solo, lo será para el resto."
+msgstr ""
+"Si intenta escribir con una audiencia general en mente, su historia sonará "
+"falsa y será sosa. Nadie estará interesado. Escriba para una persona. Si es "
+"genuina para uno solo, lo será para el resto."
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -251,7 +274,7 @@ msgstr "Mensaje"
 #. module: website_mail
 #: help:mail.message,description:0
 msgid "Message description: either the subject, or the beginning of the body"
-msgstr "Descripción del mensaje: o bien el asunto, o el comienzo del cuerpo del mensaje"
+msgstr "Descripción del Mensaje: o bien el asunto o el inicio del cuerpo"
 
 #. module: website_mail
 #: view:website:website_mail.email_designer
@@ -349,10 +372,15 @@ msgstr "¡Gracias por su suscripción!"
 #: code:addons/website_mail/models/mail_message.py:88
 #, python-format
 msgid ""
-"The requested operation cannot be completed due to security restrictions. Please contact your system administrator.\n"
+"The requested operation cannot be completed due to security restrictions. "
+"Please contact your system administrator.\n"
 "\n"
 "(Document type: %s, Operation: %s)"
-msgstr "No se ha podido completar la operación por restricciones de seguridad. Contacte por favor con su administrador de sistema.\n\n(Tipo de documento: %s, Operación: %s)"
+msgstr ""
+"La operación solicitada no pudo ser completada por restricciones de "
+"seguridad. Por favor contacte su administrador del sistema.\n"
+"\n"
+"(Tipo de Documento: %s, Operación: %s)"
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -387,7 +415,7 @@ msgstr "Ver producto"
 #. module: website_mail
 #: help:mail.message,website_published:0
 msgid "Visible on the website as a comment"
-msgstr "Visible en el sitio web como un comentario"
+msgstr "Visible en Sitio Web como un comentario"
 
 #. module: website_mail
 #: model:res.groups,name:website_mail.group_comment
@@ -397,12 +425,12 @@ msgstr "Comentarios del sitio web"
 #. module: website_mail
 #: field:mail.thread,website_message_ids:0
 msgid "Website Messages"
-msgstr "Mensajes del sitio web"
+msgstr "Mensajes del Sitio Web"
 
 #. module: website_mail
 #: help:mail.thread,website_message_ids:0
 msgid "Website communication history"
-msgstr "Historial de comunicaciones del sitio web"
+msgstr "Historial de comunicación del sitio web"
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -418,9 +446,14 @@ msgstr "Peso: 1,2 onzas"
 #: view:website:website_mail.email_designer_snippets
 msgid ""
 "Write one or two paragraphs describing your product,\n"
-"                                                    services or a specific feature. To be successful\n"
-"                                                    your content needs to be useful to your readers."
-msgstr "Escriba uno o dos párrafos describiendo su producto, servicios o características específicas. Para ser exitoso, su contenido debe ser útil a sus lectores."
+"                                                    services or a specific "
+"feature. To be successful\n"
+"                                                    your content needs to be "
+"useful to your readers."
+msgstr ""
+"Escriba uno o dos párrafos describiendo su producto, servicios o "
+"características específicas. Para ser exitoso, su contenido debe ser útil a "
+"sus lectores."
 
 #. module: website_mail
 #: view:website:website_mail.email_designer_snippets
@@ -440,4 +473,4 @@ msgstr "desconocido"
 #. module: website_mail
 #: view:website:website_mail.follow
 msgid "your email..."
-msgstr "su correo electrónico..."
+msgstr "su email..."

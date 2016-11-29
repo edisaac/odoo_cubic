@@ -34,13 +34,13 @@ msgstr "Creado en"
 #: model:ir.actions.act_window,name:decimal_precision.action_decimal_precision_form
 #: model:ir.ui.menu,name:decimal_precision.menu_decimal_precision_form
 msgid "Decimal Accuracy"
-msgstr "Precisión decimal"
+msgstr "Precisión Decimal"
 
 #. module: decimal_precision
 #: view:decimal.precision:decimal_precision.view_decimal_precision_form
 #: view:decimal.precision:decimal_precision.view_decimal_precision_tree
 msgid "Decimal Precision"
-msgstr "Precisión decimales"
+msgstr "Precisión Decimales"
 
 #. module: decimal_precision
 #: field:decimal.precision,digits:0

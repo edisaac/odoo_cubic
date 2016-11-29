@@ -48,7 +48,7 @@ msgstr "Razón de la acción"
 #. module: hr_attendance
 #: field:hr.action.reason,action_type:0
 msgid "Action Type"
-msgstr "Tipo de acción"
+msgstr "Tipo de Acción"
 
 #. module: hr_attendance
 #: help:hr.config.settings,group_hr_attendance:0

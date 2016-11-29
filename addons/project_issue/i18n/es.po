@@ -1,28 +1,31 @@
-# Translation of Odoo Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * project_issue
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
-# Rafael Blasco <rafabn@antiun.com>, 2015
+# 	* project_issue
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-01-21 14:07+0000\n"
-"PO-Revision-Date: 2015-09-10 10:52+0000\n"
-"Last-Translator: Rafael Blasco <rafabn@antiun.com>\n"
-"Language-Team: Spanish (http://www.transifex.com/odoo/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-28 15:42+0000\n"
+"PO-Revision-Date: 2016-11-28 11:06-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_PE\n"
+"X-Generator: Poedit 1.8.11\n"
+
+#. module: project_issue
+#: help:project.project,toinvoice_total:0
+msgid " Sum of everything that could be invoiced for this contract."
+msgstr " Suma de todo lo que podría ser facturado para este contrato."
 
 #. module: project_issue
 #: field:project.issue.report,email:0
 msgid "# Emails"
-msgstr "Nº de emails"
+msgstr "# de Emails"
 
 #. module: project_issue
 #: field:res.partner,issue_count:0
@@ -38,7 +41,7 @@ msgstr "Nº de incidencias"
 #: code:addons/project_issue/project_issue.py:299
 #, python-format
 msgid "%s (copy)"
-msgstr "%s (copia)"
+msgstr "%s (copiar)"
 
 #. module: project_issue
 #: model:ir.actions.act_window,help:project_issue.project_issue_version_action
@@ -50,7 +53,13 @@ msgid ""
 "                you can work on issues.\n"
 "              </p>\n"
 "            "
-msgstr "<p class=\"oe_view_nocontent_create\">\nPulse para añadir una nueva versión.\n</p><p>\nDefina aquí las diferentes versiones de sus productos en las que puede trabajar con incidencias.\n</p>\n            "
+msgstr ""
+"<p class=\"oe_view_nocontent_create\">\n"
+"Pulse para añadir una nueva versión.\n"
+"</p><p>\n"
+"Defina aquí las diferentes versiones de sus productos en las que puede trabajar con incidencias.\n"
+"</p>\n"
+"            "
 
 #. module: project_issue
 #: model:ir.actions.act_window,help:project_issue.act_project_project_2_project_issue_all
@@ -62,7 +71,14 @@ msgid ""
 "                    complaints, project troubles, material breakdowns, etc.\n"
 "                </p>\n"
 "            "
-msgstr "<p>\nEl gestor de incidencias de Odoo le permite gestionar eficientemente\ncuestiones como las peticiones internas, errores de desarrollo de \nsoftware, quejas de los clientes, problemas en el proyecto, rupturas de \nmaterial, etc.\n</p>\n            "
+msgstr ""
+"<p>\n"
+"El gestor de incidencias de Odoo le permite gestionar eficientemente\n"
+"cuestiones como las peticiones internas, errores de desarrollo de \n"
+"software, quejas de los clientes, problemas en el proyecto, rupturas de \n"
+"material, etc.\n"
+"</p>\n"
+"            "
 
 #. module: project_issue
 #: model:ir.actions.act_window,help:project_issue.project_issue_categ_act0
@@ -73,7 +89,14 @@ msgid ""
 "                complaints, project troubles, material breakdowns, etc.\n"
 "            </p>\n"
 "        "
-msgstr "<p>\nEl gestor de incidencias de Odoo le permite gestionar eficientemente\ncuestiones como las peticiones internas, errores de desarrollo de \nsoftware, quejas de los clientes, problemas en el proyecto, rupturas de \nmaterial, etc.\n</p>\n        "
+msgstr ""
+"<p>\n"
+"El gestor de incidencias de Odoo le permite gestionar eficientemente\n"
+"cuestiones como las peticiones internas, errores de desarrollo de \n"
+"software, quejas de los clientes, problemas en el proyecto, rupturas de \n"
+"material, etc.\n"
+"</p>\n"
+"        "
 
 #. module: project_issue
 #: help:project.issue,kanban_state:0
@@ -82,29 +105,31 @@ msgid ""
 " * Normal is the default situation\n"
 " * Blocked indicates something is preventing the progress of this issue\n"
 " * Ready for next stage indicates the issue is ready to be pulled to the next stage"
-msgstr "Un estado de kanban de las incidencias indica situaciones especiales que las afectan:\n* 'Normal' es la situación por defecto.\n* 'Bloqueada' indica que algo impide el progreso de la incidencia.\n* 'Lista para la siguiente etapa' indica que la incidencia está lista para ser llevada a la siguiente etapa."
+msgstr ""
+"Un estado de kanban de las incidencias indica situaciones especiales que las afectan:\n"
+"* 'Normal' es la situación por defecto.\n"
+"* 'Bloqueada' indica que algo impide el progreso de la incidencia.\n"
+"* 'Lista para la siguiente etapa' indica que la incidencia está lista para ser llevada a la siguiente etapa."
 
 #. module: project_issue
 #: field:project.issue,active:0 field:project.issue.version,active:0
 msgid "Active"
-msgstr "Activa"
+msgstr "Activo"
 
 #. module: project_issue
 #: view:project.issue:project_issue.project_issue_form_view
 msgid "Add an internal note..."
-msgstr "Añadir una nota interna..."
+msgstr "Agregar una nota interna..."
 
 #. module: project_issue
 #: help:project.config.settings,fetchmail_issue:0
-msgid ""
-"Allows you to configure your incoming mail server, and create issues from "
-"incoming emails."
+msgid "Allows you to configure your incoming mail server, and create issues from incoming emails."
 msgstr "Permite configurar su servidor de correo entrante, y crear incidencias desde los correos entrantes."
 
 #. module: project_issue
 #: model:ir.model,name:project_issue.model_account_analytic_account
 msgid "Analytic Account"
-msgstr "Cuenta analítica"
+msgstr "Cuenta Analítica"
 
 #. module: project_issue
 #: field:project.issue,date_open:0
@@ -140,6 +165,11 @@ msgid "Avg. Working Hours to Open"
 msgstr "Horas de trabajo prom. para abrir"
 
 #. module: project_issue
+#: help:project.project,ca_theorical:0
+msgid "Based on the costs you had on the project, what would have been the revenue if all these costs have been invoiced at the normal sale price provided by the pricelist."
+msgstr "Sobre la base de los costos que tuvo en el proyecto, ¿cuál habría sido el ingreso si todos estos costos se hubieran facturado al precio de venta normal proporcionado por la lista de precios."
+
+#. module: project_issue
 #: selection:project.issue,kanban_state:0
 msgid "Blocked"
 msgstr "Bloqueada"
@@ -160,19 +190,19 @@ msgid "Channel"
 msgstr "Canal"
 
 #. module: project_issue
-#: help:account.analytic.account,use_issues:0
+#: help:account.analytic.account,use_issues:0 help:project.project,use_issues:0
 msgid "Check this field if this project manages issues"
 msgstr "Marcar este campo si el proyecto administra incidencias"
 
 #. module: project_issue
 #: field:project.issue,date_closed:0
 msgid "Closed"
-msgstr "Cerrada"
+msgstr "Cerrado"
 
 #. module: project_issue
 #: field:project.issue,color:0
 msgid "Color Index"
-msgstr "Índice de colores"
+msgstr "Índice de Color"
 
 #. module: project_issue
 #: help:project.issue.report,channel:0
@@ -190,12 +220,47 @@ msgstr "Canal de comunicación"
 #: view:project.issue.report:project_issue.view_project_issue_report_filter
 #: field:project.issue.report,company_id:0
 msgid "Company"
-msgstr "Compañía"
+msgstr "Compañia"
 
 #. module: project_issue
 #: help:project.issue,progress:0
 msgid "Computed as: Time Spent / Total Time."
-msgstr "Calculado como: Tiempo dedicado / Tiempo total."
+msgstr "Calcular como: Tiempo Gastado / Tiempo Total."
+
+#. module: project_issue
+#: help:project.project,remaining_hours_to_invoice:0
+msgid "Computed using the formula: Expected on timesheets - Total invoiced on timesheets"
+msgstr "Calculado mediante la fórmula: Esperado en las hojas de horas - Total facturado en las hojas de tiempos"
+
+#. module: project_issue
+#: help:project.project,real_margin:0
+msgid "Computed using the formula: Invoiced Amount - Total Costs."
+msgstr "Calculado usando la fórmula: Cantidad facturada - Costes totales."
+
+#. module: project_issue
+#: help:project.project,revenue_per_hour:0
+msgid "Computed using the formula: Invoiced Amount / Total Time"
+msgstr "Computed using the formula: Invoiced Amount / Total Time"
+
+#. module: project_issue
+#: help:project.project,remaining_ca:0
+msgid "Computed using the formula: Max Invoice Price - Invoiced Amount."
+msgstr "Computed using the formula: Max Invoice Price - Invoiced Amount."
+
+#. module: project_issue
+#: help:project.project,remaining_hours:0
+msgid "Computed using the formula: Maximum Time - Total Worked Time"
+msgstr "Computed using the formula: Maximum Time - Total Worked Time"
+
+#. module: project_issue
+#: help:project.project,theorical_margin:0
+msgid "Computed using the formula: Theoretical Revenue - Total Costs"
+msgstr "Computed using the formula: Theoretical Revenue - Total Costs"
+
+#. module: project_issue
+#: help:project.project,real_margin_rate:0
+msgid "Computes using the formula: (Real Margin / Total Costs) * 100."
+msgstr "Computes using the formula: (Real Margin / Total Costs) * 100."
 
 #. module: project_issue
 #: view:project.config.settings:project_issue.view_config_settings
@@ -212,7 +277,7 @@ msgstr "Contacto"
 #: view:project.issue.report:project_issue.view_project_issue_report_filter
 #: field:project.issue.report,create_date:0
 msgid "Create Date"
-msgstr "Fecha de creación"
+msgstr "Crear Fecha"
 
 #. module: project_issue
 #: view:project.issue:project_issue.view_project_issue_filter
@@ -238,7 +303,7 @@ msgstr "Creado en"
 #. module: project_issue
 #: field:project.issue,create_date:0
 msgid "Creation Date"
-msgstr "Fecha de creación"
+msgstr "Fecha de Creacion"
 
 #. module: project_issue
 #: code:addons/project_issue/project_issue.py:424
@@ -263,6 +328,21 @@ msgid "Date of Closing"
 msgstr "Fecha de cierre"
 
 #. module: project_issue
+#: field:project.project,last_worked_date:0
+msgid "Date of Last Cost/Work"
+msgstr "Fecha del último costo / trabajo"
+
+#. module: project_issue
+#: field:project.project,last_worked_invoiced_date:0
+msgid "Date of Last Invoiced Cost"
+msgstr "Fecha del último costo facturado"
+
+#. module: project_issue
+#: field:project.project,recurring_next_date:0
+msgid "Date of Next Invoice"
+msgstr "Fecha de la siguiente factura"
+
+#. module: project_issue
 #: field:project.issue.report,opening_date:0
 msgid "Date of Opening"
 msgstr "Fecha de apertura"
@@ -270,7 +350,12 @@ msgstr "Fecha de apertura"
 #. module: project_issue
 #: help:project.issue,message_last_post:0
 msgid "Date of the last message posted on the record."
-msgstr "Fecha del último mensaje publicado en el registro."
+msgstr "Fecha del ultimo mensaje actualizado en el registro"
+
+#. module: project_issue
+#: help:project.project,last_worked_date:0
+msgid "Date of the latest work done on this account."
+msgstr "Fecha del último trabajo realizado en esta cuenta."
 
 #. module: project_issue
 #: field:project.issue,days_since_creation:0
@@ -298,11 +383,6 @@ msgid "Deadline"
 msgstr "Fecha límite"
 
 #. module: project_issue
-#: model:project.category,name:project_issue.project_issue_category_03
-msgid "Deadly bug"
-msgstr "Error grave"
-
-#. module: project_issue
 #: model:ir.filters,name:project_issue.filter_issue_report_delay
 msgid "Delay"
 msgstr "Retraso"
@@ -328,6 +408,12 @@ msgid "Difference in days between last action and current date"
 msgstr "Diferencia en días desde la última acción a la fecha actual"
 
 #. module: project_issue
+#: field:project.issue,display_name:0 field:project.issue.report,display_name:0
+#: field:project.issue.version,display_name:0
+msgid "Display Name"
+msgstr "Mostrar nombre"
+
+#. module: project_issue
 #: field:project.issue,duration:0
 msgid "Duration"
 msgstr "Duración"
@@ -340,7 +426,7 @@ msgstr "Editar…"
 #. module: project_issue
 #: field:project.issue,email_from:0
 msgid "Email"
-msgstr "Correo electrónico"
+msgstr "Email"
 
 #. module: project_issue
 #: constraint:project.project:0
@@ -348,9 +434,19 @@ msgid "Error! You cannot assign escalation to the same project!"
 msgstr "¡Error! No puede asignar un escalado al mismo proyecto."
 
 #. module: project_issue
+#: field:project.project,hours_qtt_est:0
+msgid "Estimation of Hours to Invoice"
+msgstr "Estimación de horas a facturar"
+
+#. module: project_issue
+#: help:project.project,remaining_total:0
+msgid "Expectation of remaining income for this contract. Computed as the sum of remaining subtotals which, in turn, are computed as the maximum between '(Estimation - Invoiced)' and 'To Invoice' amounts"
+msgstr "Expectation of remaining income for this contract. Computed as the sum of remaining subtotals which, in turn, are computed as the maximum between '(Estimation - Invoiced)' and 'To Invoice' amounts"
+
+#. module: project_issue
 #: view:project.issue:project_issue.project_issue_form_view
 msgid "Extra Info"
-msgstr "Información extra"
+msgstr "Informacion Extra"
 
 #. module: project_issue
 #: view:project.issue:project_issue.project_feature_tree_view
@@ -363,27 +459,34 @@ msgid "Feature description"
 msgstr "Descripción funcionalidad"
 
 #. module: project_issue
+#: field:project.project,fix_price_invoices:0
+msgid "Fixed Price"
+msgstr "Precio fijo"
+
+#. module: project_issue
 #: field:project.issue,message_follower_ids:0
 msgid "Followers"
 msgstr "Seguidores"
 
 #. module: project_issue
+#: field:project.project,recurring_invoices:0
+msgid "Generate recurring invoices automatically"
+msgstr "Generar automáticamente facturas recurrentes"
+
+#. module: project_issue
 #: view:project.issue:project_issue.view_project_issue_filter
 #: view:project.issue.report:project_issue.view_project_issue_report_filter
 msgid "Group By"
-msgstr "Agrupar por"
+msgstr "Agrupado por"
 
 #. module: project_issue
-#: selection:project.issue,priority:0
-#: selection:project.issue.report,priority:0
+#: selection:project.issue,priority:0 selection:project.issue.report,priority:0
 msgid "High"
 msgstr "Alta"
 
 #. module: project_issue
 #: help:project.issue,message_summary:0
-msgid ""
-"Holds the Chatter summary (number of messages, ...). This summary is "
-"directly in html format in order to be inserted in kanban views."
+msgid "Holds the Chatter summary (number of messages, ...). This summary is directly in html format in order to be inserted in kanban views."
 msgstr "Contiene el resumen del chatter (nº de mensajes, ...). Este resumen viene directamente en formato HTML para poder ser insertado en las vistas kanban."
 
 #. module: project_issue
@@ -394,27 +497,60 @@ msgstr "ID"
 
 #. module: project_issue
 #: help:project.project,project_escalation_id:0
-msgid ""
-"If any issue is escalated from the current Project, it will be listed under "
-"the project selected here."
+msgid "If any issue is escalated from the current Project, it will be listed under the project selected here."
 msgstr "Si alguna incidencia del proyecto actual se intensificó, se mostrará dentro del proyecto seleccionado aquí."
 
 #. module: project_issue
 #: help:project.issue,message_unread:0
 msgid "If checked new messages require your attention."
-msgstr "Si está marcado, hay nuevos mensajes que requieren su atención"
+msgstr "Si está marcado nuevos mensajes requieren su atención."
+
+#. module: project_issue
+#: help:project.project,ca_to_invoice:0
+msgid "If invoice from analytic account, the remaining amount you can invoice to the customer based on the total costs."
+msgstr "If invoice from analytic account, the remaining amount you can invoice to the customer based on the total costs."
+
+#. module: project_issue
+#: help:project.project,last_invoice_date:0
+msgid "If invoice from the costs, this is the date of the latest invoiced."
+msgstr "If invoice from the costs, this is the date of the latest invoiced."
+
+#. module: project_issue
+#: help:project.project,last_worked_invoiced_date:0
+msgid "If invoice from the costs, this is the date of the latest work or cost that have been invoiced."
+msgstr "If invoice from the costs, this is the date of the latest work or cost that have been invoiced."
+
+#. module: project_issue
+#: field:project.project,recurring_invoice_line_ids:0
+msgid "Invoice Lines"
+msgstr "Invoice Lines"
+
+#. module: project_issue
+#: help:project.project,recurring_rule_type:0
+msgid "Invoice automatically repeat at specified interval"
+msgstr "Factura se repita automáticamente en el intervalo especificado"
+
+#. module: project_issue
+#: field:project.project,amount_invoiced:0 field:project.project,ca_invoiced:0
+msgid "Invoiced Amount"
+msgstr "Cantidad facturada"
+
+#. module: project_issue
+#: field:project.project,hours_qtt_invoiced:0
+msgid "Invoiced Time"
+msgstr "Tiempo facturado"
 
 #. module: project_issue
 #: field:project.issue,message_is_follower:0
 msgid "Is a Follower"
-msgstr "Es un seguidor"
+msgstr "Es un Seguidor"
 
 #. module: project_issue
 #: view:project.issue:project_issue.project_issue_form_view
 #: view:project.issue:project_issue.view_project_issue_filter
 #: field:project.issue,name:0
 msgid "Issue"
-msgstr "Incidencia"
+msgstr "Incidente"
 
 #. module: project_issue
 #: model:mail.message.subtype,name:project_issue.mt_issue_assigned
@@ -486,7 +622,7 @@ msgstr "Incidencia creada"
 #: view:project.issue:project_issue.project_issue_calendar_view
 #: view:project.project:project_issue.view_project_form_inherited
 #: view:project.project:project_issue.view_project_kanban_inherited
-#: field:project.project,issue_count:0
+#: field:project.project,issue_count:0 field:project.project,use_issues:0
 #: view:res.partner:project_issue.res_partner_issues_button_view
 msgid "Issues"
 msgstr "Incidencias"
@@ -503,9 +639,19 @@ msgid "Kanban State"
 msgstr "Estado de kanban"
 
 #. module: project_issue
+#: help:project.project,amount_max:0
+msgid "Keep empty if this contract is not limited to a total fixed price."
+msgstr "Manténgase vacío si este contrato no se limita a un precio fijo total."
+
+#. module: project_issue
 #: field:project.issue,date_action_last:0
 msgid "Last Action"
 msgstr "Última acción"
+
+#. module: project_issue
+#: field:project.project,last_invoice_date:0
+msgid "Last Invoice Date"
+msgstr "Última fecha de la factura"
 
 #. module: project_issue
 #: view:project.issue:project_issue.view_project_issue_filter
@@ -518,6 +664,13 @@ msgid "Last Message Date"
 msgstr "Fecha del último mensaje"
 
 #. module: project_issue
+#: field:project.issue,__last_update:0
+#: field:project.issue.report,__last_update:0
+#: field:project.issue.version,__last_update:0
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: project_issue
 #: field:project.issue,date_last_stage_update:0
 #: field:project.issue.report,date_last_stage_update:0
 msgid "Last Stage Update"
@@ -526,23 +679,22 @@ msgstr "última actualización de la etapa"
 #. module: project_issue
 #: field:project.issue,write_uid:0 field:project.issue.version,write_uid:0
 msgid "Last Updated by"
-msgstr "Última actualización de"
+msgstr "Actualizado última vez por"
 
 #. module: project_issue
 #: field:project.issue.version,write_date:0
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Ultima Actualización"
 
 #. module: project_issue
-#: model:project.category,name:project_issue.project_issue_category_01
-msgid "Little problem"
-msgstr "Pequeño problema"
-
-#. module: project_issue
-#: selection:project.issue,priority:0
-#: selection:project.issue.report,priority:0
+#: selection:project.issue,priority:0 selection:project.issue.report,priority:0
 msgid "Low"
 msgstr "Baja"
+
+#. module: project_issue
+#: field:project.project,amount_max:0
+msgid "Max. Invoice Price"
+msgstr "Max. Precio de factura"
 
 #. module: project_issue
 #: field:project.issue,message_ids:0
@@ -552,7 +704,12 @@ msgstr "Mensajes"
 #. module: project_issue
 #: help:project.issue,message_ids:0
 msgid "Messages and communication history"
-msgstr "Mensajes e historial de comunicación"
+msgstr "Historial de mensajes y comunicación"
+
+#. module: project_issue
+#: field:project.project,month_ids:0
+msgid "Month"
+msgstr "Mes"
 
 #. module: project_issue
 #: view:project.issue:project_issue.view_project_issue_filter
@@ -599,14 +756,39 @@ msgid "Number of Days to open the project issue."
 msgstr "Número de días para abrir la incidencia de proyecto."
 
 #. module: project_issue
-#: model:project.category,name:project_issue.project_issue_category_02
-msgid "PBCK"
-msgstr "PBCK"
+#: help:project.project,hours_qtt_non_invoiced:0
+msgid "Number of time (hours/days) (from journal of type 'general') that can be invoiced if you invoice based on analytic account."
+msgstr "Número de horas (horas / días) (del diario de tipo 'general') que se pueden facturar si se factura en función de la cuenta analítica."
+
+#. module: project_issue
+#: help:project.project,hours_qtt_invoiced:0
+msgid "Number of time (hours/days) that can be invoiced plus those that already have been invoiced."
+msgstr "Número de tiempo (horas o días) que puede ser facturado más los que ya han sido facturados."
+
+#. module: project_issue
+#: help:project.project,hours_quantity:0
+msgid "Number of time you spent on the analytic account (from timesheet). It computes quantities on all journal of type 'general'."
+msgstr "Cantidad de tiempo invertido en la cuenta analítica (del parte de horas). Calcula las cantidades de todo diario de tipo 'general'."
+
+#. module: project_issue
+#: field:project.project,invoice_on_timesheets:0
+msgid "On Timesheets"
+msgstr "Hoja de Tiempo"
+
+#. module: project_issue
+#: field:project.project,is_overdue_quantity:0
+msgid "Overdue Quantity"
+msgstr "Cantidad vencida"
 
 #. module: project_issue
 #: model:ir.model,name:project_issue.model_res_partner
 msgid "Partner"
-msgstr "Empresa"
+msgstr "Partner"
+
+#. module: project_issue
+#: field:project.project,pricelist_id:0
+msgid "Pricelist"
+msgstr "Lista de Precio"
 
 #. module: project_issue
 #: view:project.issue:project_issue.project_feature_tree_view
@@ -646,7 +828,7 @@ msgstr "Escalado de proyecto"
 #: model:ir.model,name:project_issue.model_project_issue
 #: view:project.issue.report:project_issue.view_project_issue_report_graph
 msgid "Project Issue"
-msgstr "Incidencia proyecto"
+msgstr "Tema de Proyecto"
 
 #. module: project_issue
 #: view:project.issue:project_issue.project_issue_graph_view
@@ -664,6 +846,51 @@ msgid "Ready for next stage"
 msgstr "Lista para la siguiente etapa"
 
 #. module: project_issue
+#: field:project.project,real_margin:0
+msgid "Real Margin"
+msgstr "Margen real"
+
+#. module: project_issue
+#: field:project.project,real_margin_rate:0
+msgid "Real Margin Rate (%)"
+msgstr ""
+"\n"
+"Tasa de Margen Real (%)"
+
+#. module: project_issue
+#: field:project.project,recurring_rule_type:0
+msgid "Recurrency"
+msgstr "recurrencia"
+
+#. module: project_issue
+#: field:project.project,remaining_ca:0
+msgid "Remaining Revenue"
+msgstr "Ingresos restantes"
+
+#. module: project_issue
+#: field:project.project,fix_price_to_invoice:0
+#: field:project.project,remaining_hours:0
+#: field:project.project,remaining_hours_to_invoice:0
+#: field:project.project,timesheet_ca_invoiced:0
+msgid "Remaining Time"
+msgstr "Tiempo restante"
+
+#. module: project_issue
+#: field:project.project,recurring_interval:0
+msgid "Repeat Every"
+msgstr "Repite cada"
+
+#. module: project_issue
+#: help:project.project,recurring_interval:0
+msgid "Repeat every (Days/Week/Month/Year)"
+msgstr "Repita cada (días / semana / mes / año)"
+
+#. module: project_issue
+#: field:project.project,revenue_per_hour:0
+msgid "Revenue per Time (real)"
+msgstr "Ingresos por tiempo (real)"
+
+#. module: project_issue
 #: field:project.issue.report,reviewer_id:0
 msgid "Reviewer"
 msgstr "Revisor"
@@ -676,13 +903,11 @@ msgstr "Equipo de ventas"
 #. module: project_issue
 #: field:project.issue,section_id:0
 msgid "Sales Team"
-msgstr "Equipo de ventas"
+msgstr "Equipo de Ventas"
 
 #. module: project_issue
 #: help:project.issue,section_id:0
-msgid ""
-"Sales team to which Case belongs to.                             Define "
-"Responsible user and Email account for mail gateway."
+msgid "Sales team to which Case belongs to.                             Define Responsible user and Email account for mail gateway."
 msgstr "Equipo de ventas al cual pertenece el caso. Define el usuario responsable y la cuenta de correo electrónico para la pasarela de correo."
 
 #. module: project_issue
@@ -720,6 +945,16 @@ msgid "Status"
 msgstr "Estado"
 
 #. module: project_issue
+#: help:project.project,fix_price_to_invoice:0
+msgid "Sum of quotations for this contract."
+msgstr "Suma de cotizaciones para este contrato."
+
+#. module: project_issue
+#: help:project.project,timesheet_ca_invoiced:0
+msgid "Sum of timesheet lines invoiced for this contract."
+msgstr "Suma de las líneas de división de horas facturadas para este contrato."
+
+#. module: project_issue
 #: field:project.issue,message_summary:0
 msgid "Summary"
 msgstr "Resumen"
@@ -738,11 +973,23 @@ msgid "Task"
 msgstr "Tarea"
 
 #. module: project_issue
+#: help:project.project,pricelist_id:0
+msgid "The product to invoice is defined on the employee form, the price will be deducted by this pricelist on the product."
+msgstr "El producto a facturar se define en el formulario empleados, el precio se deducirá de esta lista de precios en el producto."
+
+#. module: project_issue
+#: field:project.project,theorical_margin:0
+msgid "Theoretical Margin"
+msgstr "Margen Teórico"
+
+#. module: project_issue
+#: field:project.project,ca_theorical:0
+msgid "Theoretical Revenue"
+msgstr "Ingresos teóricos"
+
+#. module: project_issue
 #: help:project.issue,email_cc:0
-msgid ""
-"These email addresses will be added to the CC field of all inbound and "
-"outbound emails for this record before being sent. Separate multiple email "
-"addresses with a comma"
+msgid "These email addresses will be added to the CC field of all inbound and outbound emails for this record before being sent. Separate multiple email addresses with a comma"
 msgstr "Estas direcciones de correo serán añadidas al campo CC para todos los correos entrantes y salientes de este registro antes de ser enviados. Separe las diferentes direcciones de correo con una coma."
 
 #. module: project_issue
@@ -752,18 +999,74 @@ msgstr "Estas personas recibirán correo electronico."
 
 #. module: project_issue
 #: model:ir.actions.act_window,help:project_issue.action_project_issue_report
-msgid ""
-"This report on the project issues allows you to analyse the quality of your "
-"support or after-sales services. You can track the issues per age. You can "
-"analyse the time required to open or close an issue, the number of email to "
-"exchange and the time spent on average by issues."
+msgid "This report on the project issues allows you to analyse the quality of your support or after-sales services. You can track the issues per age. You can analyse the time required to open or close an issue, the number of email to exchange and the time spent on average by issues."
 msgstr "Este informe sobre las incidencias del proyecto permite analizar la calidad de su soporte o los servicios postventa. Puede hacer un seguimiento de las incidencias por antigüedad. Puede analizar el tiempo requerido en abrir o cerrar una incidencia, el número de correos intercambiados y el tiempo gastado en promedio por incidencia."
+
+#. module: project_issue
+#: field:project.project,to_invoice:0
+msgid "Timesheet Invoicing Ratio"
+msgstr "Timesheet Invoicing Ratio"
+
+#. module: project_issue
+#: field:project.project,total_cost:0
+msgid "Total Costs"
+msgstr "Costos totales"
+
+#. module: project_issue
+#: field:project.project,est_total:0
+msgid "Total Estimation"
+msgstr "Estimación total"
+
+#. module: project_issue
+#: field:project.project,invoiced_total:0
+msgid "Total Invoiced"
+msgstr "Total de facturas"
+
+#. module: project_issue
+#: field:project.project,remaining_total:0
+msgid "Total Remaining"
+msgstr "Total restante"
+
+#. module: project_issue
+#: field:project.project,hours_quantity:0
+msgid "Total Worked Time"
+msgstr "Tiempo total de trabajo"
+
+#. module: project_issue
+#: help:project.project,ca_invoiced:0
+msgid "Total customer invoiced amount for this account."
+msgstr "Cantidad total facturada por el cliente para esta cuenta."
+
+#. module: project_issue
+#: help:project.project,amount_invoiced:0
+msgid "Total invoiced"
+msgstr "Total de facturas"
+
+#. module: project_issue
+#: help:project.project,total_cost:0
+msgid "Total of costs for this account. It includes real costs (from invoices) and indirect costs, like time spent on timesheets."
+msgstr "Total de gastos para esta cuenta. Incluye los costos reales (de facturas) y costos indirectos, como el tiempo empleado en horas."
+
+#. module: project_issue
+#: field:project.project,toinvoice_total:0
+msgid "Total to Invoice"
+msgstr "Total a factura"
 
 #. module: project_issue
 #: view:project.issue:project_issue.view_project_issue_filter
 #: view:project.issue.report:project_issue.view_project_issue_report_filter
 msgid "Unassigned"
 msgstr "Sin asignar"
+
+#. module: project_issue
+#: field:project.project,ca_to_invoice:0
+msgid "Uninvoiced Amount"
+msgstr "Cantidad no facturada"
+
+#. module: project_issue
+#: field:project.project,hours_qtt_non_invoiced:0
+msgid "Uninvoiced Time"
+msgstr "Tiempo no facturado"
 
 #. module: project_issue
 #: field:project.issue,message_unread:0
@@ -774,6 +1077,11 @@ msgstr "Mensajes sin leer"
 #: field:project.issue,write_date:0
 msgid "Update Date"
 msgstr "Actualizar fecha"
+
+#. module: project_issue
+#: field:project.project,user_ids:0
+msgid "User"
+msgstr "Usuario"
 
 #. module: project_issue
 #: field:project.issue,user_email:0
@@ -823,13 +1131,25 @@ msgstr "Horas laborables para cerrar la incidencia"
 msgid ""
 "You cannot escalate this issue.\n"
 "The relevant Project has not configured the Escalation Project!"
-msgstr "No puede escalar esta incidencia.\n¡El proyecto relevante no tienen configurado el escalado de proyecto!"
+msgstr ""
+"No puede escalar esta incidencia.\n"
+"¡El proyecto relevante no tienen configurado el escalado de proyecto!"
+
+#. module: project_issue
+#: help:project.project,to_invoice:0
+msgid "You usually invoice 100% of the timesheets. But if you mix fixed price and timesheet invoicing, you may use another ratio. For instance, if you do a 20% advance invoice (fixed price, based on a sales order), you should invoice the rest on timesheet with a 80% ratio."
+msgstr "You usually invoice 100% of the timesheets. But if you mix fixed price and timesheet invoicing, you may use another ratio. For instance, if you do a 20% advance invoice (fixed price, based on a sales order), you should invoice the rest on timesheet with a 80% ratio."
 
 #. module: project_issue
 #: code:addons/project_issue/project_issue.py:348
 #, python-format
 msgid "issues"
 msgstr "incidencias"
+
+#. module: project_issue
+#: view:project.project:project_issue.view_project_form_inherited
+msgid "on_change_use_tasks_or_issues(use_tasks, use_issues)"
+msgstr "on_change_use_tasks_or_issues(use_tasks, use_issues)"
 
 #. module: project_issue
 #: field:project.project,issue_ids:0
