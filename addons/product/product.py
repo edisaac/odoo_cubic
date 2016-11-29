@@ -756,6 +756,9 @@ class product_template(osv.osv):
 
         return product_template_id
 
+    def verify_change_uom(self, cr, uid, product_tmpl_id, context=None):
+        return False
+
     def write(self, cr, uid, ids, vals, context=None):
         ''' Store the standard price change in order to be able to retrieve the cost of a product template for a given date'''
         if isinstance(ids, (int, long)):
@@ -764,7 +767,7 @@ class product_template(osv.osv):
             new_uom = self.pool.get('product.uom').browse(cr, uid, vals['uom_po_id'], context=context)
             for product in self.browse(cr, uid, ids, context=context):
                 old_uom = product.uom_po_id
-                if old_uom.category_id.id != new_uom.category_id.id:
+                if old_uom.category_id.id != new_uom.category_id.id and self.verify_change_uom(cr, uid, product.id, context=context):
                     raise osv.except_osv(_('Unit of Measure categories Mismatch!'), _("New Unit of Measure '%s' must belong to same Unit of Measure category '%s' as of old Unit of Measure '%s'. If you need to change the unit of measure, you may deactivate this product from the 'Procurements' tab and create a new one.") % (new_uom.name, old_uom.category_id.name, old_uom.name,))
         if 'standard_price' in vals:
             for prod_template_id in ids:
