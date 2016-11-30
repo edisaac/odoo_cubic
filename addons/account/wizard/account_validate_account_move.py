@@ -40,6 +40,27 @@ class validate_account_move(osv.osv_memory):
         obj_move.button_validate(cr, uid, ids_move, context=context)
         return {'type': 'ir.actions.act_window_close'}
 
+    def validate_move_post(self, cr, uid, ids, context=None):
+        obj_move = self.pool.get('account.move')
+        if context is None:
+            context = {}
+        ids_move = obj_move.search(cr, uid, [('state', '=', 'draft'), ('id', 'in', tuple(context.get('active_ids', [])))], order='date')
+        if not ids_move:
+            raise osv.except_osv(_('Warning!'), _(
+                'Specified account moves do not have any entries in draft state.'))
+        obj_move.button_validate(cr, uid, ids_move, context=context)
+        return {'type': 'ir.actions.act_window_close'}
+
+    def validate_move_unpost(self, cr, uid, ids, context=None):
+        obj_move = self.pool.get('account.move')
+        if context is None:
+            context = {}
+        ids_move = obj_move.search(cr, uid, [('state','=','posted'),('id','in',tuple(context.get('active_ids', [])))], order='date')
+        if not ids_move:
+            raise osv.except_osv(_('Warning!'), _('Specified account moves do not have any entries in posted state.'))
+        obj_move.button_cancel(cr, uid, ids_move, context=context)
+        return {'type': 'ir.actions.act_window_close'}
+
 
 class validate_account_move_lines(osv.osv_memory):
     _name = "validate.account.move.lines"
