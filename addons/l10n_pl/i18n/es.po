@@ -1,47 +1,21 @@
-# Translation of OpenERP Server.
+# Translation of Server.
 # This file contains the translation of the following modules:
-# * l10n_pl
-# 
-# Translators:
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
+# 	* l10n_pl
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 8.0\n"
+"Project-Id-Version: Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-11-24 02:53+0000\n"
-"PO-Revision-Date: 2015-05-21 08:59+0000\n"
-"Last-Translator: Martin Trigaux\n"
-"Language-Team: Spanish (http://www.transifex.com/projects/p/odoo-8/language/es/)\n"
+"POT-Creation-Date: 2016-11-30 17:37+0000\n"
+"PO-Revision-Date: 2016-11-30 12:39-0500\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Language: es\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: l10n_pl
-#: model:account.account.type,name:l10n_pl.account_type_view
-msgid "Widok"
-msgstr "Vista"
-
-#. module: l10n_pl
-#: model:account.account.type,name:l10n_pl.account_type_asset
-msgid "Aktywa"
-msgstr "Bienes"
-
-#. module: l10n_pl
-#: model:account.account.type,name:l10n_pl.account_type_equity
-msgid "Kapitał własny"
-msgstr "Fondos propios"
-
-#. module: l10n_pl
-#: model:account.account.type,name:l10n_pl.account_type_income
-msgid "Dochody"
-msgstr "Ingresos"
-
-#. module: l10n_pl
-#: model:account.account.type,name:l10n_pl.account_type_payable
-msgid "Zobowiązania"
-msgstr "Pasivo"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_PE\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #. module: l10n_pl
 #: model:account.account.type,name:l10n_pl.account_type_tax
@@ -49,16 +23,11 @@ msgid "Podatki"
 msgstr "Impuestos"
 
 #. module: l10n_pl
-#: model:account.account.type,name:l10n_pl.account_type_receivable
-msgid "Należności"
-msgstr "A cobrar"
+#: model:account.account.type,name:l10n_pl.account_type_nonbalance
+msgid "Pozabilansowe"
+msgstr "fuera de balance"
 
 #. module: l10n_pl
-#: model:account.account.type,name:l10n_pl.account_type_cash
-msgid "Gotówka"
-msgstr "Efectivo"
-
-#. module: l10n_pl
-#: model:account.account.type,name:l10n_pl.account_type_expense
-msgid "Wydatki"
-msgstr "Gastos"
+#: model:account.account.type,name:l10n_pl.account_type_settlement
+msgid "Rozrachunki"
+msgstr "Cuentas por pagar"
