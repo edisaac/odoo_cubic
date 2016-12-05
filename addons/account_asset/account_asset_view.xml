@@ -20,18 +20,20 @@
                     <group attrs="{'invisible':[('type','=','view')]}">
                         <field name="journal_id"/>
                         <field name="account_asset_id" on_change="onchange_account_asset(account_asset_id)"/>
+                        <field name="account_revaluation_id"/>
                         <field name="account_depreciation_id"/>
                         <field name="account_expense_depreciation_id"/>
                     </group>
                     <group string="Depreciation Dates" attrs="{'invisible':[('type','=','view')]}">
                         <field name="method_time"/>
-                        <field name="method_number" attrs="{'invisible':[('method_time','=','end')], 'required':[('method_time','=','number')]}"/>
                         <field name="method_period"/>
-                        <field name="method_end" attrs="{'required': [('method_time','=','end')], 'invisible':[('method_time','=','number')]}"/>
+                        <field name="method_end" attrs="{'required': [('method_time','=','end')], 'invisible':[('method_time','!=','end')]}"/>
+                        <field name="method_activity" attrs="{'required': [('method_time','=','activity')], 'invisible':[('method_time','!=','activity')]}"/>
                     </group>
                     <group string="Depreciation Method" attrs="{'invisible':[('type','=','view')]}">
                         <field name="method"/>
                         <field name="method_progress_factor" attrs="{'invisible':[('method','=','linear')], 'required':[('method','=','degressive')]}"/>
+                        <field name="method_number" attrs="{'invisible':[('method','=','degressive')], 'required':[('method','=','linear')]}"/>
                         <field name="prorata"/>
                         <field name="open_asset"/>
                     </group>
@@ -99,13 +101,11 @@
                     <group>
                         <group>
                             <field name="category_id" on_change="onchange_category_id(category_id)"/>
-                            <field name="code"/>
-                            <field name="parent_id"/>
+
                         </group>
                         <group>
                             <field name="purchase_date"/>
-                            <field name="currency_id" groups="base.group_multi_currency"/>
-                            <field name="company_id" widget="selection" groups="base.group_multi_company" on_change="onchange_company_id(company_id)"/>
+
                         </group>
                     </group>
                     <notebook colspan="4">
@@ -115,62 +115,94 @@
                                     <field name="purchase_value" widget="monetary" options="{'currency_field': 'currency_id'}" on_change="onchange_purchase_salvage_value(purchase_value, salvage_value)"/>
                                     <field name="salvage_value" widget="monetary" options="{'currency_field': 'currency_id'}" on_change="onchange_purchase_salvage_value(purchase_value, salvage_value)"/>
                                     <field name="value_residual" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    <field name="partner_id"/>
-                        			<field name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
                                 </group>
                                 <group>
                                     <field name="method"/>
                                     <field name="method_progress_factor" attrs="{'invisible':[('method','=','linear')], 'required':[('method','=','degressive')]}"/>
+                                    <field name="method_number" attrs="{'invisible':[('method','=','degressive')], 'required':[('method','=','linear')]}"/>
                                     <label for="method_time"/>
                                     <div>
                                         <field name="method_time" on_change="onchange_method_time(method_time)" class="oe_inline"/>
                                         <button name="%(action_asset_modify)d" states="open" string="Change Duration" type="action" icon="terp-stock_effects-object-colorize" class="oe_inline" colspan="1"/>
                                     </div>
-                                    <field name="prorata" attrs="{'invisible': [('method_time','=','end')]}"/>
-                                    <field name="method_number" attrs="{'invisible':[('method_time','=','end')], 'required':[('method_time','=','number')]}"/>
                                     <field name="method_period"/>
-                                    <field name="method_end" attrs="{'required': [('method_time','=','end')], 'invisible':[('method_time','=','number')]}"/>
+                                    <field name="method_end" attrs="{'required': [('method_time','=','end')], 'invisible':[('method_time','!=','end')]}"/>
+                                    <field name="method_activity" attrs="{'required': [('method_time','=','activity')], 'invisible':[('method_time','!=','activity')]}"/>
+                                    <field name="prorata"/>
                                 </group>
                             </group>
                         </page>
                         <page string="Depreciation Board">
-                            <field name="depreciation_line_ids" mode="tree">
-                                <tree string="Depreciation Lines" colors="blue:(move_check == False);black:(move_check == True)">
+                            <field name="depreciation_line_ids" mode="tree" context="{'asset_line_default_create':1,'default_method_time':method_time,'default_asset_id':id,'default_method':method,'default_method_number':method_number,'default_method_period':method_period,'default_method_activity':method_activity,'default_method_progress_factor':method_progress_factor,'default_method_end':method_end,'default_salvage_value':salvage_value,'default_double_depreciation':double_depreciation,'default_double_depreciation_rate':double_depreciation_rate}">
+                                <tree string="Depreciation Lines" colors="blue:(state=='draft');grey:(state=='cancel')">
                                     <field name="depreciation_date"/>
                                     <field name="sequence" invisible="1"/>
                                     <field name="depreciated_value" readonly="1"/>
                                     <field name="amount"/>
                                     <field name="remaining_value" readonly="1"/>
-                                    <field name="move_check"/>
+                                    <field name="state"/>
                                     <field name="parent_state" invisible="1"/>
-                                    <button name="create_move" attrs="{'invisible':['|',('move_check','!=',False),('parent_state','!=','open')]}" icon="gtk-execute" string="Create Move" type="object"/>
+                                    <button name="action_done" states="draft" icon="gtk-execute" string="Create Move" type="object"/>
+                                    <button name="action_cancel" states="draft" icon="gtk-cancel" string="Cancel Move" type="object"/>
                                 </tree>
-                                <form string="Depreciation Lines"> 
-                                    <group>
+                                <form string="Depreciation Lines">
+                                    <header>
+                                        <button name="action_draft" states="cancel" string="Draft" type="object"/>
+                                        <button name="action_cancel" states="draft,done" string="Cancel" type="object"/>
+                                        <button name="action_done" states="draft" string="Done" type="object"/>
+                                        <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                                    </header>
+                                    <sheet>
                                         <group>
-                                            <field name="parent_state" invisible="1"/>
-                                            <field name="name"/>
-                                            <field name="amount"/>
-                                            <field name="move_id"/>
-                                            <field name="move_check"/>
-                                            <field name="parent_state" invisible="1"/>
+                                            <group>
+                                                <field name="name"/>
+                                                <field name="amount"/>
+                                                <field name="move_id"/>
+                                                <field name="parent_state" invisible="1"/>
+                                            </group>
+                                            <group>
+                                                <field name="sequence"/>
+                                                <field name="depreciation_date"/>
+                                                <field name="depreciated_value"/>
+                                                <field name="remaining_value"/>
+                                            </group>
                                         </group>
-                                        <group>
-                                            <field name="sequence"/>
-                                            <field name="depreciation_date"/>
-                                            <field name="depreciated_value"/>
-                                            <field name="remaining_value"/>
-                                        </group>
-                                    </group>
+                                    </sheet>
                                 </form>
                             </field>
                             <button type="object" name="compute_depreciation_board" string="Compute" icon="terp-stock_format-scientific" colspan="2" attrs="{'invisible':[('state','in',('close','open'))]}"/>
                         </page>
                         <page string="History">
-                            <field name="account_move_line_ids" readonly="1"/>
                             <field name="history_ids" readonly="0"/>
                         </page>
-                        <page string="Notes">
+                        <page string="Accounting">
+                            <group name="accounting_group">
+                                <group>
+                                    <field name="account_asset_id"/>
+                                    <field name="account_revaluation_id"/>
+                                    <field name="account_depreciation_id"/>
+                                    <field name="account_expense_depreciation_id"/>
+                                </group>
+                                <group>
+                                    <field name="partner_id"/>
+                                    <field name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
+                                    <field name="currency_id" groups="base.group_multi_currency"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Others">
+                            <group>
+                                <group>
+                                    <field name="valuation"/>
+                                    <field name="buy_date"/>
+                                    <field name="parent_id"/>
+                                </group>
+                                <group>
+                                    <field name="code"/>
+                                    <field name="company_id" widget="selection" groups="base.group_multi_company" on_change="onchange_company_id(company_id)"/>
+                                </group>
+                            </group>
+                            <separator string="Notes"/>
                             <field name="note" placeholder="Add an internal note here..."/>
                         </page>
                     </notebook>

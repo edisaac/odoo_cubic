@@ -736,7 +736,7 @@ msgstr ""
 #: field:account.asset.asset,purchase_date:0
 #: field:asset.asset.report,purchase_date:0
 msgid "Purchase Date"
-msgstr "Fecha de compra"
+msgstr "Fecha Inicio"
 
 #. module: account_asset
 #: view:asset.asset.report:account_asset.view_asset_asset_report_search
