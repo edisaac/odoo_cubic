@@ -2297,6 +2297,9 @@ class stock_move(osv.osv):
         self.check_tracking_product(cr, uid, move.product_id, lot_id, move.location_id, move.location_dest_id, context=context)
         
 
+    def _get_main_domain_move(self, cr, uid, move, context=None):
+        return [('reservation_id', '=', False), ('qty', '>', 0)]
+
     def action_assign(self, cr, uid, ids, context=None):
         """ Checks the product type and accordingly writes the state.
         """
@@ -2321,7 +2324,7 @@ class stock_move(osv.osv):
                 todo_moves.append(move)
 
                 #we always keep the quants already assigned and try to find the remaining quantity on quants not assigned only
-                main_domain[move.id] = [('reservation_id', '=', False), ('qty', '>', 0)]
+                main_domain[move.id] = self._get_main_domain_move(cr, uid, move, context=context)
 
                 #if the move is preceeded, restrict the choice of quants in the ones moved previously in original move
                 ancestors = self.find_move_ancestors(cr, uid, move, context=context)
