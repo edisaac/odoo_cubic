@@ -65,7 +65,8 @@ class account_asset_category(osv.osv):
         'journal_id': fields.many2one('account.journal', 'Journal'),
         'company_id': fields.many2one('res.company', 'Company', required=True),
         'method': fields.selection([('linear','Linear'),
-                                    ('degressive','Degressive')], 'Computation Method', required=True,
+                                    ('degressive','Degressive'),
+                                    ('custom','Custom')], 'Computation Method', required=True,
                                    help="Choose the method to use to compute the amount of depreciation lines.\n"\
             "  * Linear: Calculated on basis of: (Gross Value - Salvage Value) / Number of Depreciations\n" \
             "  * Degressive: Calculated on basis of: Book Value * Degressive Factor."),
@@ -75,7 +76,8 @@ class account_asset_category(osv.osv):
                                                help="Percentage value, for example to express 30% write 30.0"),
         'method_time': fields.selection([('number','Number of Depreciations'),
                                          ('end','Ending Date'),
-                                         ('activity', 'Activity')], 'Time Method',
+                                         ('activity', 'Activity'),
+                                         ('factor','Factor')], 'Time Method', required=True,
                                   help="Choose the method to use to compute the dates and number of depreciation lines.\n"\
                                        "  * Number of Depreciations: Fix the number of depreciation lines and the time between 2 depreciations.\n" \
                                        "  * Ending Date: Choose the time between 2 depreciations and the date the depreciations won't go beyond\n" \
@@ -299,19 +301,23 @@ class account_asset_asset(osv.osv):
         'partner_id': fields.many2one('res.partner', 'Partner', readonly=True, states={'draft':[('readonly',False)]}),
         'valuation': fields.selection([('auto', 'Automatic'), ('manual', 'Manual')], 'Valuation Method',
                                    required=True, readonly=True, states={'draft': [('readonly', False)]}, default='auto'),
-        'method': fields.selection([('linear','Linear'),('degressive','Degressive')], 'Computation Method', required=True, readonly=True, states={'draft':[('readonly',False)]}, help="Choose the method to use to compute the amount of depreciation lines.\n"\
+        'method': fields.selection([('linear','Linear'),
+                                    ('degressive','Degressive'),
+                                    ('custom','Custom')], 'Computation Method', required=True, readonly=True, states={'draft':[('readonly',False)]}, help="Choose the method to use to compute the amount of depreciation lines.\n"\
             "  * Linear: Calculated on basis of: (Gross Value - Salvage Value) / Number of Depreciations\n" \
             "  * Degressive: Calculated on basis of: Book Value * Degressive Factor"),
         'method_number': fields.integer('Number of Depreciations', readonly=True, states={'draft':[('readonly',False)]}, help="The number of depreciations needed to depreciate your asset"),
         'method_period': fields.integer('Number of Months in a Period', required=True, readonly=True, states={'draft':[('readonly',False)]}, help="The amount of time between two depreciations, in months"),
         'method_end': fields.date('Ending Date', readonly=True, states={'draft':[('readonly',False)]}),
-        'method_activity': fields.float('Activity Units'),
+        'method_activity': fields.float('Activity Units', readonly=True, states={'draft':[('readonly',False)]}),
+        'method_custom': fields.float('Custom Amount', readonly=True, states={'draft': [('readonly', False)]}),
         'method_progress_factor': fields.float('Degressive Factor', readonly=True, states={'draft':[('readonly',False)]},
                                                help="Percentage value, for example to express 30% write 30.0"),
         'value_residual': fields.function(_amount_residual, method=True, digits_compute=dp.get_precision('Account'), string='Residual Value'),
         'method_time': fields.selection([('number','Number of Depreciations'),
                                          ('end','Ending Date'),
-                                         ('activity','Activity')], 'Time Method', required=True, readonly=True, states={'draft':[('readonly',False)]},
+                                         ('activity','Activity'),
+                                         ('factor', 'Factor')], 'Time Method', required=True, readonly=True, states={'draft':[('readonly',False)]},
                                   help="Choose the method to use to compute the dates and number of depreciation lines.\n"\
                                        "  * Number of Depreciations: Fix the number of depreciation lines and the time between 2 depreciations.\n" \
                                        "  * Ending Date: Choose the time between 2 depreciations and the date the depreciations won't go beyond\n" \
@@ -321,16 +327,18 @@ class account_asset_asset(osv.osv):
         'depreciation_line_ids': fields.one2many('account.asset.depreciation.line', 'asset_id', 'Depreciation Lines', readonly=True, states={'draft':[('readonly',False)],'open':[('readonly',False)]}),
         'salvage_value': fields.float('Salvage Value', digits_compute=dp.get_precision('Account'), help="It is the amount you plan to have that you cannot depreciate.", readonly=True, states={'draft':[('readonly',False)]}),
         'account_analytic_id': fields.many2one('account.analytic.account', 'Analytic account', readonly=True, states={'draft':[('readonly',False)]}),
+        'journal_id': fields.many2one('account.journal', 'Journal', domain=[('type', '=', 'general')],
+                                            readonly=True, states={'draft':[('readonly',False)]}, required=False),
         'account_asset_id': fields.many2one('account.account', 'Asset Account', domain=[('type', '=', 'other')],
-                                            readonly=True, states={'draft':[('readonly',False)]}, required=True),
+                                            readonly=True, states={'draft':[('readonly',False)]}, required=False),
         'account_revaluation_id': fields.many2one('account.account', 'Revaluation Account', readonly=True,
-                                                  domain=[('type', '=', 'other')], required=True,
+                                                  domain=[('type', '=', 'other')], required=False,
                                                   states={'draft':[('readonly',False)]}),
         'account_depreciation_id': fields.many2one('account.account', 'Depreciation Account', readonly=True,
-                                                   states={'draft':[('readonly',False)]}, required=True,
+                                                   states={'draft':[('readonly',False)]}, required=False,
                                                    domain=[('type', '=', 'other')]),
         'account_expense_depreciation_id': fields.many2one('account.account', 'Depr. Expense Account', readonly=True,
-                                                           states={'draft':[('readonly',False)]}, required=True,
+                                                           states={'draft':[('readonly',False)]}, required=False,
                                                            domain=[('type', '=', 'other')]),
 
     }
@@ -416,7 +424,7 @@ class account_asset_asset(osv.osv):
         if not vals.get('code', False):
             vals['code'] = self.pool.get('ir.sequence').get(cr, uid, 'account.asset.code')
         asset_id = super(account_asset_asset, self).create(cr, uid, vals, context=context)
-        self.compute_depreciation_board(cr, uid, [asset_id], context=context)
+        #self.compute_depreciation_board(cr, uid, [asset_id], context=context)
         return asset_id
     
     def open_entries(self, cr, uid, ids, context=None):
@@ -437,16 +445,18 @@ class account_asset_depreciation_line(osv.osv):
     _description = 'Asset depreciation line'
 
     _columns = {
-        'name': fields.char('Depreciation Name', required=True, select=1, readonly=True, states={'draft':[('readonly',False)]}),
-        'sequence': fields.integer('Sequence', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+        'name': fields.char('Depreciation Name', required=False, select=1, readonly=True, states={'draft':[('readonly',False)]}),
+        'sequence': fields.integer('Sequence', required=False, readonly=True, states={'draft':[('readonly',False)]}),
         'asset_id': fields.many2one('account.asset.asset', 'Asset', required=True, ondelete='cascade',readonly=True, states={'draft':[('readonly',False)]}),
         'parent_state': fields.related('asset_id', 'state', type='char', string='State of Asset', readonly=True),
         'amount': fields.float('Current Depreciation', digits_compute=dp.get_precision('Account'), required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'remaining_value': fields.float('Next Period Depreciation', digits_compute=dp.get_precision('Account'),required=True,readonly=True, states={'draft':[('readonly',False)]}),
         'depreciated_value': fields.float('Amount Already Depreciated', required=True,readonly=True, states={'draft':[('readonly',False)]}),
-        'depreciation_date': fields.date('Depreciation Date', select=1, readonly=True, states={'draft':[('readonly',False)]}),
+        'depreciation_date': fields.date('Depreciation Date', select=1, required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'move_id': fields.many2one('account.move', 'Depreciation Entry',
                                    readonly=True, states={'draft':[('readonly',False)]}),
+        'period_id': fields.many2one('account.period', 'Period', domain=[('special','=',False)],
+                                   readonly=True, states={'draft': [('readonly', False)]}),
         'state': fields.selection([('draft','Draft'),
                                    ('done','Done'),
                                    ('cancel','Cancel')], string='Posted Save', readonly=True),
@@ -454,6 +464,7 @@ class account_asset_depreciation_line(osv.osv):
     _defaults = {
         'state': 'draft',
     }
+    _order = "name desc,sequence asc"
 
     def action_draft(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
@@ -486,7 +497,7 @@ class account_asset_depreciation_line(osv.osv):
             'name': "/",
             'ref': line.asset_id.name,
             'move_id': move_id,
-            'account_id': line.asset_id.account_depreciation_id.id,
+            'account_id': line.asset_id.account_depreciation_id.id or line.asset_id.category_id.account_depreciation_id.id,
             'debit': 0.0 if float_compare(amount, 0.0, precision_digits=prec) > 0 else -amount,
             'credit': amount if float_compare(amount, 0.0, precision_digits=prec) > 0 else 0.0,
             'period_id': period_id,
@@ -501,7 +512,7 @@ class account_asset_depreciation_line(osv.osv):
             'name': "/",
             'ref': line.asset_id.name,
             'move_id': move_id,
-            'account_id': line.asset_id.account_expense_depreciation_id.id,
+            'account_id': line.asset_id.account_expense_depreciation_id.id or line.asset_id.category_id.account_expense_depreciation_id.id,
             'credit': 0.0 if float_compare(amount, 0.0, precision_digits=prec) > 0 else -amount,
             'debit': amount if float_compare(amount, 0.0, precision_digits=prec) > 0 else 0.0,
             'period_id': period_id,
@@ -529,7 +540,11 @@ class account_asset_depreciation_line(osv.osv):
             if line.asset_id.valuation != 'auto':
                 continue
             depreciation_date = context.get('depreciation_date') or line.depreciation_date or time.strftime('%Y-%m-%d')
-            period_ids = period_obj.find(cr, uid, depreciation_date, context=context)
+            if line.period_id:
+                period_id = line.period_id.id
+            else:
+                period_ids = period_obj.find(cr, uid, depreciation_date, context=context)
+                period_id = period_ids and period_ids[0] or False
             company_currency = line.asset_id.company_id.currency_id.id
             current_currency = line.asset_id.currency_id.id
             context.update({'date': depreciation_date})
@@ -541,11 +556,11 @@ class account_asset_depreciation_line(osv.osv):
                 'name': asset_name,
                 'date': depreciation_date,
                 'ref': reference,
-                'period_id': period_ids and period_ids[0] or False,
-                'journal_id': line.asset_id.category_id.journal_id.id,
+                'period_id': period_id,
+                'journal_id': line.asset_id.journal_id.id or line.asset_id.category_id.journal_id.id,
                 }
             move_id = move_obj.create(cr, uid, move_vals, context=context)
-            self.create_move_lines(cr, uid, move_id, line, amount, depreciation_date, period_ids and period_ids[0] or False, context=context)
+            self.create_move_lines(cr, uid, move_id, line, amount, depreciation_date, period_id, context=context)
             self.write(cr, uid, line.id, {'move_id': move_id}, context=context)
             created_move_ids.append(move_id)
             asset_ids.append(line.asset_id.id)
