@@ -6,6 +6,7 @@
             <field name="model">asset.depreciation.confirmation.wizard</field>
             <field name="arch" type="xml">
                 <form string="Compute Asset">
+                    <label string="This wizard does not process assets with activity method"/>
                     <group>
                         <field name="period_id"/>
                     </group>
@@ -30,6 +31,14 @@
         <menuitem action="action_asset_depreciation_confirmation_wizard"
             id="menu_asset_depreciation_confirmation_wizard"
             parent="account.menu_finance_recurrent_entries" />
+        
+        <act_window id="launch_asset_compute_wizard"
+                   name="Compute Depreciation"
+                   src_model="account.asset.asset"
+                   res_model="asset.depreciation.confirmation.wizard"
+                   view_mode="form"
+                   target="new"
+                   key2="client_action_multi"/>
 
     </data>
 </openerp>

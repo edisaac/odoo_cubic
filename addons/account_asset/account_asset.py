@@ -465,7 +465,7 @@ class account_asset_depreciation_line(osv.osv):
     _defaults = {
         'state': 'draft',
     }
-    _order = "name desc,sequence asc"
+    _order = "depreciation_date desc,sequence asc"
 
     def action_draft(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'draft'}, context=context)

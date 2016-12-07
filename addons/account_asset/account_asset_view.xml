@@ -139,7 +139,6 @@
                                     <field name="name"/>
                                     <field name="depreciation_date"/>
                                     <field name="sequence" invisible="1"/>
-                                    <field name="depreciation"/>
                                     <field name="amount"/>
                                     <field name="depreciated_value" readonly="1"/>
                                     <field name="remaining_value" readonly="1"/>
@@ -174,7 +173,9 @@
                                     </sheet>
                                 </form>
                             </field>
-                            <button type="object" name="compute_depreciation_board" string="Compute" icon="terp-stock_format-scientific" colspan="2" attrs="{'invisible':[('state','in',('close','open'))]}"/>
+                            <button type="object" name="compute_depreciation_board" string="Compute"
+                                    icon="terp-stock_format-scientific" colspan="2"
+                                    attrs="{'invisible':['|',('state','in',('close','open')),('method_time','=','activity')]}"/>
                         </page>
                         <page string="History">
                             <field name="history_ids" readonly="0"/>
@@ -266,6 +267,30 @@
                 <field name="category_id"/>
                 <field name="partner_id" filter_domain="[('partner_id','child_of',self)]"/>
             </search>
+        </field>
+    </record>
+
+    <!--
+        Asset Depreciation Line
+     -->
+
+    <record model="ir.ui.view" id="view_account_asset_depreciation_line_tree">
+        <field name="name">account.asset.depreciation.line.tree</field>
+        <field name="model">account.asset.depreciation.line</field>
+        <field name="arch" type="xml">
+            <tree string="Depreciation Lines" colors="blue:(state=='draft');grey:(state=='cancel')">
+                <field name="asset_id"/>
+                <field name="name"/>
+                <field name="depreciation_date"/>
+                <field name="sequence" invisible="1"/>
+                <field name="amount"/>
+                <field name="depreciated_value" readonly="1"/>
+                <field name="remaining_value" readonly="1"/>
+                <field name="state"/>
+                <field name="parent_state" invisible="1"/>
+                <button name="action_done" states="draft" icon="gtk-execute" string="Create Move" type="object"/>
+                <button name="action_cancel" states="draft" icon="gtk-cancel" string="Cancel Move" type="object"/>
+            </tree>
         </field>
     </record>
 
