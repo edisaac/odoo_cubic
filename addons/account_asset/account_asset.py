@@ -494,7 +494,8 @@ class account_asset_depreciation_line(osv.osv):
         partner_id = line.asset_id.partner_id.id
         company_currency = line.asset_id.company_id.currency_id.id
         current_currency = line.asset_id.currency_id.id
-        if not amount:
+        if amount:
+            assert line.asset_id.account_depreciation_id.id or line.asset_id.category_id.account_depreciation_id.id, "Configure the asset depreciation account"
             move_line_obj.create(cr, uid, {
                 'name': _("%s Acumulated Depreciation")%(line.name or line.depreciation_date,),
                 'ref': line.asset_id.name,
@@ -511,6 +512,7 @@ class account_asset_depreciation_line(osv.osv):
                 'date': depreciation_date,
                 'asset_id': line.asset_id.id
             })
+            assert line.asset_id.account_expense_depreciation_id.id or line.asset_id.category_id.account_expense_depreciation_id.id, "Configure the asset depreciation expense account"
             move_line_obj.create(cr, uid, {
                 'name': _("%s Expense Depreciation")%(line.name or line.depreciation_date,),
                 'ref': line.asset_id.name,
