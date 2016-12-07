@@ -494,38 +494,39 @@ class account_asset_depreciation_line(osv.osv):
         partner_id = line.asset_id.partner_id.id
         company_currency = line.asset_id.company_id.currency_id.id
         current_currency = line.asset_id.currency_id.id
-        move_line_obj.create(cr, uid, {
-            'name': _("%s Acumulated Depreciation")%(line.name or line.depreciation_date,),
-            'ref': line.asset_id.name,
-            'move_id': move_id,
-            'account_id': line.asset_id.account_depreciation_id.id or line.asset_id.category_id.account_depreciation_id.id,
-            'debit': 0.0 if float_compare(amount, 0.0, precision_digits=prec) > 0 else -amount,
-            'credit': amount if float_compare(amount, 0.0, precision_digits=prec) > 0 else 0.0,
-            'period_id': period_id,
-            'journal_id': journal_id,
-            'partner_id': partner_id,
-            'currency_id': company_currency != current_currency and current_currency or False,
-            'amount_currency': company_currency != current_currency and -1 * line.amount or 0.0,
-            'analytic_account_id': line.asset_id.account_analytic_id.id or line.asset_id.category_id.account_analytic_id.id,
-            'date': depreciation_date,
-            'asset_id': line.asset_id.id
-        })
-        move_line_obj.create(cr, uid, {
-            'name': _("%s Expense Depreciation")%(line.name or line.depreciation_date,),
-            'ref': line.asset_id.name,
-            'move_id': move_id,
-            'account_id': line.asset_id.account_expense_depreciation_id.id or line.asset_id.category_id.account_expense_depreciation_id.id,
-            'credit': 0.0 if float_compare(amount, 0.0, precision_digits=prec) > 0 else -amount,
-            'debit': amount if float_compare(amount, 0.0, precision_digits=prec) > 0 else 0.0,
-            'period_id': period_id,
-            'journal_id': journal_id,
-            'partner_id': partner_id,
-            'currency_id': company_currency != current_currency and current_currency or False,
-            'amount_currency': company_currency != current_currency and line.amount or 0.0,
-            'analytic_account_id': line.asset_id.account_analytic_id.id or line.asset_id.category_id.account_analytic_id.id,
-            'date': depreciation_date,
-            'asset_id': line.asset_id.id
-        })
+        if not amount:
+            move_line_obj.create(cr, uid, {
+                'name': _("%s Acumulated Depreciation")%(line.name or line.depreciation_date,),
+                'ref': line.asset_id.name,
+                'move_id': move_id,
+                'account_id': line.asset_id.account_depreciation_id.id or line.asset_id.category_id.account_depreciation_id.id,
+                'debit': 0.0 if float_compare(amount, 0.0, precision_digits=prec) > 0 else -amount,
+                'credit': amount if float_compare(amount, 0.0, precision_digits=prec) > 0 else 0.0,
+                'period_id': period_id,
+                'journal_id': journal_id,
+                'partner_id': partner_id,
+                'currency_id': company_currency != current_currency and current_currency or False,
+                'amount_currency': company_currency != current_currency and -1 * line.amount or 0.0,
+                'analytic_account_id': line.asset_id.account_analytic_id.id or line.asset_id.category_id.account_analytic_id.id,
+                'date': depreciation_date,
+                'asset_id': line.asset_id.id
+            })
+            move_line_obj.create(cr, uid, {
+                'name': _("%s Expense Depreciation")%(line.name or line.depreciation_date,),
+                'ref': line.asset_id.name,
+                'move_id': move_id,
+                'account_id': line.asset_id.account_expense_depreciation_id.id or line.asset_id.category_id.account_expense_depreciation_id.id,
+                'credit': 0.0 if float_compare(amount, 0.0, precision_digits=prec) > 0 else -amount,
+                'debit': amount if float_compare(amount, 0.0, precision_digits=prec) > 0 else 0.0,
+                'period_id': period_id,
+                'journal_id': journal_id,
+                'partner_id': partner_id,
+                'currency_id': company_currency != current_currency and current_currency or False,
+                'amount_currency': company_currency != current_currency and line.amount or 0.0,
+                'analytic_account_id': line.asset_id.account_analytic_id.id or line.asset_id.category_id.account_analytic_id.id,
+                'date': depreciation_date,
+                'asset_id': line.asset_id.id
+            })
 
 
     def create_move(self, cr, uid, ids, context=None):
