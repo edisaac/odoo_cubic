@@ -287,7 +287,8 @@ class account_asset_asset(osv.osv):
         'currency_id': fields.many2one('res.currency','Currency',required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'company_id': fields.many2one('res.company', 'Company', required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'note': fields.text('Note'),
-        'category_id': fields.many2one('account.asset.category', 'Asset Category', required=True, change_default=True, readonly=True, states={'draft':[('readonly',False)]}),
+        'category_id': fields.many2one('account.asset.category', 'Asset Category', required=True, change_default=True,
+                                       domain=[('type','!=','view')], readonly=True, states={'draft':[('readonly',False)]}),
         'parent_id': fields.many2one('account.asset.asset', 'Parent Asset', readonly=True, states={'draft':[('readonly',False)]}),
         'child_ids': fields.one2many('account.asset.asset', 'parent_id', 'Children Assets', copy=True),
         'buy_date': fields.date('Purchase Date', readonly=True, states={'draft':[('readonly',False)]}),
@@ -494,7 +495,7 @@ class account_asset_depreciation_line(osv.osv):
         company_currency = line.asset_id.company_id.currency_id.id
         current_currency = line.asset_id.currency_id.id
         move_line_obj.create(cr, uid, {
-            'name': "/",
+            'name': _("%s Acumulated Depreciation")%(line.name or line.depreciation_date,),
             'ref': line.asset_id.name,
             'move_id': move_id,
             'account_id': line.asset_id.account_depreciation_id.id or line.asset_id.category_id.account_depreciation_id.id,
@@ -505,11 +506,12 @@ class account_asset_depreciation_line(osv.osv):
             'partner_id': partner_id,
             'currency_id': company_currency != current_currency and current_currency or False,
             'amount_currency': company_currency != current_currency and -1 * line.amount or 0.0,
+            'analytic_account_id': line.asset_id.account_analytic_id.id or line.asset_id.category_id.account_analytic_id.id,
             'date': depreciation_date,
             'asset_id': line.asset_id.id
         })
         move_line_obj.create(cr, uid, {
-            'name': "/",
+            'name': _("%s Expense Depreciation")%(line.name or line.depreciation_date,),
             'ref': line.asset_id.name,
             'move_id': move_id,
             'account_id': line.asset_id.account_expense_depreciation_id.id or line.asset_id.category_id.account_expense_depreciation_id.id,
@@ -520,7 +522,7 @@ class account_asset_depreciation_line(osv.osv):
             'partner_id': partner_id,
             'currency_id': company_currency != current_currency and current_currency or False,
             'amount_currency': company_currency != current_currency and line.amount or 0.0,
-            'analytic_account_id': line.asset_id.account_analytic_id.id,
+            'analytic_account_id': line.asset_id.account_analytic_id.id or line.asset_id.category_id.account_analytic_id.id,
             'date': depreciation_date,
             'asset_id': line.asset_id.id
         })

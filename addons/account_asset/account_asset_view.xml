@@ -136,10 +136,12 @@
                         <page string="Depreciation Board">
                             <field name="depreciation_line_ids" mode="tree" context="{'asset_line_default_create':1,'default_method_time':method_time,'default_asset_id':id,'default_method':method,'default_method_number':method_number,'default_method_period':method_period,'default_method_activity':method_activity,'default_method_progress_factor':method_progress_factor,'default_method_end':method_end,'default_salvage_value':salvage_value,'default_double_depreciation':double_depreciation,'default_double_depreciation_rate':double_depreciation_rate}">
                                 <tree string="Depreciation Lines" colors="blue:(state=='draft');grey:(state=='cancel')">
+                                    <field name="name"/>
                                     <field name="depreciation_date"/>
                                     <field name="sequence" invisible="1"/>
-                                    <field name="depreciated_value" readonly="1"/>
+                                    <field name="depreciation"/>
                                     <field name="amount"/>
+                                    <field name="depreciated_value" readonly="1"/>
                                     <field name="remaining_value" readonly="1"/>
                                     <field name="state"/>
                                     <field name="parent_state" invisible="1"/>
@@ -149,8 +151,8 @@
                                 <form string="Depreciation Lines">
                                     <header>
                                         <button name="action_draft" states="cancel" string="Draft" type="object"/>
+                                        <button name="action_done" states="draft" string="Done" type="object" class="oe_highlight"/>
                                         <button name="action_cancel" states="draft,done" string="Cancel" type="object"/>
-                                        <button name="action_done" states="draft" string="Done" type="object"/>
                                         <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                                     </header>
                                     <sheet>
