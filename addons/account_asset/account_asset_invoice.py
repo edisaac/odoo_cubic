@@ -22,15 +22,12 @@
 from openerp import SUPERUSER_ID
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
+from openerp import fields as fields2
+from openerp import models, api
 
 class account_invoice(osv.osv):
-
+    _name = 'account.invoice'
     _inherit = 'account.invoice'
-    def action_number(self, cr, uid, ids, *args, **kargs):
-        result = super(account_invoice, self).action_number(cr, uid, ids, *args, **kargs)
-        for inv in self.browse(cr, uid, ids):
-            self.pool.get('account.invoice.line').asset_create(cr, uid, inv.invoice_line)
-        return result
 
     def line_get_convert(self, cr, uid, x, part, date, context=None):
         res = super(account_invoice, self).line_get_convert(cr, uid, x, part, date, context=context)
@@ -38,41 +35,24 @@ class account_invoice(osv.osv):
         return res
 
 
-class account_invoice_line(osv.osv):
-
+class account_invoice_line(models.Model):
+    _name = 'account.invoice.line'
     _inherit = 'account.invoice.line'
-    _columns = {
-        'asset_category_id': fields.many2one('account.asset.category', 'Asset Category'),
-    }
-    def asset_create(self, cr, uid, lines, context=None):
-        context = context or {}
-        asset_obj = self.pool.get('account.asset.asset')
-        asset_ids = []
-        for line in lines:
-            if line.invoice_id.number:
-                #FORWARDPORT UP TO SAAS-6
-                asset_ids += asset_obj.search(cr, SUPERUSER_ID, [('code', '=', line.invoice_id.number), ('company_id', '=', line.company_id.id)], context=context)
-        asset_obj.write(cr, SUPERUSER_ID, asset_ids, {'active': False})
-        for line in lines:
-            if line.asset_category_id:
-                #FORWARDPORT UP TO SAAS-6
-                sign = -1 if line.invoice_id.type in ("in_refund", 'out_refund') else 1
-                vals = {
-                    'name': line.name,
-                    'code': line.invoice_id.number or False,
-                    'category_id': line.asset_category_id.id,
-                    'purchase_value': sign * line.price_subtotal,
-                    'partner_id': line.invoice_id.partner_id.id,
-                    'company_id': line.invoice_id.company_id.id,
-                    'currency_id': line.invoice_id.currency_id.id,
-                    'purchase_date' : line.invoice_id.date_invoice,
-                }
-                changed_vals = asset_obj.onchange_category_id(cr, uid, [], vals['category_id'], context=context)
-                vals.update(changed_vals['value'])
-                asset_id = asset_obj.create(cr, uid, vals, context=context)
-                if line.asset_category_id.open_asset:
-                    asset_obj.validate(cr, uid, [asset_id], context=context)
-        return True
+
+    asset_id = fields2.Many2one('account.asset.asset', 'Asset')
+
+    @api.model
+    def move_line_get_item(self, line):
+        res = super(account_invoice_line, self).move_line_get_item(line)
+        if line.asset_id:
+            res['asset_id'] = line.asset_id.id
+        return res
+
+    @api.onchange('asset_id')
+    def onchange_asset(self):
+        if self.asset_id:
+            self.account_id = self.asset_id.account_asset_id.id or self.asset_id.category_id.account_asset_id.id
+            self.account_analytic_id = self.asset_id.account_analytic_id.id or self.asset_id.category_id.account_analytic_id.id
 
 
 class account_entries_report(osv.osv):

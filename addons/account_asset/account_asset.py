@@ -107,6 +107,7 @@ class account_asset_category(osv.osv):
 
 class account_asset_asset(osv.osv):
     _name = 'account.asset.asset'
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = 'Asset'
 
     def unlink(self, cr, uid, ids, context=None):
@@ -283,7 +284,7 @@ class account_asset_asset(osv.osv):
         'entry_count': fields.function(_entry_count, string='# Asset Entries', type='integer'),
         'name': fields.char('Asset Name', required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'code': fields.char('Reference', size=32, readonly=True, states={'draft':[('readonly',False)]}),
-        'purchase_value': fields.float('Purchase Value', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+        'purchase_value': fields.float('Purchase Value', required=False, readonly=True, states={'draft':[('readonly',False)]}),
         'currency_id': fields.many2one('res.currency','Currency',required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'company_id': fields.many2one('res.company', 'Company', required=True, readonly=True, states={'draft':[('readonly',False)]}),
         'note': fields.text('Note'),

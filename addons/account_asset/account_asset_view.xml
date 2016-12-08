@@ -1,5 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
+
+    <menuitem id="menu_finance_assets" name="Assets" parent="account.menu_finance" sequence="9"/>
+    <menuitem id="menu_finance_config_assets" name="Assets" parent="account.menu_finance_configuration" sequence="25"/>
 
     <!--
         Asset Category
@@ -70,6 +74,15 @@
             </search>
         </field>
     </record>
+
+    <record model="ir.actions.act_window" id="action_account_asset_asset_list_normal">
+        <field name="name">Asset Categories</field>
+        <field name="res_model">account.asset.category</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem parent="menu_finance_config_assets" id="menu_action_account_asset_asset_list_normal" action="action_account_asset_asset_list_normal"/>
 
     <!--
         Asset
@@ -196,13 +209,17 @@
                                 <group>
                                     <field name="valuation"/>
                                     <field name="buy_date"/>
-                                    <field name="parent_id"/>
+
                                 </group>
                                 <group>
                                     <field name="code"/>
-                                    <field name="company_id" widget="selection" groups="base.group_multi_company" on_change="onchange_company_id(company_id)"/>
+                                    <field name="parent_id"/>
                                     <field name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
                                     <field name="currency_id" groups="base.group_multi_currency"/>
+                                    <field name="company_id" widget="selection" groups="base.group_multi_company" on_change="onchange_company_id(company_id)"/>
+                                </group>
+                                <group>
+                                    <field name="user_id"/>
                                     <field name="partner_id"/>
                                 </group>
                             </group>
@@ -211,6 +228,10 @@
                         </page>
                     </notebook>
                 </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>
@@ -218,7 +239,6 @@
     <record model="ir.ui.view" id="view_account_asset_asset_tree">
         <field name="name">account.asset.asset.tree</field>
         <field name="model">account.asset.asset</field>
-        <field name="field_parent">child_ids</field>
         <field name="arch" type="xml">
             <tree string="Assets" colors="blue:(state == 'draft');grey:(state == 'close')">
                 <field name="name"/>
@@ -235,22 +255,24 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="view_account_asset_asset_hierarchy_tree">
-        <field name="name">account.asset.asset.hierarchy</field>
+    <record model="ir.ui.view" id="view_account_asset_asset_calendar">
+        <field name="name">account.asset.asset.calendar</field>
         <field name="model">account.asset.asset</field>
-        <field name="field_parent">child_ids</field>
         <field name="arch" type="xml">
-            <tree string="Assets">
+            <calendar string="Assets Calendar" date_start="purchase_date" color="user_id">
                 <field name="name"/>
-                <field name="code"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_account_asset_asset_graph">
+        <field name="name">account.asset.asset.graph</field>
+        <field name="model">account.asset.asset</field>
+        <field name="arch" type="xml">
+            <graph string="Assets Graaph" type="pie">
                 <field name="category_id"/>
-                <field name="purchase_date"/>
-                <field name="purchase_value"/>
-                <field name="value_residual"/>
-                <field name="currency_id" groups="base.group_multi_currency"/>
-                <field name="company_id" groups="base.group_multi_company"/>
-                <field name="state"/>
-            </tree>
+                <field name="value_residual" operator="+"/>
+            </graph>
         </field>
     </record>
 
@@ -280,6 +302,48 @@
             </search>
         </field>
     </record>
+
+    <record model="ir.actions.act_window" id="action_account_asset_asset_form">
+        <field name="name">Assets</field>
+        <field name="res_model">account.asset.asset</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,calendar,graph</field>
+        <field name="view_id" ref="view_account_asset_asset_tree"/>
+        <field name="search_view_id" ref="view_account_asset_search"/>
+    </record>
+
+    <menuitem parent="menu_finance_assets" id="menu_action_account_asset_asset_form" action="action_account_asset_asset_form"/>
+
+    <record model="ir.ui.view" id="view_account_asset_asset_hierarchy_tree">
+        <field name="name">account.asset.asset.hierarchy</field>
+        <field name="model">account.asset.asset</field>
+        <field name="field_parent">child_ids</field>
+        <field name="arch" type="xml">
+            <tree string="Assets">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="purchase_date"/>
+                <field name="purchase_value"/>
+                <field name="value_residual"/>
+                <field name="currency_id" groups="base.group_multi_currency"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_account_asset_asset_tree">
+        <field name="name">Asset Hierarchy</field>
+        <field name="res_model">account.asset.asset</field>
+        <field name="view_type">tree</field>
+        <field name="domain">[('parent_id','=',False)]</field>
+        <field name="view_id" ref="view_account_asset_asset_hierarchy_tree"/>
+    </record>
+
+    <menuitem parent="menu_finance_assets" id="menu_action_account_asset_asset_tree"
+        sequence="100"
+        action="action_account_asset_asset_tree"/>
 
     <!--
         Asset Depreciation Line
@@ -375,7 +439,7 @@
     </record>
 
     <menuitem parent="menu_finance_assets" id="menu_action_account_asset_depreciation_form"
-              action="action_account_asset_depreciation_form" sequence="90"/>
+              action="action_account_asset_depreciation_form" sequence="200"/>
 
     <!--
         Asset History
@@ -390,7 +454,6 @@
                     <group>
                         <field name="name"/>
                         <field name="date"/>
-                        <field name="user_id"/>
                     </group>
                     <group>
                         <field name="method_time"/>
@@ -420,77 +483,6 @@
             </tree>
         </field>
     </record>
-
-    <record model="ir.actions.act_window" id="action_account_asset_asset_tree">
-        <field name="name">Asset Hierarchy</field>
-        <field name="res_model">account.asset.asset</field>
-        <field name="view_type">tree</field>
-        <field name="domain">[('parent_id','=',False)]</field>
-        <field name="view_id" ref="view_account_asset_asset_hierarchy_tree"/>
-    </record>
-
-    <record id="view_account_move_line_form_inherit" model="ir.ui.view">
-        <field name="name">Journal Items (form)</field>
-        <field name="model">account.move.line</field>
-        <field name="inherit_id" ref="account.view_move_line_form"/>
-        <field name="arch" type="xml">
-            <field name="statement_id" position="after">
-                <field name="asset_id"/>
-            </field>
-        </field>
-    </record>
-
-    <record model='ir.ui.view' id='view_move_form'>
-			<field name='name'>account.move.form.inherit.asset</field>
-			<field name='model'>account.move</field>
-			<field name='inherit_id' ref='account.view_move_form'/>
-			<field name='arch' type='xml'>
-                <xpath expr="//group[@string='Accounting Documents']" position="inside">
-                    <field name="asset_id"/>
-                </xpath>
-                <xpath expr="//tree/field[@name='analytic_account_id']" position="after">
-                    <field name="asset_id"/>
-                </xpath>
-			</field>
-		</record>
-
-    <record id="view_account_move_line_filter_inherit" model="ir.ui.view">
-        <field name="name">Journal Items (Search)</field>
-        <field name="model">account.move.line</field>
-        <field name="inherit_id" ref="account.view_account_move_line_filter"/>
-        <field name="arch" type="xml">
-            <field name="account_id" position="after">
-                <field name="asset_id"/>
-            </field>
-        </field>
-    </record>
-
-    <menuitem id="menu_finance_assets" name="Assets" parent="account.menu_finance" sequence="9"/>
-    <menuitem parent="menu_finance_assets" id="menu_action_account_asset_asset_tree"
-        sequence="100"
-        action="action_account_asset_asset_tree"/>
-
-    <record model="ir.actions.act_window" id="action_account_asset_asset_form">
-        <field name="name">Assets</field>
-        <field name="res_model">account.asset.asset</field>
-        <field name="view_type">form</field>
-        <field name="view_id" ref="view_account_asset_asset_tree"/>
-        <field name="search_view_id" ref="view_account_asset_search"/>
-    </record>
-
-    <menuitem parent="menu_finance_assets" id="menu_action_account_asset_asset_form" action="action_account_asset_asset_form"/>
-
-    <act_window id="act_entries_open" name="Entries" res_model="account.move.line" src_model="account.asset.asset" context="{'search_default_asset_id': [active_id], 'default_asset_id': active_id}"/>
-
-    <menuitem id="menu_finance_config_assets" name="Assets" parent="account.menu_finance_configuration" sequence="25"/>
-    <record model="ir.actions.act_window" id="action_account_asset_asset_list_normal">
-        <field name="name">Asset Categories</field>
-        <field name="res_model">account.asset.category</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
-    <menuitem parent="menu_finance_config_assets" id="menu_action_account_asset_asset_list_normal" action="action_account_asset_asset_list_normal"/>
 
 </data>
 </openerp>

@@ -48,6 +48,7 @@ of the depreciation lines.
         'wizard/account_asset_change_duration_view.xml',
         'wizard/wizard_asset_compute_view.xml',
         'account_asset_view.xml',
+        'account_view.xml',
         'account_asset_invoice_view.xml',
         'account_asset_data.xml',
         'report/account_asset_report_view.xml',
