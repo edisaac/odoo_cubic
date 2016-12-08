@@ -300,6 +300,7 @@ class account_asset_asset(osv.osv):
                                        "You can manually close an asset when the depreciation is over. If the last line of depreciation is posted, the asset automatically goes in that status."),
         'active': fields.boolean('Active'),
         'partner_id': fields.many2one('res.partner', 'Partner', readonly=True, states={'draft':[('readonly',False)]}),
+        'user_id': fields.many2one('res.users', 'Responsible', readonly=True, states={'draft':[('readonly',False)]}),
         'valuation': fields.selection([('auto', 'Automatic'), ('manual', 'Manual')], 'Valuation Method',
                                    required=True, readonly=True, states={'draft': [('readonly', False)]}, default='auto'),
         'method': fields.selection([('linear','Linear'),

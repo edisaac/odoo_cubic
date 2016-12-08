@@ -83,6 +83,7 @@ class account_entries_report(osv.osv):
         'asset_id': fields.many2one('account.asset.asset', 'Asset', readonly=True),
         'parent_asset_id': fields.many2one('account.asset.asset', 'Asset Parent', readonly=True),
         'asset_category_id': fields.many2one('account.asset.category', 'Asset Category', readonly=True),
+        'asset_parent_category_id': fields.many2one('account.asset.category', 'Asset Parent Category', readonly=True),
     }
 
     def _get_select(self):
@@ -90,13 +91,15 @@ class account_entries_report(osv.osv):
         return """%s,
          l.asset_id as asset_id,
          aasset.parent_id as parent_asset_id,
-         aasset.category_id as asset_category_id
+         aasset.category_id as asset_category_id,
+         assetcategory.parent_id as asset_parent_category_id
         """%(res)
 
     def _get_from(self):
         res = super(account_entries_report, self)._get_from()
         return """%s
          left join account_asset_asset aasset on (l.asset_id = aasset.id)
+         left join account_asset_category assetcategory on (aasset.category_id = assetcategory.id)
         """ % (res)
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

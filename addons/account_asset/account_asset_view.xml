@@ -83,7 +83,7 @@
                 <header>
                     <button name="validate" states="draft" string="Confirm Asset" type="object" class="oe_highlight"/>
                     <button name="set_to_close" states="open" string="Set to Close" type="object" class="oe_highlight"/>
-                    <button name="set_to_draft" states="open" string="Set to Draft" type="object" />
+                    <button name="set_to_draft" states="open,close" string="Set to Draft" type="object" />
                     <field name="state" widget="statusbar" statusbar_visible="draft,open"/>
                 </header>
                 <sheet>
@@ -101,11 +101,9 @@
                     <group>
                         <group>
                             <field name="category_id" on_change="onchange_category_id(category_id)"/>
-
                         </group>
                         <group>
                             <field name="purchase_date"/>
-
                         </group>
                     </group>
                     <notebook colspan="4">
@@ -180,7 +178,7 @@
                         <page string="History">
                             <field name="history_ids" readonly="0"/>
                         </page>
-                        <page string="Accounting">
+                        <page string="Accounting" attrs="{'invisible':[('valuation','=','manual')]}">
                             <group name="accounting_group">
                                 <group>
                                     <field name="account_asset_id"/>
@@ -190,9 +188,6 @@
                                 </group>
                                 <group>
                                     <field name="journal_id"/>
-                                    <field name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
-                                    <field name="currency_id" groups="base.group_multi_currency"/>
-                                    <field name="partner_id"/>
                                 </group>
                             </group>
                         </page>
@@ -206,6 +201,9 @@
                                 <group>
                                     <field name="code"/>
                                     <field name="company_id" widget="selection" groups="base.group_multi_company" on_change="onchange_company_id(company_id)"/>
+                                    <field name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
+                                    <field name="currency_id" groups="base.group_multi_currency"/>
+                                    <field name="partner_id"/>
                                 </group>
                             </group>
                             <separator string="Notes"/>
@@ -226,6 +224,7 @@
                 <field name="name"/>
                 <field name="category_id"/>
                 <field name="purchase_date"/>
+                <field name="user_id"/>
                 <field name="partner_id"/>
                 <field name="purchase_value"/>
                 <field name="value_residual"/>
@@ -262,10 +261,22 @@
             <search string="Account Asset">
                 <field name="name" string="Asset"/>
                 <field name="purchase_date"/>
-                <filter icon="terp-check" string="Current" domain="[('state','in', ('draft','open'))]" help="Assets in draft and open states"/>
-                <filter icon="terp-dialog-close" string="Closed" domain="[('state','=', 'close')]" help="Assets in closed state"/>
                 <field name="category_id"/>
                 <field name="partner_id" filter_domain="[('partner_id','child_of',self)]"/>
+                <filter icon="terp-check" string="Current" domain="[('state','in', ('draft','open'))]" help="Assets in draft and open states"/>
+                <filter icon="terp-dialog-close" string="Closed" domain="[('state','=', 'close')]" help="Assets in closed state"/>
+                <filter string="My Assets" domain="[('user_id','=', uid)]"/>
+                <separator string="Group By"/>
+                <filter name="analytic_group" string="Analytic" context="{'group_by':'account_analytic_id'}"/>
+                <filter name="category_group" string="Category" context="{'group_by':'category_id'}"/>
+                <filter name="parent_group" string="Parent" context="{'group_by':'parent_id'}"/>
+                <filter name="user_group" string="Responsible" context="{'group_by':'user_id'}"/>
+                <filter name="partner_group" string="Partner" context="{'group_by':'partner_id'}"/>
+                <filter name="state_group" string="State" context="{'group_by':'state'}"/>
+                <filter name="purchase_date_group" string="Purchase Date" context="{'group_by':'purchase_date'}"/>
+                <filter name="method_group" string="Method" context="{'group_by':'method'}"/>
+                <filter name="method_time_group" string="Method Time" context="{'group_by':'method_time'}"/>
+                <filter name="valuation_group" string="Valuation" context="{'group_by':'valuation'}"/>
             </search>
         </field>
     </record>
@@ -293,6 +304,78 @@
             </tree>
         </field>
     </record>
+
+    <record model="ir.ui.view" id="view_account_asset_depreciation_line_graph">
+        <field name="name">account.asset.depreciation.line.graph</field>
+        <field name="model">account.asset.depreciation.line</field>
+        <field name="arch" type="xml">
+            <graph string="Depreciation Lines" type="bar">
+                <field name="depreciation_date"/>
+                <field name="amount" operator="+"/>
+            </graph>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_account_asset_depreciation_line_form">
+        <field name="name">account.asset.depreciation.line.form</field>
+        <field name="model">account.asset.depreciation.line</field>
+        <field name="arch" type="xml">
+            <form string="Depreciation Lines">
+                <header>
+                    <button name="action_draft" states="cancel" string="Draft" type="object"/>
+                    <button name="action_done" states="draft" string="Done" type="object" class="oe_highlight"/>
+                    <button name="action_cancel" states="draft,done" string="Cancel" type="object"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <group name="depreciation_line_details">
+                        <group>
+                            <field name="asset_id"/>
+                            <field name="period_id"/>
+                            <field name="amount"/>
+                        </group>
+                        <group>
+                            <field name="depreciation_date"/>
+                            <field name="depreciated_value"/>
+                            <field name="remaining_value"/>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                            <field name="move_id" attrs="{'invisible':[('state','=','draft')]}"/>
+                            <field name="parent_state" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_account_asset_depreciation_line_search" model="ir.ui.view">
+        <field name="name">account.asset.depreciation.line.search</field>
+        <field name="model">account.asset.depreciation.line</field>
+        <field name="arch" type="xml">
+            <search string="Asset Depreciation Line">
+                <field name="name" string="Depreciation Line"/>
+                <filter icon="terp-check" string="Current" domain="[('state','in', ('draft','done'))]" help="Depreciation line in draft and done states"/>
+                <filter icon="check" string="Draft" domain="[('state','=', 'draft')]" help="Depreciation line in draft state"/>
+                <filter icon="terp-dialog-close" string="Cancel" domain="[('state','=', 'cancel')]" help="Depreciation line in cancel state"/>
+                <separator string="Group By"/>
+                <filter name="period_group" string="Period" context="{'group_by':'period_id'}"/>
+                <filter name="asset_group" string="Asset" context="{'group_by':'asset_id'}"/>
+                <filter name="state_group" string="State" context="{'group_by':'state'}"/>
+                <filter name="date_group" string="Date" context="{'group_by':'depreciation_date'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_account_asset_depreciation_form">
+        <field name="name">Depreciation Lines</field>
+        <field name="res_model">account.asset.depreciation.line</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,graph</field>
+    </record>
+
+    <menuitem parent="menu_finance_assets" id="menu_action_account_asset_depreciation_form"
+              action="action_account_asset_depreciation_form" sequence="90"/>
 
     <!--
         Asset History
