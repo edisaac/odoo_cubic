@@ -218,7 +218,7 @@ class account_account_type(osv.osv):
         res = [('none','/')]
         reports = self._get_financial_report_ref(cr, uid, context=context)
         for k in reports:
-            res += [(k,reports[k].name)]
+            res += [(k,"%s%s"%(reports[k].sequence and "[%s] "%reports[k].sequence or "", reports[k].name))]
         return res
 
     _columns = {
