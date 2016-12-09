@@ -431,7 +431,7 @@ class account_asset_asset(osv.osv):
         return asset_id
     
     def open_entries(self, cr, uid, ids, context=None):
-        context = dict(context or {}, search_default_asset_id=ids, default_asset_id=ids)
+        context = dict(search_default_asset_id=ids, default_asset_id=ids)
         return {
             'name': _('Journal Items'),
             'view_type': 'form',

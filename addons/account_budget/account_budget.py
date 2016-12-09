@@ -473,7 +473,7 @@ class account_entries_report(osv.osv):
     _inherit = "account.entries.report"
 
     _columns = {
-        'budget_post_id': fields.many2one('account.budget.post', 'Budget Position', readonly=True),
+        'budget_post_id': fields.many2one('account.budget.post', 'Position Budget', readonly=True),
     }
 
     def _get_select(self):
@@ -481,6 +481,3 @@ class account_entries_report(osv.osv):
         return """%s,
          l.budget_post_id as budget_post_id
         """%(res)
-
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -193,33 +193,42 @@
             <field name="model">stock.production.lot</field>
             <field name="arch" type="xml">
                 <form string="Serial Number">
-                    <div class="oe_button_box oe_right">
-                        <button name="action_traceability" icon="fa-arrow-up" class="oe_stat_button" string="Traceability" type="object" attrs="{'invisible': [('quant_ids','=',[])]}"/>
-                    </div>
-                    <div class="oe_title">
-                        <label for="name" class="oe_edit_only"/>
-                        <h1>
-                            <field name="name"/>
-                        </h1>
-                    </div>
-                    <group name="main_group">
-                        <group>
-                            <field name="product_id"/>
-                            <field name="ref"/>
+                    <header>
+
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box oe_right">
+                            <button name="action_traceability" icon="fa-arrow-up" class="oe_stat_button" string="Traceability" type="object" attrs="{'invisible': [('quant_ids','=',[])]}"/>
+                        </div>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        <group name="main_group">
+                            <group>
+                                <field name="product_id"/>
+                                <field name="ref"/>
+                            </group>
                         </group>
-                    </group>
-                    <notebook>
-                        <page string="Products">
-                            <field name="quant_ids">
-                                <tree string="Stock Moves">
-                                    <field name="name"/>
-                                    <field name="product_id"/>
-                                    <field name="qty" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)"/>
-                                    <field name="location_id" groups="stock.group_locations"/>
-                                </tree>
-                             </field>
-                        </page>
-                    </notebook>
+                        <notebook>
+                            <page string="Products">
+                                <field name="quant_ids">
+                                    <tree string="Stock Moves">
+                                        <field name="name"/>
+                                        <field name="product_id"/>
+                                        <field name="qty" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)"/>
+                                        <field name="location_id" groups="stock.group_locations"/>
+                                    </tree>
+                                 </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
                 </form>
             </field>
         </record>

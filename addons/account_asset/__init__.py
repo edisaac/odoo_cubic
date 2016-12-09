@@ -20,7 +20,7 @@
 ##############################################################################
 
 import account_asset
-import account_asset_invoice
+import account_invoice
 import wizard
 import report
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

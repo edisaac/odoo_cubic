@@ -1584,7 +1584,7 @@ class stock_picking(osv.osv):
 
 class stock_production_lot(osv.osv):
     _name = 'stock.production.lot'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = 'Lot/Serial'
     _columns = {
         'name': fields.char('Serial Number', required=True, help="Unique Serial Number"),
