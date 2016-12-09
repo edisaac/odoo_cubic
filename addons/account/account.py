@@ -181,7 +181,7 @@ class account_account_type(osv.osv):
             except ValueError:
                 pass
         for financial_report in obj_financial_report.browse(cr, uid, obj_financial_report.search(cr, uid, [('type','=','account_type'),
-                                                                         ('id','not in',financial_repor_ids)], context=context), context=context):
+                                                                         ('id','not in',financial_repor_ids)], order="sequence asc", context=context), context=context):
             financial_report_ref[financial_report.id] = financial_report
         return financial_report_ref
 
