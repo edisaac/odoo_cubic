@@ -291,14 +291,11 @@
                 <separator string="Group By"/>
                 <filter name="analytic_group" string="Analytic" context="{'group_by':'account_analytic_id'}"/>
                 <filter name="category_group" string="Category" context="{'group_by':'category_id'}"/>
-                <filter name="parent_group" string="Parent" context="{'group_by':'parent_id'}"/>
+                <filter name="parent_group" string="Parent Asset" context="{'group_by':'parent_id'}"/>
                 <filter name="user_group" string="Responsible" context="{'group_by':'user_id'}"/>
                 <filter name="partner_group" string="Partner" context="{'group_by':'partner_id'}"/>
                 <filter name="state_group" string="State" context="{'group_by':'state'}"/>
                 <filter name="purchase_date_group" string="Purchase Date" context="{'group_by':'purchase_date'}"/>
-                <filter name="method_group" string="Method" context="{'group_by':'method'}"/>
-                <filter name="method_time_group" string="Method Time" context="{'group_by':'method_time'}"/>
-                <filter name="valuation_group" string="Valuation" context="{'group_by':'valuation'}"/>
             </search>
         </field>
     </record>

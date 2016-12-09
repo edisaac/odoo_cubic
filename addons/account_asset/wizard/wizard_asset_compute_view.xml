@@ -6,7 +6,7 @@
             <field name="model">asset.depreciation.confirmation.wizard</field>
             <field name="arch" type="xml">
                 <form string="Compute Asset">
-                    <label string="This wizard does not process assets with activity method"/>
+                    <label string="This wizard only process assets in open state and computation method different from activity"/>
                     <group>
                         <field name="period_id"/>
                     </group>
