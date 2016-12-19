@@ -59,13 +59,13 @@ def check_ean(eancode):
     """returns True if eancode is a valid ean13 string, or null"""
     if not eancode:
         return True
-    if len(eancode) != 13:
-        return False
+    if len(eancode) == 13:
+        return ean_checksum(eancode) == int(eancode[-1])
     try:
         int(eancode)
     except:
         return False
-    return ean_checksum(eancode) == int(eancode[-1])
+    return True
 
 def sanitize_ean13(ean13):
     """Creates and returns a valid ean13 from an invalid one"""
