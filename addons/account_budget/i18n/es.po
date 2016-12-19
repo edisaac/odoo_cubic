@@ -104,12 +104,12 @@ msgstr "Cuentas"
 #: selection:account.budget.post,value_type:0
 #: view:crossovered.budget.lines:account_budget.view_crossovered_budget_line_search
 msgid "Amount"
-msgstr "Cantidad"
+msgstr "Monto"
 
 #. module: account_budget
 #: view:crossovered.budget.lines:account_budget.view_crossovered_budget_line_search
 msgid "Amount Values"
-msgstr "Presupuesto"
+msgstr "Valores de Monto"
 
 #. module: account_budget
 #: view:website:account_budget.report_analyticaccountbudget

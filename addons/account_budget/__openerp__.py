@@ -52,17 +52,17 @@ Three reports are available:
     'data': [
         'security/ir.model.access.csv',
         'security/account_budget_security.xml',
-        'account_budget_view.xml',
-        'account_budget_report.xml',
+        'view/account_budget_view.xml',
+        'view/account_view.xml',
         'account_budget_workflow.xml',
         'wizard/account_budget_analytic_view.xml',
         'wizard/account_budget_report_view.xml',
         'wizard/account_budget_crossovered_summary_report_view.xml',
         'wizard/account_budget_crossovered_report_view.xml',
 
-        'views/report_analyticaccountbudget.xml',
-        'views/report_budget.xml',
-        'views/report_crossoveredbudget.xml',
+        'report/analytic_account_budget_report.xml',
+        'report/budget_report.xml',
+        'report/crossovered_budget_report.xml',
     ],
     'demo': ['account_budget_demo.xml'],
     'test': [

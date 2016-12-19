@@ -19,9 +19,32 @@
 #
 ##############################################################################
 
-import model
-import report
-import wizard
+from datetime import date, datetime
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from openerp.osv import fields, osv, expression
+from openerp.tools import ustr, DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools.translate import _
 
+import openerp.addons.decimal_precision as dp
+
+
+class account_account(osv.osv):
+    _inherit = "account.account"
+
+    _columns = {
+        'budget_post_ids': fields.many2many('account.budget.post', 'account_budget_rel', 'account_id', 'budget_id', 'Budget Positions'),
+    }
+
+class account_analytic_account(osv.osv):
+    _inherit = "account.analytic.account"
+
+    _columns = {
+        'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'analytic_account_id', 'Budget Lines'),
+    }
+
+class account_move_line(osv.osv):
+    _inherit = "account.move.line"
+
+    _columns = {
+        'budget_post_id': fields.many2one('account.budget.post', 'Budget Position'),
+    }

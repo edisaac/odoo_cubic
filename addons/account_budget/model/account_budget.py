@@ -58,9 +58,13 @@ class account_budget_post(osv.osv):
     _columns = {
         'code': fields.char('Code', size=64),
         'name': fields.char('Name', required=True),
+        'type': fields.selection([('normal', 'Normal'),
+                                  ('view', 'View')], 'Type', required=True),
         'type_post_id': fields.many2one('account.budget.post.type', 'Position Type', required=True),
         'value_type': fields.selection([('amount', 'Amount'),
-                                    ('quantity', 'Quantity')], 'Value Type', required=True),
+                                        ('quantity', 'Quantity')], 'Value Type', required=True),
+
+
         'account_ids': fields.many2many('account.account', 'account_budget_rel', 'budget_id', 'account_id', 'Accounts'),
         'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'general_budget_id', 'Budget Lines'),
         'company_id': fields.many2one('res.company', 'Company', required=True),
@@ -445,39 +449,3 @@ class crossovered_budget_lines(osv.osv):
 
     _constraints = [(_check_overload, "Overload of control budgets in lines for budgetary position  and analytic account with same dates.",
                      ['main_budget_type', 'analytic_account_id', 'general_budget_id', 'date_from', 'date_to'])]
-
-
-class account_account(osv.osv):
-    _inherit = "account.account"
-
-    _columns = {
-        'budget_post_ids': fields.many2many('account.budget.post', 'account_budget_rel', 'account_id', 'budget_id', 'Budget Positions'),
-    }
-
-class account_analytic_account(osv.osv):
-    _inherit = "account.analytic.account"
-
-    _columns = {
-        'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'analytic_account_id', 'Budget Lines'),
-    }
-
-class account_move_line(osv.osv):
-    _inherit = "account.move.line"
-
-    _columns = {
-        'budget_post_id': fields.many2one('account.budget.post', 'Budget Position'),
-    }
-
-class account_entries_report(osv.osv):
-    _name = "account.entries.report"
-    _inherit = "account.entries.report"
-
-    _columns = {
-        'budget_post_id': fields.many2one('account.budget.post', 'Position Budget', readonly=True),
-    }
-
-    def _get_select(self):
-        res = super(account_entries_report, self)._get_select()
-        return """%s,
-         l.budget_post_id as budget_post_id
-        """%(res)

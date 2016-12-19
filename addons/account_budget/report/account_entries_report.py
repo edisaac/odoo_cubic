@@ -19,9 +19,25 @@
 #
 ##############################################################################
 
-import model
-import report
-import wizard
+from datetime import date, datetime
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from openerp.osv import fields, osv, expression
+from openerp.tools import ustr, DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools.translate import _
 
+import openerp.addons.decimal_precision as dp
+
+
+class account_entries_report(osv.osv):
+    _name = "account.entries.report"
+    _inherit = "account.entries.report"
+
+    _columns = {
+        'budget_post_id': fields.many2one('account.budget.post', 'Position Budget', readonly=True),
+    }
+
+    def _get_select(self):
+        res = super(account_entries_report, self)._get_select()
+        return """%s,
+         l.budget_post_id as budget_post_id
+        """%(res)
