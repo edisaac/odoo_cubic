@@ -333,11 +333,11 @@
                         <group>
                             <field name="date_invoice" on_change="onchange_payment_term_date_invoice(payment_term, date_invoice)" />
                             <field name="internal_number" invisible="1"/>
-                            <field name="journal_id" groups="account.group_account_user"
+                            <field name="journal_id" groups="account.group_account_invoice"
                                 on_change="onchange_journal_id(journal_id)" options="{'no_create': True}"
                                 attrs="{'readonly':[('internal_number','!=',False)]}"/>
                             <field domain="[('company_id', '=', company_id),('type','=', 'receivable')]"
-                                name="account_id" groups="account.group_account_user"
+                                name="account_id" groups="account.group_account_invoice"
                                 context="{'periods_special': False, 'all_fiscalyear': True}"/>
 
                             <label for="currency_id" groups="base.group_multi_currency"/>

@@ -1895,7 +1895,7 @@ class account_tax_code(osv.osv):
 def get_precision_tax():
     def change_digit_tax(cr):
         res = openerp.registry(cr.dbname)['decimal.precision'].precision_get(cr, SUPERUSER_ID, 'Account')
-        return (16, res+3)
+        return (16, res+6)
     return change_digit_tax
 
 class account_tax(osv.osv):
