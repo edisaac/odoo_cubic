@@ -8,38 +8,40 @@
         <!--
     Budgets
     -->
-        <record id="view_budget_post_type_tree" model="ir.ui.view">
-            <field name="name">account.budget.post.type.tree</field>
-            <field name="model">account.budget.post.type</field>
+        <record id="view_budget_struct_tree" model="ir.ui.view">
+            <field name="name">account.budget.struct.tree</field>
+            <field name="model">account.budget.struct</field>
             <field name="arch" type="xml">
-                <tree string="Budgetary Position Type">
-                    <field name="name"/>
+                <tree string="Budgetary Struct" colors="blue:type=='view'">
                     <field name="code"/>
+                    <field name="name"/>
+                    <field name="parent_id"/>
                 </tree>
             </field>
         </record>
 
-        <record model="ir.ui.view" id="view_budget_post_type_form">
-            <field name="name">account.budget.post.type.form</field>
-            <field name="model">account.budget.post.type</field>
+        <record model="ir.ui.view" id="view_budget_struct_form">
+            <field name="name">account.budget.struct.form</field>
+            <field name="model">account.budget.struct</field>
             <field name="arch" type="xml">
-                <form string="Budgetary Position Type">
+                <form string="Budgetary Struct">
                     <group col="4">
                         <field name="name"/>
                         <field name="code"/>
-                        <field name="financial_report_id"/>
+                        <field name="type"/>
+                        <field name="parent_id"/>
                     </group>
-                    <separator string="Budgetary Positions"/>
-                    <field name="post_ids"/>
+                    <separator string="Budgetary Lines"/>
+                    <field name="line_ids"/>
                 </form>
             </field>
         </record>
 
-        <record id="view_budget_post_type_search" model="ir.ui.view">
-            <field name="name">account.budget.post.type.search</field>
-            <field name="model">account.budget.post.type</field>
+        <record id="view_budget_struct_search" model="ir.ui.view">
+            <field name="name">account.budget.struct.search</field>
+            <field name="model">account.budget.struct</field>
             <field name="arch" type="xml">
-                <search string="Budgetary Position Type">
+                <search string="Budgetary Struct">
                     <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Position Type"/>
                     <group expand="0" string="Group By">
                         <filter string="Financial Report" context="{'group_by':'financial_report_id'}"/>
@@ -48,21 +50,20 @@
             </field>
         </record>
 
-        <record id="open_budget_post_type" model="ir.actions.act_window">
+        <record id="open_budget_struct" model="ir.actions.act_window">
             <field name="name">Positions Type</field>
-            <field name="res_model">account.budget.post.type</field>
+            <field name="res_model">account.budget.struct</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem name="Position Type" action="open_budget_post_type" id="menu_budget_post_type" parent="next_id_pos" sequence="10"/>
+        <menuitem name="Budget Struct" action="open_budget_struct" id="menu_budget_struct" parent="next_id_pos" sequence="10"/>
 
         <record id="view_budget_post_tree" model="ir.ui.view">
             <field name="name">account.budget.post.tree</field>
             <field name="model">account.budget.post</field>
             <field name="arch" type="xml">
                 <tree string="Budgetary Position">
-                    <field name="type_post_id"/>
                     <field name="name"/>
                     <field name="code"/>
                     <field name="company_id" widget="selection" groups="base.group_multi_company"/>
@@ -78,8 +79,6 @@
                     <group col="4">
                         <field name="name"/>
                         <field name="code"/>
-                        <field name="type_post_id"/>
-                        <field name="value_type"/>
                         <field name="company_id"  groups="base.group_multi_company" widget="selection"/>
                     </group>
                     <notebook>
@@ -126,10 +125,6 @@
                 <search string="Budgetary Position">
                     <field name="name" filter_domain="['|', ('name','ilike',self), ('code','ilike',self)]" string="Budgetary Position"/>
                     <field name="company_id" groups="base.group_multi_company"/>
-                    <group expand="0" string="Group By">
-                        <filter string="Position Type" context="{'group_by':'type_post_id'}"/>
-                        <filter string="Value Type" context="{'group_by':'value_type'}"/>
-                    </group>
                 </search>
             </field>
         </record>
@@ -376,6 +371,7 @@
                     <field name="crossovered_budget_id" invisible="1"/>
                     <field name="main_budget_id" invisible="1"/>
                     <field name="main_budget_type" invisible="1"/>
+                    <field name="struct_budget_id"/>
                     <field name="general_budget_id"/>
                     <field name="name"/>
                     <field name="date_from"/>
@@ -386,7 +382,7 @@
                     <field name="theoritical_amount"/>
                     <field name="percentage"/>
                     <field name="available_amount"/>
-                    <field name="type_budget_id" invisible="1"/>
+
                 </tree>
             </field>
         </record>
@@ -401,7 +397,7 @@
                             <field name="crossovered_budget_id"/>
                             <field name="analytic_account_id"/>
                             <field name="general_budget_id"/>
-                            <field name="type_budget_id"/>
+                            <field name="struct_budget_id"/>
                             <field name="name"/>
                             <field name="date_from"/>
                             <field name="date_to"/>
@@ -440,8 +436,8 @@
                     <filter string="Control" icon="terp-document-new" domain="[('main_budget_type','=','control')]" help="Control Budgets"/>
                    <filter string="View" icon="terp-document-new" domain="[('main_budget_type','=','view')]" help="View Budgets"/>
                    <separator/>
-                    <filter string="Amount" icon="terp-document-new" domain="[('post_value_type','=','amount')]" help="Amount Values"/>
-                   <filter string="Quantity" icon="terp-document-new" domain="[('post_value_type','=','quantity')]" help="Quantities Values"/>
+                    <filter string="Amount" icon="terp-document-new" domain="[('value_type','=','amount')]" help="Amount Values"/>
+                   <filter string="Quantity" icon="terp-document-new" domain="[('value_type','=','quantity')]" help="Quantities Values"/>
                    <separator/>
                     <filter name="draft" string="Draft" domain="[('state','=','draft')]" help="Draft"/>
                     <filter name="confirm" string="Confirm" domain="[('state','=','confirm')]" help="Confirm"/>
@@ -451,16 +447,16 @@
                     <field name="crossovered_budget_id"/>
                     <field name="analytic_account_id"/>
                     <field name="general_budget_id"/>
-                    <field name="type_budget_id"/>
+                    <field name="struct_budget_id"/>
                     <group expand="0" string="Group By">
                         <filter string="Main Budget" context="{'group_by':'main_budget_id'}"/>
                         <filter string="Budget" context="{'group_by':'crossovered_budget_id'}"/>
                         <filter string="Analytic Account" context="{'group_by':'analytic_account_id'}"/>
-                        <filter string="Position Type" context="{'group_by':'type_budget_id'}"/>
+                        <filter string="Struct Budget" context="{'group_by':'struct_budget_id'}"/>
                         <filter string="Position Budget" context="{'group_by':'general_budget_id'}"/>
                         <separator/>
                         <filter string="State" context="{'group_by':'state'}"/>
-                        <filter string="Value Type" context="{'group_by':'post_value_type'}"/>
+                        <filter string="Value Type" context="{'group_by':'value_type'}"/>
                         <separator/>
                         <filter string="Start Month" context="{'group_by':'date_from'}"/>
                         <filter string="Month Paid" context="{'group_by':'paid_date'}"/>

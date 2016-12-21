@@ -40,16 +40,19 @@ def strToDatetime(strdate):
 # ---------------------------------------------------------
 # Budgets
 # ---------------------------------------------------------
-class account_budget_post_type(osv.osv):
-    _name = "account.budget.post.type"
-    _description = "Kind of Budgetary Position"
+class account_budget_struct(osv.osv):
+    _name = "account.budget.struct"
+    _description = "Budgetary Struct"
     _columns = {
         'code': fields.char('Code', size=64),
         'name': fields.char('Name', required=True),
-        'post_ids': fields.one2many('account.budget.post','type_post_id', string="Budgetary Position"),
-        'financial_report_id': fields.many2one('account.financial.report', string="Financial Report"),
+        'parent_id': fields.many2one('account.budget.struct', string="Parent", domain=[('type','=','view')]),
+        'type': fields.selection([('normal','Normal'),
+                                  ('view','View')], string="Type", required=True),
+        'line_ids': fields.one2many('crossovered.budget.lines','struct_budget_id', string="Budgetary Lines"),
     }
     _order = 'code,name'
+    _sql_constraints = [('code_unique','unique(code)','The code must be unique!')]
 
 
 class account_budget_post(osv.osv):
@@ -58,20 +61,12 @@ class account_budget_post(osv.osv):
     _columns = {
         'code': fields.char('Code', size=64),
         'name': fields.char('Name', required=True),
-        'type': fields.selection([('normal', 'Normal'),
-                                  ('view', 'View')], 'Type', required=True),
-        'type_post_id': fields.many2one('account.budget.post.type', 'Position Type', required=True),
-        'value_type': fields.selection([('amount', 'Amount'),
-                                        ('quantity', 'Quantity')], 'Value Type', required=True),
-
-
         'account_ids': fields.many2many('account.account', 'account_budget_rel', 'budget_id', 'account_id', 'Accounts'),
         'crossovered_budget_line': fields.one2many('crossovered.budget.lines', 'general_budget_id', 'Budget Lines'),
         'company_id': fields.many2one('res.company', 'Company', required=True),
     }
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'account.budget.post', context=c),
-        'value_type': 'amount',
 
     }
     _order = "code,name"
@@ -376,19 +371,10 @@ class crossovered_budget_lines(osv.osv):
             }),
         'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account'),
         'general_budget_id': fields.many2one('account.budget.post', 'Budgetary Position',required=True),
-        'type_budget_id': fields.related('general_budget_id','type_post_id', string="Budget Type", type="many2one",
-                                         relation="account.budget.post.type", readonly= True, store={
-                'account.budget.post': (lambda  s,cr,u,i,c: [e for j in [[l.id for l in b.crossovered_budget_line] for b in s.pool['account.budget.post'].browse(cr,u,i)] for e in j], ['type_post_id'], 10),
-                'crossovered.budget.lines': (lambda s, cr, u, i, c: i, ['general_budget_id'], 10)
-            }),
-        'post_value_type': fields.related('general_budget_id', 'value_type', string="Position Value Type", type="char",
-                                         readonly=True, store={
-                'account.budget.post': (lambda s, cr, u, i, c: [e for j in
-                                                                [[l.id for l in b.crossovered_budget_line] for b in
-                                                                 s.pool['account.budget.post'].browse(cr, u, i)] for e
-                                                                in j], ['value_type'], 10),
-                'crossovered.budget.lines': (lambda s, cr, u, i, c: i, ['general_budget_id'], 10)
-            }),
+        'struct_budget_id': fields.many2one('account.budget.struct', 'Budgetary Struct'),
+        'value_type': fields.selection([('amount','Amount'),
+                                        ('quantity','Quantity'),
+                                        ('code','Python Code')], string="Value Type"),
         'date_from': fields.date('Start Date', required=True),
         'date_to': fields.date('End Date', required=True),
         'paid_date': fields.date('Paid Date'),
@@ -400,7 +386,7 @@ class crossovered_budget_lines(osv.osv):
                                                                               'general_account_id', 'amount',
                                                                               'unit_amount'], 10),
                                                    'account.move.line': (_get_line_from_move,
-                                                                         ['budget_post_id', 'date', 'account_id',
+                                                                         ['budget_struct_id', 'date', 'account_id',
                                                                           'debit', 'credit', 'quantity'], 10),
                                                    'crossovered.budget.lines': (lambda s,cr,u,i,c: i,['crossovered_budget_id',
                                                                                                       'analytic_account_id',

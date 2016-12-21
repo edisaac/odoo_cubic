@@ -46,5 +46,5 @@ class account_move_line(osv.osv):
     _inherit = "account.move.line"
 
     _columns = {
-        'budget_post_id': fields.many2one('account.budget.post', 'Budget Position'),
+        'budget_struct_id': fields.many2one('account.budget.struct', 'Budget Struct', domain=[('type','=','normal')]),
     }

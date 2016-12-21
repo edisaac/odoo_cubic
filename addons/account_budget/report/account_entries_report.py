@@ -33,11 +33,11 @@ class account_entries_report(osv.osv):
     _inherit = "account.entries.report"
 
     _columns = {
-        'budget_post_id': fields.many2one('account.budget.post', 'Position Budget', readonly=True),
+        'budget_struct_id': fields.many2one('account.budget.struct', 'Budget Struct', readonly=True),
     }
 
     def _get_select(self):
         res = super(account_entries_report, self)._get_select()
         return """%s,
-         l.budget_post_id as budget_post_id
+         l.budget_struct_id as budget_struct_id
         """%(res)
