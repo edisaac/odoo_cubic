@@ -150,6 +150,13 @@
       <field name="condition">cash_control == True</field>
     </record>
 
+    <record model="workflow.transition" id="trans_closing_control_to_open">
+      <field name="act_to" ref="act_open" />
+      <field name="act_from" ref="act_closing_control" />
+      <field name="signal">open</field>
+      <field name="condition">cash_control == True</field>
+    </record>
+
     <record model="workflow.transition" id="trans_open_to_close">
       <field name="act_from" ref="act_open" />
       <field name="act_to" ref="act_closing_control" />

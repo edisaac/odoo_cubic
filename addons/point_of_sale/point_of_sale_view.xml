@@ -822,6 +822,7 @@
                         <button name="open_cb" type="object" string="Validate &amp; Open Session" states="opening_control" class="oe_highlight"/>
                         <button name="open_frontend_cb" type="object" string="Continue Selling" states="opened"
                             class="oe_highlight"/>
+                        <button name="open" string="Continue Selling" states="closing_control"/>
                         <button name="cashbox_control" type="workflow" string="End of Session"
                             attrs="{'invisible' : ['|', ('cash_control', '=', False),('state', '!=', 'opened')]}" 
                             class="oe_highlight" />

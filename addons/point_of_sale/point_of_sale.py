@@ -487,7 +487,8 @@ class pos_session(osv.osv):
             values['state'] = 'opened'
             record.write(values)
             for st in record.statement_ids:
-                st.button_open()
+                if not st.state == 'open':
+                    st.button_open()
 
         return self.open_frontend_cb(cr, uid, ids, context=context)
 
