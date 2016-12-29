@@ -984,7 +984,7 @@ class account_move_line(osv.osv):
         for line in unrec_lines:
             if line.state <> 'valid':
                 raise osv.except_osv(_('Error!'),
-                        _('Entry "%s" is not valid !') % line.name)
+                        _('Entry %s "%s" is not valid !') % (line.move_id.name,line.name))
             credit += line['credit']
             debit += line['debit']
             currency += line['amount_currency'] or 0.0
